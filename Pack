@@ -1,0 +1,37 @@
+FILES="$@"
+for FILE in $FILES
+do
+	case $FILE in
+	*.Z)	echo "$FILE - Already packed, skipped";;
+	?????????????? | ?????????????)	echo "$FILE - Name too long, skipped";;
+	*)	echo "$FILE - \c"
+		if test -f $FILE.Z; then
+			echo "$FILE.Z Already exists, skipped"
+			continue
+		fi
+		STATO=`ls -l $FILE`
+		set .$STATO
+		NLINKS=$2
+		STATO=$4
+		if test $NLINKS -ne 1; then
+			echo "Has links, skipped"
+			continue
+		fi
+		compress $FILE > $FILE.Z
+		STAT=$?
+		if test $STAT -ne 0; then
+			echo "Bad status from compress, skipped"
+			continue
+		fi
+		STATN=`ls -l $FILE.Z`
+		set .$STATN
+		STATN=$4
+		if test $STATO -le $STATN; then
+			echo "$FILE - No savings, skipped"
+			rm $FILE.Z
+			continue
+		fi
+		copystat $FILE $FILE.Z
+		rm $FILE;;
+	esac
+done

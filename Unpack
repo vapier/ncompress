@@ -1,0 +1,36 @@
+for FILE
+do
+	case $FILE in
+	*.Z)
+		if test -f $FILE; then
+			OUT=`expr $FILE : '\(.*\)\.Z'`
+			compress -d $FILE > $OUT
+			STAT=$?
+			if test $STAT -ne 0; then
+				echo "$FILE: Bad status from compress, skipped"
+				continue
+			fi
+			copystat $FILE $OUT
+			echo "$OUT: Unpacked"
+			rm $FILE
+		else
+			echo "$FILE: not found"
+		fi;;
+	????????????? | ??????????????)
+		echo "$FILE.Z: not found";;
+	*)
+		if test -f $FILE.Z; then
+			compress -d $FILE.Z > $FILE
+			STAT=$?
+			if test $STAT -ne 0; then
+				echo "$FILE.Z: Bad status from compress, skipped"
+				continue
+			fi
+			copystat $FILE.Z $FILE
+			echo "$FILE: Unpacked"
+			rm $FILE.Z
+		else
+			echo "$FILE.Z: not found"
+		fi;;
+	esac
+done

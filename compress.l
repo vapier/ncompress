@@ -1,5 +1,5 @@
 .PU
-.TH COMPRESS 1
+.TH COMPRESS 1 local
 .SH NAME
 compress  \-  compress files
 .SH SYNOPSIS
@@ -31,4 +31,5 @@ Typically, text files, such as C programs,
 are reduced to 40\-50% of their original size;
 .SH BUGS
 Even if the file gets bigger after compression, the output is still produced.
-Some of the code is highly VAX dependent.
+.SH SEE ALSO
+Pack(l), Pcat(l), Unpack(l)

@@ -1,0 +1,19 @@
+for FILE
+do
+	case $FILE in
+	*.Z)
+		if test -f $FILE; then
+			compress -d $FILE
+		else
+			echo "$FILE: not found"
+		fi;;
+	????????????? | ??????????????)
+		echo "$FILE.Z: not found";;
+	*)
+		if test -f $FILE.Z; then
+			compress -d $FILE.Z
+		else
+			echo "$FILE.Z: not found"
+		fi;;
+	esac
+done

@@ -3,6 +3,9 @@
  */
 #define	min(a,b)	((a>b) ? b : a)
 
+/* MAXPATHLEN - maximum length of a pathname we allow */
+#define MAXPATHLEN 1024
+
 /*
  * machine variants which require cc -Dmachine:  pdp11, z8000, pcxt
  */
@@ -373,7 +376,7 @@ count_int checkpoint = CHECK_GAP;
 #define	CLEAR	256	/* table clear output code */
 
 int force = 0;
-char ofname [100];
+char ofname[MAXPATHLEN];
 #ifdef DEBUG
 int verbose = 0;
 #endif /* DEBUG */
@@ -386,6 +389,7 @@ void (*bgnd_flag)();
 
 
 int do_decomp = 0;
+struct stat statbuf, insbuf;
 
 /*****************************************************************
  * TAG( main )
@@ -596,8 +600,7 @@ register int argc; char **argv;
 comprexx(fileptr)
 char **fileptr;
 {
-	struct stat statbuf,insbuf;
-	char tempname[1024], *cp;
+	char tempname[MAXPATHLEN], *cp;
 
 	strcpy(tempname,*fileptr);
 	errno = 0;
@@ -647,6 +650,9 @@ char **fileptr;
 	case S_IFDIR:	/* directory */
 	  if (recursive)
 	    compdir(tempname);
+	  else if ( ! quiet )
+	    fprintf(stderr,"%s is a directory -- ignored\n",
+		    tempname);
 	  break;
 
 	case S_IFREG:	/* regular file */
@@ -697,9 +703,14 @@ char **fileptr;
 	    else {
 	/* COMPRESSION */
 		if (strcmp(tempname + strlen(tempname) - 2, ".Z") == 0) {
-		    	fprintf(stderr, "%s: already has .Z suffix -- no change\n",
-			    tempname);
-		    return;
+		  fprintf(stderr, "%s: already has .Z suffix -- no change\n",
+			  tempname);
+		  return;
+		}
+		if (insbuf.st_nlink > 1 && (! force) ) {
+		  fprintf(stderr, "%s has %d other links: unchanged\n",
+			  tempname,insbuf.st_nlink - 1);
+		  return;
 		}
 		/* Open input file */
 		if ((freopen(tempname, "r", stdin)) == NULL) {
@@ -787,8 +798,11 @@ char **fileptr;
 		if((exit_stat == 1) || (!quiet))
 			putc('\n', stderr);
 	    }
+	  break;
 	default:
-		break;
+	  fprintf(stderr,"%s is not a directory or a regular file - ignored\n",
+		  tempname);
+	  break;
 	} /* end switch */
 	return;
 } /* end comprexx */
@@ -802,22 +816,41 @@ char *dir;
 #else
 	register struct dirent *dp;
 #endif
-	char nbuf[1024];
+	char nbuf[MAXPATHLEN];
 	char *nptr = nbuf;
 	dirp = opendir(dir);
 	if (dirp == NULL) {
 		printf("%s unreadable\n", dir);		/* not stderr! */
 		return ;
 	}
+	/*
+	** WARNING: the following algorithm will occasionally cause
+	** compress to produce error warnings of the form "<filename>.Z
+	** already has .Z suffix - ignored". This occurs when the
+	** .Z output file is inserted into the directory below
+	** readdir's current pointer.
+	** These warnings are harmless but annoying. The alternative
+	** to allowing this would be to store the entire directory
+	** list in memory, then compress the entries in the stored
+	** list. Given the depth-first recursive algorithm used here,
+	** this could use up a tremendous amount of memory. I don't
+	** think it's worth it. -- Dave Mack
+	*/
 	while (dp = readdir(dirp)) {
 		if (dp->d_ino == 0)
 			continue;
-		if (strcmp(dp->d_name,".") == 0 || strcmp(dp->d_name,"..") == 0)
+		if (strcmp(dp->d_name,".") == 0 ||
+		    strcmp(dp->d_name,"..") == 0)
 			continue;
-		strcpy(nbuf,dir);
-		strcat(nbuf,"/");
-		strcat(nbuf,dp->d_name);
-		comprexx(&nptr);
+		if ( (strlen(dir)+strlen(dp->d_name)+1) < (MAXPATHLEN - 1)){
+		  strcpy(nbuf,dir);
+		  strcat(nbuf,"/");
+		  strcat(nbuf,dp->d_name);
+		  comprexx(&nptr);
+		}
+		else {
+		  fprintf(stderr,"Pathname too long: %s/%s\n",dir,dp->d_name);
+		}
   	}
 	closedir(dirp);
 	return;
@@ -1407,42 +1440,27 @@ writeerr()
 copystat(ifname, ofname)
 char *ifname, *ofname;
 {
-    struct stat statbuf;
     int mode;
     time_t timep[2];
 
     fclose(stdout);
-    if (stat(ifname, &statbuf)) {		/* Get stat on input file */
-	perror(ifname);
-	return;
-    }
-    if ((statbuf.st_mode & S_IFMT/*0170000*/) != S_IFREG/*0100000*/) {
-	if(quiet)
-	    	fprintf(stderr, "%s: ", ifname);
-	fprintf(stderr, " -- not a regular file: unchanged");
-	exit_stat = 1;
-    } else if (statbuf.st_nlink > 1 && (! force) ) {
-	if(quiet)
-	    	fprintf(stderr, "%s: ", ifname);
-	fprintf(stderr, " -- has %d other links: unchanged",
-		statbuf.st_nlink - 1);
-	exit_stat = 1;
-    } else if (exit_stat == 2 && (!force)) { /* No compression: remove file.Z */
+    if (exit_stat == 2 && (!force)) { /* No compression: remove file.Z */
 	if(!quiet)
-		fprintf(stderr, " -- file unchanged");
+		fprintf(stderr, "No compression -- %s unchanged",
+			ifname);
     } else {			/* ***** Successful Compression ***** */
 	exit_stat = 0;
-	mode = statbuf.st_mode & 07777;
+	mode = insbuf.st_mode & 07777;
 	if (chmod(ofname, mode))		/* Copy modes */
 	    perror(ofname);
-	chown(ofname, statbuf.st_uid, statbuf.st_gid);	/* Copy ownership */
-	timep[0] = statbuf.st_atime;
-	timep[1] = statbuf.st_mtime;
+	chown(ofname, insbuf.st_uid, insbuf.st_gid);	/* Copy ownership */
+	timep[0] = insbuf.st_atime;
+	timep[1] = insbuf.st_mtime;
 	utime(ofname, timep);	/* Update last accessed and modified times */
 	if (unlink(ifname))	/* Remove input file */
 	    perror(ifname);
 	if(!quiet)
-		fprintf(stderr, " -- replaced with %s", ofname);
+		fprintf(stderr, " -- replaced with %s",ofname);
 	return;		/* Successful return */
     }
 

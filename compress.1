@@ -51,15 +51,15 @@ each file is replaced by one with the extension
 while keeping the same ownership modes, access and modification times.
 If no files are specified, the standard input is compressed to the
 standard output.
-Compressed files can be restored to their original form using
-.I uncompress
-or
-.I zcat.
-.PP
-The
+.I Compress
+will only attempt to compress regular files.
+In particular, it will ignore symbolic links. If a file has multiple
+hard links,
+.I compress
+will refuse to compress it unless the
 .B \-f
-option will force compression of
-.I name.
+flag is given.
+.PP
 If
 .B \-f
 is not given and
@@ -67,16 +67,39 @@ is not given and
 is run in the foreground,
 the user is prompted as to whether an existing file should be overwritten.
 .PP
+Compressed files can be restored to their original form using
+.I uncompress
+or
+.I zcat.
+.PP
+.I uncompress
+takes a list of files on its command line and replaces each
+file whose name ends with
+.B "\&.Z"
+and which begins with the correct magic number with an uncompressed
+file without the 
+.B "\&.Z."
+The uncompressed file will have the mode, ownership and
+timestamps of the compressed file.
+.PP
 The
 .B \-c
 option makes
 .I compress/uncompress
 write to the standard output; no files are changed.
-The nondestructive behavior of
+.PP
 .I zcat
-is identical to that of
+is identical to
 .I uncompress
 .B \-c.
+.I zcat
+uncompresses either a list of files on the command line or its
+standard input and writes the uncompressed data on standard output.
+.I zcat
+will uncompress files that have the correct magic number whether
+they have a
+.B "\&.Z"
+suffix or not.
 .PP
 If the
 .B \-r
@@ -86,6 +109,12 @@ will operate recursively. If any of the file names specified on the command
 line are directories, 
 .I compress
 will descend into the directory and compress all the files it finds there.
+.PP
+The
+.B \-V
+flag tells each of these programs to print its version and patchlevel,
+along with any preprocessor flags specified during compilation, on
+stderr before doing any compression or uncompression.
 .PP
 .I Compress
 uses the modified Lempel-Ziv algorithm popularized in
@@ -147,18 +176,13 @@ option,
 a message is printed yielding the percentage of
 reduction for each file compressed.
 .PP
-If the
-.B \-V
-option is specified, the current version and compile options are printed on
-stderr.
-.PP
 Exit status is normally 0;
 if the last file is larger after (attempted) compression, the status is 2;
 if an error occurs, exit status is 1.
 .SH "SEE ALSO"
 pack(1), compact(1)
 .SH "DIAGNOSTICS"
-Usage: compress [\-dfvcV] [\-b maxbits] [file ...]
+Usage: compress [\-dfvcVr] [\-b maxbits] [file ...]
 .in +8
 Invalid options were specified on the command line.
 .in -8
@@ -220,10 +244,10 @@ Percentage of the input saved by compression.
 (Relevant only for
 .BR \-v \.)
 .in -8
--- not a regular file: unchanged
+-- not a regular file or directory: ignored
 .in +8
-When the input file is not a regular file,
-(e.g. a directory), it is
+When the input file is not a regular file or directory,
+(e.g. a symbolic link, socket, FIFO, device file), it is
 left unaltered.
 .in -8
 -- has 
@@ -232,7 +256,9 @@ other links: unchanged
 .in +8
 The input file has links; it is left unchanged.  See
 .IR ln "(1)"
-for more information.
+for more information. Use the
+.B \-f
+flag to force compression of multiply-linked files.
 .in -8
 -- file unchanged
 .in +8
@@ -245,3 +271,14 @@ Although compressed files are compatible between machines with large memory,
 should be used for file transfer to architectures with 
 a small process data space (64KB or less, as exhibited by the DEC PDP
 series, the Intel 80286, etc.)
+.PP
+Invoking compress with a \-r
+flag will occasionally cause it to produce spurious error warnings of the form
+.PP
+.in 8
+"<filename>.Z already has .Z suffix - ignored"
+.in -8
+.PP
+These warnings can be ignored. See the comments in compress.c:compdir()
+for an explanation.
+

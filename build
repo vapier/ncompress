@@ -1,7 +1,7 @@
 :
 #!/bin/sh
 #
-version="4.2.3"
+version="4.2.4"
 
 echo "Build (N)compress ${version}"
 CLS=`sh -c 'tput clear' 2>/dev/null`
@@ -50,7 +50,7 @@ do
 			fi
 		fi
 	
-		echo "12.  Word must start at even addres: ${NOALLIGN}, Bytorder on your system: ${BYTEORDER}"
+		echo "12.  Word must start at even addres: ${NOALLIGN}, Bytorder on your system: ${BYTEORDER} (1=msb)"
 		echo "
  d. Set default settings                    mkshar.  Create shell archive
  c. Compile compress                        mktar.   Create tar archive
@@ -767,6 +767,9 @@ MANDIR=${MANDIR}
 # compiler options:
 # options is a collection of:
 #
+#	-DAMIGA=1					Amiga support.
+#	-DNOFUNCDEF=1				Disable libary function definitions in
+#								compress42.c
 #	-DDIRENT=1					Use dirent.h
 #	-DSYSDIR=1					Use sys/dir.h
 #	-DLSTAT=1					Use lstat for finding symlinks.
@@ -790,22 +793,20 @@ compress:	Makefile compress42.c patchlevel.h
 	$(CC) -o compress $(options) "-DCOMPILE_DATE=\"\`date\`\"" compress42.c $(LBOPT)
 
 install:	compress
-		[ -f ${BINDIR}/compress ] && \
-			{ rm -f ${BINDIR}/compress.old ; \
-	  		mv ${BINDIR}/compress ${BINDIR}/compress.old ; }
-		rm -f ${BINDIR}/uncompress ${BINDIR}/zcat
-		cp compress ${BINDIR}/compress
-		strip ${BINDIR}/compress
-		rm -f ${BINDIR}/uncompress
-		ln ${BINDIR}/compress ${BINDIR}/uncompress
-		rm -f  ${BINDIR}/zcat
-		ln -f ${BINDIR}/compress ${BINDIR}/zcat
-		cp zcmp zdiff zmore ${BINDIR}/.
-		chmod 0755 ${BINDIR}/compress ${BINDIR}/zcmp ${BINDIR}/zdiff \
-                   ${BINDIR}/zmore
-		cp compress.1 zcmp.1 zmore.1 ${MANDIR}/.
-		chmod 0644 ${MANDIR}/compress.1 ${MANDIR}/zcmp.1 \
-				   ${MANDIR}/zmore.1
+		[ -f \$(BINDIR)/compress ] && \\
+			{ rm -f \$(BINDIR)/compress.old ; \\
+	  		mv \$(BINDIR)/compress \$(BINDIR)/compress.old ; }
+		rm -f \$(BINDIR)/uncompress \$(BINDIR)/zcat
+		cp compress \$(BINDIR)/compress
+		strip \$(BINDIR)/compress
+		rm -f \$(BINDIR)/uncompress
+		ln \$(BINDIR)/compress \$(BINDIR)/uncompress
+		rm -f \$(BINDIR)/zcat
+		ln -f \$(BINDIR)/compress \$(BINDIR)/zcat
+		cp zcmp zdiff zmore \$(BINDIR)/.
+		chmod 0755 \$(BINDIR)/compress \$(BINDIR)/zcmp \$(BINDIR)/zdiff \$(BINDIR)/zmore
+		cp compress.1 zcmp.1 zmore.1 \$(MANDIR)/.
+		chmod 0644 \$(MANDIR)/compress.1 \$(MANDIR)/zcmp.1 \$(MANDIR)/zmore.1
 
 cleanup:
 		rm -f compress compress.def comp.log

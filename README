@@ -79,6 +79,10 @@ REMARKS
 - compatibility with compress 3.0 has not been tested in the 4.2 release of
   (N)compress.
 
+- There has been 1 problem report in relation to GCC 2.0 on a sparc
+  workstation. GCC 2.0 seems to generate a bad compress. Use the
+  standard c compiler 'cc'.
+
 ===============================================================================
 Peter Jannesen
 Network Communication Systems (N.C.S), The Netherlands

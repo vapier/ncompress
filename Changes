@@ -1,4 +1,13 @@
-(N)compress cersion 4.2.2
+(N)compress version 4.2.4
+	o Fix '-c' flag.
+	o Fix utime error.
+	o Added AMIGA support (Sascha Wildner).
+	o Div. remarks added.
+
+(N)compress version 4.2.3
+	o Comp.source.reveiwed release.
+
+(N)compress version 4.2.2
 	Minor changes after the reviewes from comp.sources.reviewed
 	o Change the name to ncompress because of version problems.
 	o Start all scripts with ':'

@@ -789,7 +789,7 @@ main(argc, argv)
 						goto nextarg;
 
 		    		case 'c':
-						do_decomp = zcat_flg = 1;
+						zcat_flg = 1;
 						break;
 
 			    	case 'q':
@@ -800,7 +800,7 @@ main(argc, argv)
 #ifdef	RECURSIVE
 						recursive = 1;
 #else
-						fprintf(stderr, "%s -r not availble (du to missing directory functions)\n", **argv);
+						fprintf(stderr, "%s -r not availble (du to missing directory functions)\n", *argv);
 #endif
 						break;
 
@@ -982,18 +982,21 @@ comprexx(fileptr)
 	   		}
 	   		else
 			{/* COMPRESSION */
-				if (strcmp(tempname + strlen(tempname) - 2, ".Z") == 0)
+		    	if (!zcat_flg)
 				{
-		 	 		fprintf(stderr, "%s: already has .Z suffix -- no change\n", tempname);
-			  		return;
-				}
+					if (strcmp(tempname + strlen(tempname) - 2, ".Z") == 0)
+					{
+		 	 			fprintf(stderr, "%s: already has .Z suffix -- no change\n", tempname);
+			  			return;
+					}
 
-				if (infstat.st_nlink > 1 && (!force))
-				{
-			  		fprintf(stderr, "%s has %d other links: unchanged\n",
-									tempname, infstat.st_nlink - 1);
-					exit_code = 1;
-			  		return;
+					if (infstat.st_nlink > 1 && (!force))
+					{
+			  			fprintf(stderr, "%s has %d other links: unchanged\n",
+										tempname, infstat.st_nlink - 1);
+						exit_code = 1;
+			  			return;
+					}
 				}
 
 				strcpy(ofname, tempname);
@@ -1204,16 +1207,6 @@ comprexx(fileptr)
 						fprintf(stderr, "\n");
 					}
 
-					if (chmod(ofname, infstat.st_mode & 07777))		/* Copy modes */
-					{
-						fprintf(stderr, "\nchmod error (ignored) ");
-				    	perror(ofname);
-						exit_code = 1;
-					}
-#ifndef	DOS
-					chown(ofname, infstat.st_uid, infstat.st_gid);	/* Copy ownership */
-#endif
-
 					timep.actime = infstat.st_atime;
 					timep.modtime = infstat.st_mtime;
 
@@ -1224,6 +1217,17 @@ comprexx(fileptr)
 						exit_code = 1;
 					}
 
+#ifndef	AMIGA
+					if (chmod(ofname, infstat.st_mode & 07777))		/* Copy modes */
+					{
+						fprintf(stderr, "\nchmod error (ignored) ");
+				    	perror(ofname);
+						exit_code = 1;
+					}
+#ifndef	DOS
+					chown(ofname, infstat.st_uid, infstat.st_gid);	/* Copy ownership */
+#endif
+#endif
 					remove_ofname = 0;
 
 					if (unlink(ifname))	/* Remove input file */

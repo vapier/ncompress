@@ -3,11 +3,16 @@
 .SH NAME
 compress, uncompress, zcat  \-  compress and uncompress files
 .SH SYNOPSIS
+.ll +8
 .B compress
 [
 .B \-d
 ] [
 .B \-f
+] [
+.B \-F
+] [
+.B \-q
 ] [
 .B \-c
 ] [
@@ -16,10 +21,13 @@ compress, uncompress, zcat  \-  compress and uncompress files
 ] [
 .I "filename \&..."
 ]
+.ll -8
 .br
 .B uncompress
 [
 .B \-f
+] [
+.B \-q
 ] [
 .B \-c
 ] [
@@ -60,6 +68,12 @@ is run in the foreground,
 the user is prompted
 as to whether the file should be overwritten.
 .PP
+If the
+.B \-F
+flag is given, all files specified are replaced with
+.B "\&.Z"
+files \- even if the file didn't get smaller.
+.PP
 When file names are given, the ownership (if run by root), modes, accessed
 and modified times are maintained between the file and its 
 .B "\&.Z"
@@ -98,6 +112,18 @@ must be between 9 and 16.  The default can be changed in the source to allow
 .I compress
 to be run on a smaller machine.
 .PP
+After the
+.I bits
+limit is reached,
+.I compress
+periodically checks the compression ratio.  If it is increasing,
+.I compress
+continues to use the codes that were previously found in the file.  However,
+if the compression ratio decreases,
+.I compress
+discards the table of substrings and rebuilds it from scratch.  This allows
+the algorithm to adapt to the next "block" of the file.
+.PP
 A two byte magic number is prepended to the file
 to ensure that neither uncompression of random text nor recompression of 
 compressed text are attempted.  In addition, the
@@ -106,7 +132,7 @@ specified during
 .I compress
 is written to the file so that the
 .B \-b
-specifier can be omitted for
+flag can be omitted for
 .IR uncompress \.
 .PP
 .ne 8
@@ -115,7 +141,7 @@ input file, the amount of
 .I bits
 per code, and the distribution of character substrings.
 Typically, text files, such as C programs,
-are reduced to 40\-50% of their original size.
+are reduced by 50\-60%.
 Compression is generally much better than that achieved by
 Huffman coding (as used in
 .IR pack ),
@@ -123,13 +149,20 @@ or adaptive Huffman coding
 .RI ( compact ),
 and takes less time to compute.
 .PP
+.PP
+After each file is compressed, a message is printed giving the percentage of
+the input file that has been saved by compression.  This message is
+suppressed when the
+.B \-q
+(quiet) flag is given.
+.PP
 The exit status is normally 0;
 if the last file gets bigger after compression, the exit status is 2;
 if an error occurs, the exit status is 1.
 .SH "SEE ALSO"
 compact(1), pack(1)
 .SH "DIAGNOSTICS"
-Usage: compress [-dfc] [-b maxbits] [file ...]
+Usage: compress [-dfFqc] [-b maxbits] [file ...]
 .in +8
 Invalid options were specified on the command line.
 .in -8
@@ -174,7 +207,8 @@ filename too long to tack on .Z
 The specified file cannot be compressed because its filename is longer than
 12 characters.
 .IR mv "(1)"
-the file to a different name and try again.
+the file to a different name and try again.  This message does not occur on
+4.2BSD systems.
 .in -8
 .I file
 already exists; do you wish to overwrite (y or n)?
@@ -189,7 +223,7 @@ This message fragment is written during the processing of a file.
 Compression: 
 .I "xx.xx%"
 .in +8
-This message fragment gives the percentage of the input file that have been
+This message fragment gives the percentage of the input file that has been
 saved by compression.
 .in -8
 -- not a regular file: unchanged

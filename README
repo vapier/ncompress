@@ -1,44 +1,112 @@
-Enclosed is a modified version of compress.c, along with scripts to make it
-run identically to pack(1), unpack(1), an pcat(1).  Here is what I
-(petsd!joe) and a colleague (petsd!peora!srd) did:
+Enclosed is compress.c version 2.0 with the following bugs fixed:
 
-1. Removed VAX dependencies.
-2. Changed the struct to separate arrays; saves mucho memory.
-3. Did comparisons in unsigned, where possible.  (Faster on Perkin-Elmer.)
-4. Sorted the character next chain and changed the search to stop
-prematurely.  This saves a lot on the execution time when compressing.
+1.	The packed files produced by compress are different on different
+	machines and dependent on the vax sysgen option.
+		The bug was in the different byte/bit ordering on the
+		various machines.  This has been fixed.
 
-This version is totally compatible with the original version.  Even though
-lint(1) -p has no complaints about compress.c, it won't run on a 16-bit
-machine, due to the size of the arrays.
+		This version is NOT compatible with the original vax posting
+		unless the '-DCOMPATIBLE' option is specified to the C
+		compiler.  The original posting has a bug which I fixed, 
+		causing incompatible files.  I recommend you NOT to use this
+		option unless you already have a lot of packed files from
+		the original posting by thomas.
+2.	The exit status is not well defined (on some machines) causing the
+	scripts to fail.
+		The exit status is now 0,1 or 2 and is documented in
+		compress.l.
+3.	The function getopt() is not available in all C libraries.
+		The function getopt() is no longer referenced by the
+		program.
+4.	Error status is not being checked on the fwrite() and fflush() calls.
+		Fixed.
 
-Here is the README file from the original author:
- 
->Well, with all this discussion about file compression (for news batching
->in particular) going around, I decided to implement the text compression
->algorithm described in the June Computer magazine.  The author claimed
->blinding speed and good compression ratios.  It's certainly faster than
->compact (but, then, what wouldn't be), but it's also the same speed as
->pack, and gets better compression than both of them.  On 350K bytes of
->unix-wizards, compact took about 8 minutes of CPU, pack took about 80
->seconds, and compress (herein) also took 80 seconds.  But, compact and
->pack got about 30% compression, whereas compress got over 50%.  So, I
->decided I had something, and that others might be interested, too.
+The following enhancements have been made:
+
+1.	Added facilities of "compact" into the compress program.  "Pack",
+	"Unpack", and "Pcat" are no longer required (no longer supplied).
+2.	Installed work around for C compiler bug with "-O".
+3.	Added a magic number header (\037\235).  Put the bits specified
+	in the file.
+4.	Added "-f" flag to force overwrite of output file.
+5.	Added "-c" flag and "zcat" program.  'ln compress zcat' after you
+	compile.
+6.	The 'uncompress' script has been deleted; simply 
+	'ln compress uncompress' after you compile and it will work.
+7.	Removed extra bit masking for machines that support unsigned
+	characters.  If your machine doesn't support unsigned characters,
+	define "NO_UCHAR" when compiling.
+
+Compile "compress.c" with "-O -o compress" flags.  Move "compress" to a
+standard executable location, such as /usr/local.  Then:
+	cd /usr/local
+	ln compress uncompress
+	ln compress zcat
+
+On machines that have a fixed stack size (such as Perkin-Elmer), set the
+stack to at least 12kb.  ("setstack compress 12" on Perkin-Elmer).
+
+Next, install the manual (compress.l).
+	cp compress.l /usr/man/manl		- or -
+	cp compress.l /usr/man/man1/compress.1
+
+Just to make sure all is working, here is the output of 
+'compress -c compress.c | od -b | head' on my machine (Perkin-Elmer 3230):
+0000000 037 235 020 057 124 050 000 241 002 004 221 062 146 322 270 051
+0000020 003 302 311 223 057 125 206 040 011 042 005 104 032 063 040 104
+0000040 324 161 063 047 315 031 205 144 100 214 101 023 106 216 010 020
+0000060 146 064 216 241 223 346 315 106 020 141 346 200 340 350 261 014
+0000100 110 221 044 101 264 004 221 347 115 035 071 002 011 266 011 043
+0000120 062 141 031 027 100 137 050 000 010 142 004 231 203 105 031 072
+0000140 204 050 221 242 212 244 115 237 052 004 061 205 112 020 052 123
+0000160 024 214 320 350 364 042 127 257 140 261 042 324 112 244 210 220
+0000200 052 107 302 216 075 130 260 355 133 245 004 201 206 174 323 006
+0000220 216 234 062 163 346 270 030 003 242 005 010 043 151 330 054 034
+On your machine, it should be exactly the same.
+
+Here is the README that I sent with my first posting:
+
+>Enclosed is a modified version of compress.c, along with scripts to make it
+>run identically to pack(1), unpack(1), an pcat(1).  Here is what I
+>(petsd!joe) and a colleague (petsd!peora!srd) did:
 >
->As is probably true of compact and pack (although I haven't checked),
->the byte order within a word is probably relevant here, but as long as
->you stay on a single machine type, you should be ok.  (Can anybody
->elucidate on this?)  There are a couple of asm's in the code (extv and
->insv instructions), so anyone porting it to another machine will have to
->deal with this anyway (and could probably make it compatible with Vax
->byte order at the same time).  Anyway, I've linted the code (both with
->and without -p), so it should run elsewhere.  Note the longs in the
->code, you can take these out if you reduce BITS to <= 15.
+>1. Removed VAX dependencies.
+>2. Changed the struct to separate arrays; saves mucho memory.
+>3. Did comparisons in unsigned, where possible.  (Faster on Perkin-Elmer.)
+>4. Sorted the character next chain and changed the search to stop
+>prematurely.  This saves a lot on the execution time when compressing.
 >
->Have fun, and as always, if you make good enhancements, or bug fixes,
->I'd like to see them.
+>This version is totally compatible with the original version.  Even though
+>lint(1) -p has no complaints about compress.c, it won't run on a 16-bit
+>machine, due to the size of the arrays.
 >
->=Spencer (thomas@utah-20, {harpo,hplabs,arizona}!utah-cs!thomas)
+>Here is the README file from the original author:
+> 
+>>Well, with all this discussion about file compression (for news batching
+>>in particular) going around, I decided to implement the text compression
+>>algorithm described in the June Computer magazine.  The author claimed
+>>blinding speed and good compression ratios.  It's certainly faster than
+>>compact (but, then, what wouldn't be), but it's also the same speed as
+>>pack, and gets better compression than both of them.  On 350K bytes of
+>>unix-wizards, compact took about 8 minutes of CPU, pack took about 80
+>>seconds, and compress (herein) also took 80 seconds.  But, compact and
+>>pack got about 30% compression, whereas compress got over 50%.  So, I
+>>decided I had something, and that others might be interested, too.
+>>
+>>As is probably true of compact and pack (although I haven't checked),
+>>the byte order within a word is probably relevant here, but as long as
+>>you stay on a single machine type, you should be ok.  (Can anybody
+>>elucidate on this?)  There are a couple of asm's in the code (extv and
+>>insv instructions), so anyone porting it to another machine will have to
+>>deal with this anyway (and could probably make it compatible with Vax
+>>byte order at the same time).  Anyway, I've linted the code (both with
+>>and without -p), so it should run elsewhere.  Note the longs in the
+>>code, you can take these out if you reduce BITS to <= 15.
+>>
+>>Have fun, and as always, if you make good enhancements, or bug fixes,
+>>I'd like to see them.
+>>
+>>=Spencer (thomas@utah-20, {harpo,hplabs,arizona}!utah-cs!thomas)
 
 					regards,
 					joe

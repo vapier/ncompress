@@ -1,1 +1,0 @@
-.so manl/compress.l

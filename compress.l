@@ -1,35 +1,219 @@
 .PU
 .TH COMPRESS 1 local
 .SH NAME
-compress  \-  compress files
+compress, uncompress, zcat  \-  compress and uncompress files
 .SH SYNOPSIS
 .B compress
-.B [\-d]
-[filename]
+[
+.B \-d
+] [
+.B \-f
+] [
+.B \-c
+] [
+.B \-b
+.I bits
+] [
+.I "filename \&..."
+]
 .br
 .B uncompress
-[filename]
+[
+.B \-f
+] [
+.B \-c
+] [
+.I "filename \&..."
+]
+.br
+.B zcat
+[
+.I "filename \&..."
+]
 .SH DESCRIPTION
-Compresses the specified file or standard input.
-The result is written to standard output.
+Compresses the specified files or standard input.
+Each file is replaced by a file with the extension
+.B "\&.Z,"
+but only if the file got smaller.
+If no files are specified,
+the compression is applied to the standard input
+and is written to standard output
+regardless of the results.
 Compressed files can be restored
 to their original form by specifying the
 .B \-d
 option, or by running
-.I uncompress.
+.I uncompress
+(linked to
+.IR compress ),
+on the 
+.B "\&.Z"
+files or the standard input.
+.PP
+If the output file exists, it will not be overwritten unless the
+.B \-f
+flag is given.  If
+.B \-f
+is not specified and
+.I compress
+is run in the foreground,
+the user is prompted
+as to whether the file should be overwritten.
+.PP
+When file names are given, the ownership (if run by root), modes, accessed
+and modified times are maintained between the file and its 
+.B "\&.Z"
+version.  In this respect,
+.I compress
+can be used for archival purposes, yet can still be used with
+.IR make "(1)"
+after uncompression.
+.PP
+The
+.B \-c
+option causes the results of the compress/uncompress operation to be written
+to stdout; no files are changed.  The
+.I zcat
+program is the same as specifying
+.B \-c
+to
+.I uncompress
+(all files are unpacked and written to stdout).
 .PP
 .I Compress
 uses the modified Lempel-Ziv algorithm described in
 "A Technique for High Performance Data Compression",
 Terry A. Welch,
-.I IEEE Computer
+.I "IEEE Computer"
 Vol 17, No 6 (June 1984), pp 8-19.
+Common substrings in the file are first replaced by 9-bit codes 257 and up.
+When code 512 is reached, the algorithm switches to 10-bit codes and
+continues to use more bits until the
+.I bits
+limit as specified by the
+.B \-b
+flag is reached (default 16).
+.I Bits
+must be between 9 and 16.  The default can be changed in the source to allow
+.I compress
+to be run on a smaller machine.
 .PP
+A two byte magic number is prepended to the file
+to ensure that neither uncompression of random text nor recompression of 
+compressed text are attempted.  In addition, the
+.I bits
+specified during
+.I compress
+is written to the file so that the
+.B \-b
+specifier can be omitted for
+.IR uncompress \.
+.PP
+.ne 8
 The amount of compression obtained depends on the size of the
-input file, and the distribution of character sequences.
+input file, the amount of
+.I bits
+per code, and the distribution of character substrings.
 Typically, text files, such as C programs,
-are reduced to 40\-50% of their original size;
-.SH BUGS
-Even if the file gets bigger after compression, the output is still produced.
-.SH SEE ALSO
-Pack(l), Pcat(l), Unpack(l)
+are reduced to 40\-50% of their original size.
+Compression is generally much better than that achieved by
+Huffman coding (as used in
+.IR pack ),
+or adaptive Huffman coding
+.RI ( compact ),
+and takes less time to compute.
+.PP
+The exit status is normally 0;
+if the last file gets bigger after compression, the exit status is 2;
+if an error occurs, the exit status is 1.
+.SH "SEE ALSO"
+compact(1), pack(1)
+.SH "DIAGNOSTICS"
+Usage: compress [-dfc] [-b maxbits] [file ...]
+.in +8
+Invalid options were specified on the command line.
+.in -8
+Missing maxbits
+.in +8
+Maxbits must follow
+.BR \-b \.
+.in -8
+Unknown flag: 
+.I "\'x\';"
+.in +8
+Invalid flags were specified on the command line.
+.in -8
+.IR file :
+not in compressed format
+.in +8
+The specified file has not been compressed.
+.in -8
+.IR file :
+compressed with 
+.I xx
+bits, can only handle 
+.I yy
+bits
+.in +8
+The specified file was compressed by a compress program that could handle
+more 
+.I bits
+than the current compress program.  Recompress the file with a smaller
+.IR bits \.
+.in -8
+.IR file :
+already has .Z suffix -- no change
+.in +8
+Cannot compress a file that has a ".Z" suffix.
+.IR mv "(1)"
+the file to a different name and try again.
+.in -8
+.IR file :
+filename too long to tack on .Z
+.in +8
+The specified file cannot be compressed because its filename is longer than
+12 characters.
+.IR mv "(1)"
+the file to a different name and try again.
+.in -8
+.I file
+already exists; do you wish to overwrite (y or n)?
+.in +8
+Respond "y" if you want the output file to be replaced; "n" if you want it
+to be left alone.
+.in -8
+.IR file :
+.in +8
+This message fragment is written during the processing of a file.
+.in -8
+Compression: 
+.I "xx.xx%"
+.in +8
+This message fragment gives the percentage of the input file that have been
+saved by compression.
+.in -8
+-- not a regular file: unchanged
+.in +8
+This message fragment is written when the input file is not a regular file.
+The input file is left unchanged.
+.in -8
+-- has 
+.I xx 
+other links: unchanged
+.in +8
+This message fragment is written when the input file has links.  The input
+file is left unchanged.  See
+.IR ln "(1)"
+for more information.
+.in -8
+-- file unchanged
+.in +8
+This message fragment is written when no savings are achieved by
+compression.  The input file is left unchanged.
+.in -8
+-- replaced with 
+.I file
+.in +8
+This message fragment is written when a file has been sucessfully
+compressed/uncompressed.
+.in -8

@@ -1,0 +1,51 @@
+# Makefile
+
+# C complier
+CC=cc
+
+# Install directory for binarys
+BINDIR=/usr/local/bin
+
+# Install directory for manual
+MANDIR=/usr/local/man/man1
+
+# compiler options:
+# options is a collection of:
+#
+#	-DDIRENT=1					Use dirent.h
+#	-DSYSDIR=1					Use sys/dir.h
+#	-DLSTAT=1					Use lstat for finding symlinks.
+#	-DUTIME_H=1					Use utime.h
+#	-DUSERMEM=<size>			Availble memory for compress (default 800k).
+#	-DREGISTERS=<nbr>			Number of registers (default 2).
+#	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
+#	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
+#	-DBYTEORDER=<order>			Byte order (default: unknown).
+#	-DNOALLIGN=1				Data word allignment (default: yes).
+#	-DDEF_ERRNO=1				Define error (not defined in errno.h).
+#	-DMAXSEG_64K=1 -BITS=16		Support segment processsor like 80286.
+#
+options= -DIRENT=1 -DUSERMEM=800000 -DREGISTERS=3  
+
+# libary options
+LBOPT=
+
+compress:	Makefile compress42.c patchlevel.h
+	$(CC) -o compress $(options) "-DCOMPILE_DATE=\"`date`\"" compress42.c $(LBOPT)
+
+install:	compress
+		[ -f /usr/local/bin/compress ] && 			{ rm -f /usr/local/bin/compress.old ; 	  		mv /usr/local/bin/compress /usr/local/bin/compress.old ; }
+		rm -f /usr/local/bin/uncompress /usr/local/bin/zcat
+		cp compress /usr/local/bin/compress
+		strip /usr/local/bin/compress
+		rm -f /usr/local/bin/uncompress
+		ln /usr/local/bin/compress /usr/local/bin/uncompress
+		rm -f  /usr/local/bin/zcat
+		ln -f /usr/local/bin/compress /usr/local/bin/zcat
+		cp zcmp zdiff zmore /usr/local/bin/.
+		chmod 0755 /usr/local/bin/compress /usr/local/bin/zcmp /usr/local/bin/zdiff                    /usr/local/bin/zmore
+		cp compress.1 zcmp.1 zmore.1 /usr/local/man/man1/.
+		chmod 0644 /usr/local/man/man1/compress.1 /usr/local/man/man1/zcmp.1 				   /usr/local/man/man1/zmore.1
+
+cleanup:
+		rm -f compress compress.def comp.log

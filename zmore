@@ -1,3 +1,6 @@
+:
+#!/bin/sh
+
 FIRST=1
 for FILE
 do

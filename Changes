@@ -1,3 +1,30 @@
+(N)compress cersion 4.2.2
+	Minor changes after the reviewes from comp.sources.reviewed
+	o Change the name to ncompress because of version problems.
+	o Start all scripts with ':'
+	o Added libary options to buidl script.
+	o Install zmore zcmp zdiff and manuals.
+	o Added patchlevel.h
+	o Updated README file. Created LZW.INFO
+	o a complete grammatical go-round
+	o Use utime.h if availble
+	o Change de default input/output buffer size to BUFSIZ. Because
+	  of performance problems with read a head on systems.
+	o Build generates a makefile.
+
+compress version 4.2.1 improvements
+	o Change the name to ncompress because of version problems.
+	o Completly rewrite of the compress and decompress functions.
+	  compress speedup 25-50% (user cpu time).
+	  decompress speedup 20-30% (user cpu time).
+    o Add special fast compress hash algorithm.
+	o Fix some minor things.
+	o use #include <utime.h> if availble.
+	o Cleanup the source code (I think so).
+	o Test if filename is not to long. This is done on runtime no fix length
+      size any more.
+	o Powerfull build script (test almost every thing).
+
 Modifications for version 4.1: 
 	o Added -r command line flag to allow recursive compression/
 	  decompression of directory trees. As a side-effect, compress
@@ -15,13 +42,14 @@ Modifications for version 4.1:
 	o Removed atob/btoa/tarmail/untarmail - my versions are
 	  based on btoa 5.2 which is not compatible with the atob
 	  included with compress4.0.
+
 Compress version 4.0 improvements:
 	o compress() speedup (10-50%) by changing division hash to xor
 	o decompress() speedup (5-10%)
 	o Memory requirements reduced (3-30%)
 	o Stack requirements reduced to less than 4kb
 	o Removed 'Big+Fast' compress code (FBITS) because of compress speedup
-    	o Portability mods for Z8000 and PC/XT (but not zeus 3.2)
+	o Portability mods for Z8000 and PC/XT (but not zeus 3.2)
 	o Default to 'quiet' mode
 	o Unification of 'force' flags
 	o Manual page overhaul

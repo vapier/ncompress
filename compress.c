@@ -68,7 +68,7 @@
 #ifdef PBITS		/* Preferred BITS for this memory size */
 # ifndef BITS
 #  define BITS PBITS
-# endif BITS
+# endif /* BITS */
 #endif /* PBITS */
 
 #if BITS == 16
@@ -137,9 +137,13 @@ char_type magic_header[] = { "\037\235" };	/* 1F 9D */
  *		Ken Turkowski		(decvax!decwrl!turtlevax!ken)
  *		James A. Woods		(decvax!ihnp4!ames!jaw)
  *		Joe Orost		(decvax!vax135!petsd!joe)
+ *		Dave Mack		(csu@alembic.acs.com)
  *
- * $Header: compress.c,v 4.0 85/07/30 12:50:00 joe Release $
- * $Log:	compress.c,v $
+ * Revision 4.1   91/05/26  	  csu@alembic.acs.com
+ * Modified to recursively compress directories ('r' flag). As a side
+ * effect, compress will no longer attempt to compress things that
+ * aren't "regular" files. See Changes.
+ *
  * Revision 4.0  85/07/30  12:50:00  joe
  * Removed ferror() calls in output routine on every output except first.
  * Prepared for release to the world.
@@ -250,13 +254,22 @@ char_type magic_header[] = { "\037\235" };	/* 1F 9D */
  * Add variable bit length output.
  *
  */
-static char rcs_ident[] = "$Header: compress.c,v 4.0 85/07/30 12:50:00 joe Release $";
+static char version_id[] = "compress.c 4.1";
 
 #include <stdio.h>
 #include <ctype.h>
 #include <signal.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#ifndef DIRENT
+#include <sys/dir.h>
+#else
+#include <dirent.h>
+#endif
+#include <errno.h>
+extern int errno;
+
+#include "patchlevel.h"
 
 #define ARGVAL() (*++(*argv) || (--argc && *++argv))
 
@@ -328,11 +341,11 @@ code_int getcode();
 
 Usage() {
 #ifdef DEBUG
-fprintf(stderr,"Usage: compress [-dDVfc] [-b maxbits] [file ...]\n");
+fprintf(stderr,"Usage: compress [-dDVfcr] [-b maxbits] [file ...]\n");
 }
 int debug = 0;
 #else
-fprintf(stderr,"Usage: compress [-dfvcV] [-b maxbits] [file ...]\n");
+fprintf(stderr,"Usage: compress [-dfvcVr] [-b maxbits] [file ...]\n");
 }
 #endif /* DEBUG */
 int nomagic = 0;	/* Use a 3-byte magic number header, unless old file */
@@ -346,7 +359,11 @@ int quiet = 1;		/* don't tell me about compression */
 int block_compress = BLOCK_MASK;
 int clear_flg = 0;
 long int ratio = 0;
+#if BITS == 16
+#define CHECK_GAP 50000	/* ratio check interval recommended by jaw */
+#else
 #define CHECK_GAP 10000	/* ratio check interval */
+#endif
 count_int checkpoint = CHECK_GAP;
 /*
  * the next two codes should not be changed lightly, as they must not
@@ -360,7 +377,13 @@ char ofname [100];
 #ifdef DEBUG
 int verbose = 0;
 #endif /* DEBUG */
+
+#ifndef	VOIDSIG
 int (*bgnd_flag)();
+#else
+void (*bgnd_flag)();
+#endif	/* VOIDSIG */
+
 
 int do_decomp = 0;
 
@@ -385,6 +408,9 @@ int do_decomp = 0;
  *
  *      -v:	    Write compression statistics
  *
+ *	-r:		Recursive. If a filename is a directory, descend
+ *			into it and compress everything in it.
+ *
  * 	file ...:   Files to be compressed.  If none specified, stdin
  *		    is used.
  * Outputs:
@@ -401,14 +427,13 @@ int do_decomp = 0;
  * procedure needs no input table, but tracks the way the table was built.
  */
 
+int overwrite = 0;	/* Do not overwrite unless given -f flag */
+int recursive = 0;  /* compress directories */
 main( argc, argv )
 register int argc; char **argv;
 {
-    int overwrite = 0;	/* Do not overwrite unless given -f flag */
-    char tempname[100];
     char **filelist, **fileptr;
     char *cp, *rindex(), *malloc();
-    struct stat statbuf;
     extern onintr(), oops();
 
 
@@ -436,10 +461,10 @@ register int argc; char **argv;
 	zcat_flg = 1;
     }
 
-#ifdef BSD4_2
+#ifdef BSD4
     /* 4.2BSD dependent - take it out if not */
     setlinebuf( stderr );
-#endif /* BSD4_2 */
+#endif /* BSD4 */
 
     /* Argument Processing
      * All flags are optional.
@@ -453,6 +478,7 @@ register int argc; char **argv;
      *	    given also.
      * -c => cat all output to stdout
      * -C => generate output compatible with compress 2.0.
+     * -r => recursively compress directories
      * if a string is left, must be an input filename.
      */
     for (argc--, argv++; argc > 0; argc--, argv++) {
@@ -503,6 +529,10 @@ register int argc; char **argv;
 		    case 'q':
 			quiet = 1;
 			break;
+		    case 'r':
+		    case 'R':
+			recursive = 1;
+			break;
 		    default:
 			fprintf(stderr, "Unknown flag: '%c'; ", **argv);
 			Usage();
@@ -523,27 +553,125 @@ register int argc; char **argv;
     maxmaxcode = 1 << maxbits;
 
     if (*filelist != NULL) {
-	for (fileptr = filelist; *fileptr; fileptr++) {
-	    exit_stat = 0;
-	    if (do_decomp != 0) {			/* DECOMPRESSION */
-		/* Check for .Z suffix */
-		if (strcmp(*fileptr + strlen(*fileptr) - 2, ".Z") != 0) {
-		    /* No .Z: tack one on */
-		    strcpy(tempname, *fileptr);
-		    strcat(tempname, ".Z");
-		    *fileptr = tempname;
+      for (fileptr = filelist; *fileptr; fileptr++) {
+	comprexx(fileptr);
+      }
+    } else {		/* Standard input */
+	if (do_decomp == 0) {
+		compress();
+		if(!quiet)
+			putc('\n', stderr);
+	} else {
+		/* Check the magic number */
+		if (nomagic == 0) {
+		if ((getchar()!=(magic_header[0] & 0xFF))
+		 || (getchar()!=(magic_header[1] & 0xFF))) {
+			fprintf(stderr, "stdin: not in compressed format\n");
+			exit(1);
 		}
-		/* Open input file */
-		if ((freopen(*fileptr, "r", stdin)) == NULL) {
-			perror(*fileptr); continue;
+		maxbits = getchar();	/* set -b from file */
+		block_compress = maxbits & BLOCK_MASK;
+		maxbits &= BIT_MASK;
+		maxmaxcode = 1 << maxbits;
+		fsize = 100000;		/* assume stdin large for USERMEM */
+		if(maxbits > BITS) {
+			fprintf(stderr,
+			"stdin: compressed with %d bits, can only handle %d bits\n",
+			maxbits, BITS);
+			exit(1);
 		}
+		}
+#ifndef DEBUG
+		decompress();
+#else   /* DEBUG */
+		if (debug == 0)	decompress();
+		else		printcodes();
+		if (verbose)	dump_tab();
+#endif /* DEBUG */
+	}
+	}
+	exit(exit_stat);
+}
+
+comprexx(fileptr)
+char **fileptr;
+{
+	struct stat statbuf,insbuf;
+	char tempname[1024], *cp;
+
+	strcpy(tempname,*fileptr);
+	errno = 0;
+#ifdef	BSD4
+	if (lstat(tempname,&insbuf) == -1) {
+#else
+	if (stat(tempname,&insbuf) == -1) {
+#endif
+	  if ( do_decomp ) {
+	    switch (errno) {
+	    case ENOENT:	/* file doesn't exist */
+	      /*
+	      ** if the given name doesn't end with .Z, try appending one
+	      ** This is obviously the wrong thing to do if it's a 
+	      ** directory, but it shouldn't do any harm.
+	      */
+	      if (strcmp(tempname + strlen(tempname) - 2, ".Z") != 0) {
+		strcat(tempname,".Z");
+		errno = 0;
+#ifdef	BSD4
+		if (lstat(tempname,&insbuf) == -1) {
+#else
+		if (stat(tempname,&insbuf) == -1) {
+#endif
+		  perror(tempname);
+		  return;
+		}
+	      }
+	      else {
+		perror(tempname);
+		return;
+	      }
+	      break;
+	    default:
+	      perror(tempname);
+	      return;
+	    } /* end switch */
+	  } /* endif */
+	  else {
+	    /* we can't stat the file, ignore it */
+	      perror(tempname);
+	      return;
+	  }
+	} /* endif */
+
+	switch (insbuf.st_mode & S_IFMT) {
+	case S_IFDIR:	/* directory */
+	  if (recursive)
+	    compdir(tempname);
+	  break;
+
+	case S_IFREG:	/* regular file */
+	  exit_stat = 0;
+	  if (do_decomp != 0) {
+	/* DECOMPRESSION */
+	    if ( ! zcat_flg ) {
+	      if (strcmp(tempname + strlen(tempname) - 2, ".Z") != 0) {
+		if ( ! quiet ) {
+		  fprintf(stderr,"%s - no .Z suffix\n",tempname);
+		}
+		return;
+	      }
+	    }
+	    /* Open input file */
+	    if ((freopen(tempname, "r", stdin)) == NULL) {
+	      perror(tempname); return;
+	    }
 		/* Check the magic number */
 		if (nomagic == 0) {
 		    if ((getchar() != (magic_header[0] & 0xFF))
 		     || (getchar() != (magic_header[1] & 0xFF))) {
 			fprintf(stderr, "%s: not in compressed format\n",
-			    *fileptr);
-		    continue;
+			    tempname);
+					return;
 		    }
 		    maxbits = getchar();	/* set -b from file */
 		    block_compress = maxbits & BLOCK_MASK;
@@ -552,25 +680,32 @@ register int argc; char **argv;
 		    if(maxbits > BITS) {
 			fprintf(stderr,
 			"%s: compressed with %d bits, can only handle %d bits\n",
-			*fileptr, maxbits, BITS);
-			continue;
+			tempname, maxbits, BITS);
+					return;
 		    }
 		}
+	        /* we have to ignore SIGINT for a while, otherwise
+		   a ^C can nuke an existing file with ofname */
+	        signal(SIGINT,SIG_IGN);
 		/* Generate output filename */
-		strcpy(ofname, *fileptr);
-		ofname[strlen(*fileptr) - 2] = '\0';  /* Strip off .Z */
-	    } else {					/* COMPRESSION */
-		if (strcmp(*fileptr + strlen(*fileptr) - 2, ".Z") == 0) {
+		strcpy(ofname, tempname);
+		/* Check for .Z suffix */
+		if (strcmp(tempname + strlen(tempname) - 2, ".Z") == 0) {
+		  ofname[strlen(tempname) - 2] = '\0';  /* Strip off .Z */
+		}
+	    }
+	    else {
+	/* COMPRESSION */
+		if (strcmp(tempname + strlen(tempname) - 2, ".Z") == 0) {
 		    	fprintf(stderr, "%s: already has .Z suffix -- no change\n",
-			    *fileptr);
-		    continue;
+			    tempname);
+		    return;
 		}
 		/* Open input file */
-		if ((freopen(*fileptr, "r", stdin)) == NULL) {
-		    perror(*fileptr); continue;
+		if ((freopen(tempname, "r", stdin)) == NULL) {
+		    perror(tempname); return;
 		}
-		stat ( *fileptr, &statbuf );
-		fsize = (long) statbuf.st_size;
+		fsize = (long) insbuf.st_size;
 		/*
 		 * tune hash table size for small files -- ad hoc,
 		 * but the sizes match earlier #defines, which
@@ -588,16 +723,20 @@ register int argc; char **argv;
 		else if ( fsize < 47000 )
 		    hsize = min ( 50021, HSIZE );
 
+	        /* we have to ignore SIGINT for a while, otherwise
+		   a ^C can nuke an existing file with ofname */
+	        signal(SIGINT,SIG_IGN);
 		/* Generate output filename */
-		strcpy(ofname, *fileptr);
-#ifndef BSD4_2		/* Short filenames */
+		strcpy(ofname, tempname);
+#ifdef SHORTNAMES	/* Short filenames */
 		if ((cp=rindex(ofname,'/')) != NULL)	cp++;
 		else					cp = ofname;
 		if (strlen(cp) > 12) {
 		    fprintf(stderr,"%s: filename too long to tack on .Z\n",cp);
-		    continue;
+		    signal(SIGINT,onintr);
+		    return;
 		}
-#endif  /* BSD4_2		Long filenames allowed */
+#endif  /* SHORTNAMES */
 		strcat(ofname, ".Z");
 	    }
 	    /* Check for overwrite of existing file */
@@ -619,17 +758,19 @@ register int argc; char **argv;
 		    }
 		    if (response[0] != 'y') {
 			fprintf(stderr, "\tnot overwritten\n");
-			continue;
+			signal(SIGINT,onintr);
+			return;
 		    }
 		}
 	    }
+	    signal(SIGINT,onintr);
 	    if(zcat_flg == 0) {		/* Open output file */
 		if (freopen(ofname, "w", stdout) == NULL) {
 		    perror(ofname);
-		    continue;
+			return;
 		}
 		if(!quiet)
-			fprintf(stderr, "%s: ", *fileptr);
+			fprintf(stderr, "%s: ", tempname);
 	    }
 
 	    /* Actually do the compression/decompression */
@@ -642,50 +783,45 @@ register int argc; char **argv;
 	    if (verbose)		dump_tab();
 #endif /* DEBUG */
 	    if(zcat_flg == 0) {
-		copystat(*fileptr, ofname);	/* Copy stats */
+		copystat(tempname, ofname);	/* Copy stats */
 		if((exit_stat == 1) || (!quiet))
 			putc('\n', stderr);
 	    }
-	}
-    } else {		/* Standard input */
-	if (do_decomp == 0) {
-		compress();
-#ifdef DEBUG
-		if(verbose)		dump_tab();
-#endif /* DEBUG */
-		if(!quiet)
-			putc('\n', stderr);
-	} else {
-	    /* Check the magic number */
-	    if (nomagic == 0) {
-		if ((getchar()!=(magic_header[0] & 0xFF))
-		 || (getchar()!=(magic_header[1] & 0xFF))) {
-		    fprintf(stderr, "stdin: not in compressed format\n");
-		    exit(1);
-		}
-		maxbits = getchar();	/* set -b from file */
-		block_compress = maxbits & BLOCK_MASK;
-		maxbits &= BIT_MASK;
-		maxmaxcode = 1 << maxbits;
-		fsize = 100000;		/* assume stdin large for USERMEM */
-		if(maxbits > BITS) {
-			fprintf(stderr,
-			"stdin: compressed with %d bits, can only handle %d bits\n",
-			maxbits, BITS);
-			exit(1);
-		}
-	    }
-#ifndef DEBUG
-	    decompress();
+	default:
+		break;
+	} /* end switch */
+	return;
+} /* end comprexx */
+
+compdir(dir)
+char *dir;
+{
+	DIR *dirp;
+#ifndef	DIRENT
+	register struct direct *dp;
 #else
-	    if (debug == 0)	decompress();
-	    else		printcodes();
-	    if (verbose)	dump_tab();
-#endif /* DEBUG */
+	register struct dirent *dp;
+#endif
+	char nbuf[1024];
+	char *nptr = nbuf;
+	dirp = opendir(dir);
+	if (dirp == NULL) {
+		printf("%s unreadable\n", dir);		/* not stderr! */
+		return ;
 	}
-    }
-    exit(exit_stat);
-}
+	while (dp = readdir(dirp)) {
+		if (dp->d_ino == 0)
+			continue;
+		if (strcmp(dp->d_name,".") == 0 || strcmp(dp->d_name,"..") == 0)
+			continue;
+		strcpy(nbuf,dir);
+		strcat(nbuf,"/");
+		strcat(nbuf,dp->d_name);
+		comprexx(&nptr);
+  	}
+	closedir(dirp);
+	return;
+} /* end compdir */
 
 static int offset;
 long int in_count = 1;			/* length of input */
@@ -1285,7 +1421,7 @@ char *ifname, *ofname;
 	    	fprintf(stderr, "%s: ", ifname);
 	fprintf(stderr, " -- not a regular file: unchanged");
 	exit_stat = 1;
-    } else if (statbuf.st_nlink > 1) {
+    } else if (statbuf.st_nlink > 1 && (! force) ) {
 	if(quiet)
 	    	fprintf(stderr, "%s: ", ifname);
 	fprintf(stderr, " -- has %d other links: unchanged",
@@ -1459,10 +1595,19 @@ long int num, den;
 
 version()
 {
-	fprintf(stderr, "%s\n", rcs_ident);
+	fprintf(stderr, "%s, patchlevel %d\n", version_id, PATCHLEVEL);
 	fprintf(stderr, "Options: ");
 #ifdef vax
 	fprintf(stderr, "vax, ");
+#endif
+#ifdef SHORTNAMES
+	fprintf(stderr,"SHORTNAMES, ");
+#endif
+#ifdef VOIDSIG
+	fprintf(stderr,"VOIDSIG, ");
+#endif
+#ifdef DIRENT
+	fprintf(stderr,"DIRENT, ");
 #endif
 #ifdef NO_UCHAR
 	fprintf(stderr, "NO_UCHAR, ");
@@ -1479,8 +1624,8 @@ version()
 #ifdef DEBUG
 	fprintf(stderr, "DEBUG, ");
 #endif
-#ifdef BSD4_2
-	fprintf(stderr, "BSD4_2, ");
+#ifdef BSD4
+	fprintf(stderr, "BSD4, ");
 #endif
 	fprintf(stderr, "BITS = %d\n", BITS);
 }

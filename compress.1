@@ -1,7 +1,7 @@
 .PU
 .TH COMPRESS 1 local
 .SH NAME
-compress, uncompress, zcat \- compress and expand data
+compress, uncompress, zcat \- compress and expand data (version 4.1)
 .SH SYNOPSIS
 .ll +8
 .B compress
@@ -13,6 +13,8 @@ compress, uncompress, zcat \- compress and expand data
 .B \-c
 ] [
 .B \-V
+] [
+.B \-r
 ] [
 .B \-b
 .I bits
@@ -58,8 +60,6 @@ The
 .B \-f
 option will force compression of
 .I name.
-This is useful for compressing an entire directory,
-even if some of the files do not actually shrink.
 If
 .B \-f
 is not given and
@@ -77,6 +77,15 @@ The nondestructive behavior of
 is identical to that of
 .I uncompress
 .B \-c.
+.PP
+If the
+.B \-r
+flag is specified, 
+.I compress
+will operate recursively. If any of the file names specified on the command
+line are directories, 
+.I compress
+will descend into the directory and compress all the files it finds there.
 .PP
 .I Compress
 uses the modified Lempel-Ziv algorithm popularized in

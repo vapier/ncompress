@@ -1,0 +1,26 @@
+
+Well, with all this discussion about file compression (for news batching
+in particular) going around, I decided to implement the text compression
+algorithm described in the June Computer magazine.  The author claimed
+blinding speed and good compression ratios.  It's certainly faster than
+compact (but, then, what wouldn't be), but it's also the same speed as
+pack, and gets better compression than both of them.  On 350K bytes of
+unix-wizards, compact took about 8 minutes of CPU, pack took about 80
+seconds, and compress (herein) also took 80 seconds.  But, compact and
+pack got about 30% compression, whereas compress got over 50%.  So, I
+decided I had something, and that others might be interested, too.
+
+As is probably true of compact and pack (although I haven't checked),
+the byte order within a word is probably relevant here, but as long as
+you stay on a single machine type, you should be ok.  (Can anybody
+elucidate on this?)  There are a couple of asm's in the code (extv and
+insv instructions), so anyone porting it to another machine will have to
+deal with this anyway (and could probably make it compatible with Vax
+byte order at the same time).  Anyway, I've linted the code (both with
+and without -p), so it should run elsewhere.  Note the longs in the
+code, you can take these out if you reduce BITS to <= 15.
+
+Have fun, and as always, if you make good enhancements, or bug fixes,
+I'd like to see them.
+
+=Spencer (thomas@utah-20, {harpo,hplabs,arizona}!utah-cs!thomas)

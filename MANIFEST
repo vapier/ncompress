@@ -1,0 +1,17 @@
+   File Name		Archive #	Description
+-----------------------------------------------------------
+ Acknowleds                 1	
+ Changes                    1	
+ Makefile.def				1
+ MANIFEST                   1	This shipping list
+ LZW.INFO					1
+ README                     1	
+ build                      1	
+ compress.1                 1	
+ compress42.c               1/2	
+ patchlevel.h				2
+ zcmp                       1	
+ zcmp.1                     1	
+ zdiff                      1	
+ zmore                      1	
+ zmore.1                    1	

@@ -1700,6 +1700,11 @@ resetbuf:	;
 
 				if (oldcode == -1)
 				{
+					if (code >= 256) {
+						fprintf(stderr, "oldcode:-1 code:%i\n", (int)(code));
+						fprintf(stderr, "uncompress: corrupt input\n");
+						abort_compress();
+					}
 					outbuf[outpos++] = (char_type)(finchar = (int)(oldcode = code));
 					continue;
 				}

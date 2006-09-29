@@ -1,7 +1,3 @@
-(N)compress version 4.2.4.1
-	o Fix possible bss buffer underflow CVE-2006-1168
-	o New homepage http://ncompress.sourceforge.net/
-
 (N)compress version 4.2.4
 	o Fix '-c' flag.
 	o Fix utime error.

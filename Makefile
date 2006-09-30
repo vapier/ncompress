@@ -53,6 +53,6 @@ install_extra: install
 	$(INSTALL_MAN) zcmp.1 zmore.1 $(DESTDIR)$(MAN1DIR)
 
 distclean clean:
-	rm -f *.o compress *.log
+	rm -f *.o compress *.log patchlevel.h
 
 .PHONY: all clean distclean install install_extra

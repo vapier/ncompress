@@ -441,8 +441,9 @@ void comprexx(char *fileptr)
 	int fdin, fdout;
 	char tempname[MAXPATHLEN];
 
-	if (strlen(fileptr) > sizeof(tempname) - 1) {
+	if (strlen(fileptr) > sizeof(tempname) - 3) {
 		fprintf(stderr, "Pathname too long: %s\n", fileptr);
+		exit_code = 1;
 		return;
 	}
 

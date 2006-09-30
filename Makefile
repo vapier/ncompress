@@ -21,6 +21,8 @@ options =
 CPPFLAGS += $(options)
 
 all: compress
+
+test:
 	rm -f zmore.1.Z
 	svn revert zmore.1
 	./compress zmore.1

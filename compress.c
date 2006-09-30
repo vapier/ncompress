@@ -17,6 +17,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <dirent.h>
+#include <getopt.h>
 
 #include "patchlevel.h"
 
@@ -247,15 +248,15 @@ int primetab[256] =		/* Special secondary hash table.		*/
 };
 #endif
 
-void Usage(void);
-void comprexx(char **);
+void Usage(int);
+void comprexx(char *);
 void compdir(char *);
-void compress(int,int);
-void decompress(int,int);
+void compress(int, int);
+void decompress(int, int);
 void read_error(void);
 void write_error(void);
 void abort_compress(void);
-void prratio(FILE *,long,long);
+void prratio(FILE *, long, long);
 void about(void);
 
 /*
@@ -300,16 +301,13 @@ void about(void);
  */
 int main(int argc, char *argv[])
 {
-	char **filelist, **fileptr;
+	int i;
 
 	if ((fgnd_flag = (signal(SIGINT, SIG_IGN)) != SIG_IGN))
 		signal(SIGINT, (SIG_TYPE)abort_compress);
 
 	signal(SIGTERM, (SIG_TYPE)abort_compress);
 	signal(SIGHUP, (SIG_TYPE)abort_compress);
-
-	filelist = fileptr = (char **)malloc(argc*sizeof(char *));
-	*filelist = NULL;
 
 	if ((progname = strrchr(argv[0], '/')) != 0)
 		progname++;
@@ -335,138 +333,116 @@ int main(int argc, char *argv[])
 	 * if a string is left, must be an input filename.
 	 */
 
-	for (argc--, argv++; argc > 0; argc--, argv++) {
-		if (**argv == '-') {
-			/* A flag argument */
-			while (*++(*argv)) {
-				/* Process all flags in this arg */
-				switch (**argv) {
-				case 'V':
-					about();
-					break;
-
-				case 's':
-					silent = 1;
-					quiet = 1;
-					break;
-
-				case 'v':
-					silent = 0;
-					quiet = 0;
-					break;
-
-				case 'd':
-					do_decomp = 1;
-					break;
-
-				case 'f':
-				case 'F':
-					force = 1;
-					break;
-
-				case 'n':
-					nomagic = 1;
-					break;
-
-				case 'C':
-					block_mode = 0;
-					break;
-
-				case 'b':
-					if (!ARGVAL()) {
-						fprintf(stderr, "Missing maxbits\n");
-						Usage();
-					}
-
-					maxbits = atoi(*argv);
-					goto nextarg;
-
-				case 'c':
-						zcat_flg = 1;
-						break;
-
-				case 'q':
-						quiet = 1;
-						break;
-				case 'r':
-				case 'R':
-						recursive = 1;
-						break;
-
-				default:
-						fprintf(stderr, "Unknown flag: '%c'; ", **argv);
-						Usage();
-					}
-			}
-			} else {
-			*fileptr++ = *argv;	/* Build input file list */
-			*fileptr = NULL;
-			}
-
-nextarg:	continue;
+	while ((i = getopt(argc, argv, "VsvdfFnCb:cqrRh")) != -1) {
+		switch (i) {
+			case 'V':
+				about();
+				break;
+			case 's':
+				silent = 1;
+				quiet = 1;
+				break;
+			case 'v':
+				silent = 0;
+				quiet = 0;
+				break;
+			case 'd':
+				do_decomp = 1;
+				break;
+			case 'f':
+			case 'F':
+				force = 1;
+				break;
+			case 'n':
+				nomagic = 1;
+				break;
+			case 'C':
+				block_mode = 0;
+				break;
+			case 'b':
+				maxbits = atoi(optarg);
+				break;
+			case 'c':
+				zcat_flg = 1;
+				break;
+			case 'q':
+				quiet = 1;
+				break;
+			case 'r':
+			case 'R':
+				recursive = 1;
+				break;
+			case 'h':
+				Usage(0);
+			case ':':
+				fprintf(stderr, "Option '%c' is missing parameter\n", optopt);
+				Usage(1);
+			case '?':
+				fprintf(stderr, "Unknown option '%c' or argument missing\n", optopt);
+				Usage(1);
+			default:
+				fprintf(stderr, "Unknown flag '%c'\n", **argv);
+				Usage(1);
+		}
 	}
 
 	if (maxbits < INIT_BITS)	maxbits = INIT_BITS;
 	if (maxbits > BITS) 		maxbits = BITS;
 
-	if (*filelist != NULL)
-		{
- 		for (fileptr = filelist; *fileptr; fileptr++)
-				comprexx(fileptr);
-	}
-		else
-		{/* Standard input */
-			ifname = "";
-			exit_code = 0;
-			remove_ofname = 0;
+	if (argc > optind) {
+ 		for (i = optind; i < argc; ++i)
+			comprexx(argv[i]);
+	} else {
+		/* Standard input */
+		ifname = "";
+		exit_code = 0;
+		remove_ofname = 0;
 
-			if (do_decomp == 0)
-			{
-				compress(0, 1);
+		if (do_decomp == 0) {
+			compress(0, 1);
 
-				if (zcat_flg == 0 && !quiet)
-				{
-					fprintf(stderr, "Compression: ");
-					prratio(stderr, bytes_in-bytes_out, bytes_in);
-					fprintf(stderr, "\n");
-				}
-
-				if (bytes_out >= bytes_in && !(force))
-					exit_code = 2;
+			if (zcat_flg == 0 && !quiet) {
+				fprintf(stderr, "Compression: ");
+				prratio(stderr, bytes_in-bytes_out, bytes_in);
+				fprintf(stderr, "\n");
 			}
-			else
-				decompress(0, 1);
-		}
 
-		exit((exit_code== -1) ? 1:exit_code);
+			if (bytes_out >= bytes_in && !(force))
+				exit_code = 2;
+		} else
+			decompress(0, 1);
 	}
 
-void Usage(void)
-{
-	fprintf(stderr, "\
-Usage: %s [-dfvcVr] [-b maxbits] [file ...]\n\
-       -d   If given, decompression is done instead.\n\
-       -c   Write output on stdout, don't remove original.\n\
-       -b   Parameter limits the max number of bits/code.\n\
-       -f   Forces output file to be generated, even if one already.\n\
-            exists, and even if no space is saved by compressing.\n\
-            If -f is not used, the user will be prompted if stdin is.\n\
-            a tty, otherwise, the output file will not be overwritten.\n\
-       -v   Write compression statistics.\n\
-       -V   Output vesion and compile options.\n\
-       -r   Recursive. If a filename is a directory, descend\n\
-            into it and compress everything in it.\n", progname);
-
-	exit(1);
+	exit(exit_code == -1 ? 1 : exit_code);
 }
 
-void comprexx(char **fileptr)
+void Usage(int exit_status)
+{
+	fprintf((exit_status == 0 ? stdout : stderr),
+		"Usage: %s [-dfvcVr] [-b maxbits] [file ...]\n"
+		"       -d   If given, decompression is done instead.\n"
+		"       -c   Write output on stdout, don't remove original.\n"
+		"       -b   Parameter limits the max number of bits/code.\n"
+		"       -f   Forces output file to be generated, even if one already.\n"
+		"            exists, and even if no space is saved by compressing.\n"
+		"            If -f is not used, the user will be prompted if stdin is.\n"
+		"            a tty, otherwise, the output file will not be overwritten.\n"
+		"       -v   Write compression statistics.\n"
+		"       -V   Output vesion and compile options.\n"
+		"       -r   Recursive. If a filename is a directory, descend\n"
+		"            into it and compress everything in it.\n",
+		progname);
+
+	exit(exit_status);
+}
+
+void comprexx(char *fileptr)
 {
 	int		fdin;
 	int		fdout;
 	char	tempname[MAXPATHLEN];
 
-	strcpy(tempname,*fileptr);
+	strcpy(tempname, fileptr);
 	errno = 0;
 
 	if (lstat(tempname,&infstat) == -1) {
@@ -800,10 +776,10 @@ void compdir(char *dir)
 			continue;
 
 		if ((strlen(dir)+strlen(dp->d_name)+1) < (MAXPATHLEN - 1)) {
-			strcpy(nbuf,dir);
-			strcat(nbuf,"/");
-			strcat(nbuf,dp->d_name);
-			comprexx(&nptr);
+			strcpy(nbuf, dir);
+			strcat(nbuf, "/");
+			strcat(nbuf, dp->d_name);
+			comprexx(nptr);
 		} else
 			fprintf(stderr,"Pathname too long: %s/%s\n", dir, dp->d_name);
 	}
@@ -1291,27 +1267,36 @@ void prratio(FILE *stream, long int num, long int den)
 
 void about(void)
 {
-	printf("Compress version: (N)compress %s, compiled: %s\n", VERSION, __DATE__);
-	printf("Compile options:\n        ");
-#if BYTEORDER == 4321 && NOALLIGN == 1
-	printf("USE_BYTEORDER, ");
+	printf(
+		"Compress version: (N)compress %s, compiled: %s\n"
+		"\n"
+		"Compile options:\n"
+		"     "
+#if BYTEORDER == 0000
+		"!BYTEORDER?, "
 #endif
 #ifdef FAST
-	printf("FAST, ");
+		"FAST, "
 #endif
-	printf("\n        IBUFSIZ=%d, OBUFSIZ=%d, BITS=%d, MAXPATHLEN=%d\n",
-		IBUFSIZ, OBUFSIZ, BITS, MAXPATHLEN);
-
-	printf("\n\
-Author version 4.2 (Speed improvement & source cleanup):\n\
-     Peter Jannesen  (peter@ncs.nl)\n\
-\n\
-Author version 4.1 (Added recursive directory compress):\n\
-     Dave Mack  (csu@alembic.acs.com)\n\
-\n\
-Authors version 4.0 (World release in 1985):\n\
-     Spencer W. Thomas, Jim McKie, Steve Davies,\n\
-     Ken Turkowski, James A. Woods, Joe Orost\n");
+		"IBUFSIZ=%d, OBUFSIZ=%d, BITS=%d, MAXPATHLEN=%d\n"
+		"\n"
+		"Homepage:\n"
+		"     http://ncompress.sourceforge.net/\n"
+		"\n"
+		"Author version 4.2.5 (Modernization):\n"
+		"     Mike Frysinger  (vapier@gmail.com)\n"
+		"\n"
+		"Author version 4.2 (Speed improvement & source cleanup):\n"
+		"     Peter Jannesen  (peter@ncs.nl)\n"
+		"\n"
+		"Author version 4.1 (Added recursive directory compress):\n"
+		"     Dave Mack  (csu@alembic.acs.com)\n"
+		"\n"
+		"Authors version 4.0 (World release in 1985):\n"
+		"     Spencer W. Thomas, Jim McKie, Steve Davies,\n"
+		"     Ken Turkowski, James A. Woods, Joe Orost\n",
+		VERSION, __DATE__, IBUFSIZ, OBUFSIZ, BITS, MAXPATHLEN
+	);
 
 	exit(0);
 }

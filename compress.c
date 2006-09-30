@@ -438,9 +438,8 @@ void Usage(int exit_status)
 
 void comprexx(char *fileptr)
 {
-	int		fdin;
-	int		fdout;
-	char	tempname[MAXPATHLEN];
+	int fdin, fdout;
+	char tempname[MAXPATHLEN];
 
 	if (strlen(fileptr) > sizeof(tempname) - 1) {
 		fprintf(stderr, "Pathname too long: %s\n", fileptr);
@@ -450,7 +449,7 @@ void comprexx(char *fileptr)
 	strcpy(tempname, fileptr);
 	errno = 0;
 
-	if (lstat(tempname,&infstat) == -1) {
+	if (lstat(tempname, &infstat) == -1) {
 		if (do_decomp) {
 			switch (errno) {
 			case ENOENT:	/* file doesn't exist */
@@ -460,9 +459,9 @@ void comprexx(char *fileptr)
 				 * directory, but it shouldn't do any harm.
 				 */
 				if (strcmp(tempname + strlen(tempname) - 2, ".Z") != 0) {
-					strcat(tempname,".Z");
+					strcat(tempname, ".Z");
 					errno = 0;
-					if (lstat(tempname,&infstat) == -1) {
+					if (lstat(tempname, &infstat) == -1) {
 						perror(tempname);
 						exit_code = 1;
 						return;
@@ -498,7 +497,7 @@ void comprexx(char *fileptr)
 			if (recursive)
 				compdir(tempname);
 			else if (!quiet)
-				fprintf(stderr,"%s is a directory -- ignored\n", tempname);
+				fprintf(stderr, "%s is a directory -- ignored\n", tempname);
 			break;
 
 		case S_IFREG:	/* regular file */
@@ -507,7 +506,7 @@ void comprexx(char *fileptr)
 				if (!zcat_flg) {
 					if (strcmp(tempname + strlen(tempname) - 2, ".Z") != 0) {
 						if (!quiet)
-							fprintf(stderr,"%s - no .Z suffix\n",tempname);
+							fprintf(stderr, "%s - no .Z suffix\n", tempname);
 						return;
 					}
 				}
@@ -610,7 +609,7 @@ void comprexx(char *fileptr)
 					}
 				}
 
-				if ((fdout = open(ofname, O_WRONLY|O_CREAT|O_EXCL|O_BINARY,0600)) == -1) {
+				if ((fdout = open(ofname, O_WRONLY|O_CREAT|O_EXCL|O_BINARY, 0600)) == -1) {
 					perror(tempname);
 					return;
 				}
@@ -699,7 +698,7 @@ void comprexx(char *fileptr)
 				} else {
 					/* ***** Successful Compression ***** */
 					if (!quiet) {
-						fprintf(stderr, " -- replaced with %s",ofname);
+						fprintf(stderr, " -- replaced with %s", ofname);
 
 						if (!do_decomp) {
 							fprintf(stderr, " Compression: ");
@@ -740,7 +739,7 @@ void comprexx(char *fileptr)
 			break;
 
 		default:
-			fprintf(stderr,"%s is not a directory or a regular file - ignored\n",
+			fprintf(stderr, "%s is not a directory or a regular file - ignored\n",
 				tempname);
 			break;
 	}
@@ -759,6 +758,7 @@ void compdir(char *dir)
 		printf("%s unreadable\n", dir); /* not stderr! */
 		return;
 	}
+
 	/*
 	 * WARNING: the following algorithm will occasionally cause
 	 * compress to produce error warnings of the form "<filename>.Z
@@ -777,7 +777,7 @@ void compdir(char *dir)
 		if (dp->d_ino == 0)
 			continue;
 
-		if (strcmp(dp->d_name,".") == 0 || strcmp(dp->d_name,"..") == 0)
+		if (strcmp(dp->d_name, ".") == 0 || strcmp(dp->d_name, "..") == 0)
 			continue;
 
 		if ((strlen(dir)+strlen(dp->d_name)+1) < (MAXPATHLEN - 1)) {
@@ -786,7 +786,7 @@ void compdir(char *dir)
 			strcat(nbuf, dp->d_name);
 			comprexx(nptr);
 		} else
-			fprintf(stderr,"Pathname too long: %s/%s\n", dir, dp->d_name);
+			fprintf(stderr, "Pathname too long: %s/%s\n", dir, dp->d_name);
 	}
 
 	closedir(dirp);
@@ -893,7 +893,7 @@ void compress(int fdin, int fdout)
 				else {
 					ratio = 0;
 					clear_htab();
-					output(outbuf,outbits,CLEAR,n_bits);
+					output(outbuf, outbits, CLEAR, n_bits);
 					boff = outbits = (outbits-1)+((n_bits<<3)-
 					                 ((outbits-boff-1+(n_bits<<3))%(n_bits<<3)));
 					extcode = MAXCODE(n_bits = INIT_BITS)+1;
@@ -980,7 +980,7 @@ lookup:			hp = (hp+p)&HMASK;
 			}
 out:		;
 #endif
-			output(outbuf,outbits,fcode.e.ent,n_bits);
+			output(outbuf, outbits, fcode.e.ent, n_bits);
 
 			{
 				long fc;
@@ -1009,7 +1009,7 @@ endlop:		if (fcode.e.ent >= FIRST && rpos < rsize)
 		read_error();
 
 	if (bytes_in > 0)
-		output(outbuf,outbits,fcode.e.ent,n_bits);
+		output(outbuf, outbits, fcode.e.ent, n_bits);
 
 	if (write(fdout, outbuf, (outbits+7)>>3) != (outbits+7)>>3)
 		write_error();
@@ -1131,7 +1131,7 @@ resetbuf: ;
 				goto resetbuf;
 			}
 
-			input(inbuf,posbits,code,n_bits,bitmask);
+			input(inbuf, posbits, code, n_bits, bitmask);
 
 			if (oldcode == -1) {
 				if (code >= 256) {
@@ -1164,7 +1164,7 @@ resetbuf: ;
 					p = &inbuf[posbits>>3];
 
 					fprintf(stderr, "insize:%d posbits:%d inbuf:%02X %02X %02X %02X %02X (%d)\n", insize, posbits,
-						p[-1],p[0],p[1],p[2],p[3], (posbits&07));
+						p[-1], p[0], p[1], p[2], p[3], (posbits&07));
 					fprintf(stderr, "uncompress: corrupt input\n");
 					abort_compress();
 				}
@@ -1182,7 +1182,6 @@ resetbuf: ;
 			*--stackp =	(char_type)(finchar = tab_suffixof(code));
 
 			/* And put them out in forward order */
-
 			{
 				int	i;
 

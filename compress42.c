@@ -883,6 +883,11 @@ comprexx(fileptr)
 		int		fdout;
 		char	tempname[MAXPATHLEN];
 
+		if (strlen(*fileptr) > sizeof(tempname) - 1) {
+			fprintf(stderr, "Pathname too long: %s\n", *fileptr);
+			return;
+		}
+
 		strcpy(tempname,*fileptr);
 		errno = 0;
 

@@ -1,7 +1,5 @@
 Acknowledgments:
 
-(N)compress, Version 4.2
-
 Thanks to the previous authors whom I didn't contact, for making
 the program available originally.
    Spencer W. Thomas   (decvax!harpo!utah-cs!utah-gr!thomas)
@@ -11,10 +9,8 @@ the program available originally.
    James A. Woods      (decvax!ihnp4!ames!jaw)
    Joe Orost           (decvax!vax135!petsd!joe)
    Dave Mack           (csu@alembic.acs.com)
+   Peter Jannesen      (peter@ncs.nl)
 
 Also thanks to Frans Meulenbroeks, Jan Christiaan van Winkel,
 Peter van Hooft and the testers of comp.sources.reveiwed for testing
 this version on different platforms.
- 
--- 
-Peter Jannesen

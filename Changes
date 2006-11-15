@@ -1,5 +1,7 @@
 (N)compress version 4.2.5.0
 	o Source code cleanup
+	o Integrate build/man touchups from Debian.
+	o Add fix from Fedora for handling of 0 byte files.
 	o Fix possible bss buffer underflow CVE-2006-1168
 	o New homepage http://ncompress.sourceforge.net/
 

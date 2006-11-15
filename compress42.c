@@ -638,7 +638,7 @@ long 			bytes_out;			/* Total number of byte to output				*/
 	} ;
 #endif
 
-void  	main			ARGS((int,char **));
+int  	main			ARGS((int,char **));
 void  	Usage			ARGS((void));
 void  	comprexx		ARGS((char **));
 void  	compdir			ARGS((char *));
@@ -691,7 +691,7 @@ void  	about			ARGS((void));
  *   deterministic, and can be done on the fly.  Thus, the decompression
  *   procedure needs no input table, but tracks the way the table was built.
  */ 
-void
+int
 main(argc, argv)
 	REG1	int 	 argc;
 	REG2	char	*argv[];

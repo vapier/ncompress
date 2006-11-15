@@ -1165,10 +1165,12 @@ comprexx(fileptr)
 			if (fdout != 1 && close(fdout))
 				write_error();
 
-			if (bytes_in == 0)
+			if ( (bytes_in == 0) && (force == 0 ) )
 			{
 				if (remove_ofname)
 				{
+					if(!quiet)
+						fprintf(stderr, "No compression -- %s unchanged\n", ifname);
 					if (unlink(ofname))	/* Remove input file */
 					{
 						fprintf(stderr, "\nunlink error (ignored) ");
@@ -1177,6 +1179,7 @@ comprexx(fileptr)
 					}
 		
 					remove_ofname = 0;
+					exit_code = 2;
 				}
 			}
 			else

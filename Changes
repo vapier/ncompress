@@ -2,6 +2,7 @@
 	o Integrate build/man touchups from Debian.
 	o Add fix from Fedora for handling of 0 byte files.
 	o Pull in POSIX standard headers for prototypes (stdlib,string,unistd).
+	o Replace rindex() with strrchr().
 
 (N)compress version 4.2.4.1
 	o Fix possible bss buffer underflow CVE-2006-1168

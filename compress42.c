@@ -131,6 +131,9 @@
  *
  */
 #include	<stdio.h>
+#include	<stdlib.h>
+#include	<string.h>
+#include	<unistd.h>
 #include	<fcntl.h>
 #include	<ctype.h>
 #include	<signal.h>
@@ -638,13 +641,12 @@ long 			bytes_out;			/* Total number of byte to output				*/
 	} ;
 #endif
 
-void  	main			ARGS((int,char **));
+int  	main			ARGS((int,char **));
 void  	Usage			ARGS((void));
 void  	comprexx		ARGS((char **));
 void  	compdir			ARGS((char *));
 void  	compress		ARGS((int,int));
 void  	decompress		ARGS((int,int));
-char  	*rindex			ARGS((char *,int));
 void  	read_error		ARGS((void));
 void  	write_error		ARGS((void));
 void 	abort_compress	ARGS((void));
@@ -691,7 +693,7 @@ void  	about			ARGS((void));
  *   deterministic, and can be done on the fly.  Thus, the decompression
  *   procedure needs no input table, but tracks the way the table was built.
  */ 
-void
+int
 main(argc, argv)
 	REG1	int 	 argc;
 	REG2	char	*argv[];
@@ -714,7 +716,7 @@ main(argc, argv)
     	filelist = fileptr = (char **)malloc(argc*sizeof(char *));
     	*filelist = NULL;
 
-    	if((progname = rindex(argv[0], '/')) != 0)
+    	if((progname = strrchr(argv[0], '/')) != 0)
 			progname++;
 		else
 			progname = argv[0];
@@ -882,6 +884,12 @@ comprexx(fileptr)
 		int		fdin;
 		int		fdout;
 		char	tempname[MAXPATHLEN];
+
+		if (strlen(*fileptr) > sizeof(tempname) - 3) {
+			fprintf(stderr, "Pathname too long: %s\n", *fileptr);
+			exit_code = 1;
+			return;
+		}
 
 		strcpy(tempname,*fileptr);
 		errno = 0;
@@ -1159,10 +1167,12 @@ comprexx(fileptr)
 			if (fdout != 1 && close(fdout))
 				write_error();
 
-			if (bytes_in == 0)
+			if ( (bytes_in == 0) && (force == 0 ) )
 			{
 				if (remove_ofname)
 				{
+					if(!quiet)
+						fprintf(stderr, "No compression -- %s unchanged\n", ifname);
 					if (unlink(ofname))	/* Remove input file */
 					{
 						fprintf(stderr, "\nunlink error (ignored) ");
@@ -1171,6 +1181,7 @@ comprexx(fileptr)
 					}
 		
 					remove_ofname = 0;
+					exit_code = 2;
 				}
 			}
 			else
@@ -1700,6 +1711,11 @@ resetbuf:	;
 
 				if (oldcode == -1)
 				{
+					if (code >= 256) {
+						fprintf(stderr, "oldcode:-1 code:%i\n", (int)(code));
+						fprintf(stderr, "uncompress: corrupt input\n");
+						abort_compress();
+					}
 					outbuf[outpos++] = (char_type)(finchar = (int)(oldcode = code));
 					continue;
 				}
@@ -1796,20 +1812,6 @@ resetbuf:	;
 
 		if (outpos > 0 && write(fdout, outbuf, outpos) != outpos)
 			write_error();
-	}
-
-char *
-rindex(s, c)		/* For those who don't have it in libc.a */
-	REG1 char	*s;
-	REG2 int	 c;
-	{
-		char *p;
-
-		for (p = NULL; *s; s++)
-		    if (*s == (char)c)
-				p = s;
-
-		return(p);
 	}
 
 void

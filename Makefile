@@ -33,7 +33,7 @@ test:
 patchlevel.h: version
 	echo "#define VERSION \"`cat version`\"" > patchlevel.h
 
-compress: patchlevel.h
+compress.o: patchlevel.h
 
 INSTALL_DIR = install -d -m 755
 INSTALL_EXE = install -m 755

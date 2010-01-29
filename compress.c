@@ -726,7 +726,11 @@ void comprexx(char *fileptr)
 						perror(ofname);
 						exit_code = 1;
 					}
-					chown(ofname, infstat.st_uid, infstat.st_gid);	/* Copy ownership */
+					if (chown(ofname, infstat.st_uid, infstat.st_gid)) { /* Copy ownership */
+						fprintf(stderr, "\nchown error (ignored) ");
+						perror(ofname);
+						exit_code = 1;
+					}
 					remove_ofname = 0;
 
 					if (unlink(ifname)) { /* Remove input file */

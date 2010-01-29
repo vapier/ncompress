@@ -713,7 +713,13 @@ main(argc, argv)
     	nomagic = 1;	/* Original didn't have a magic number */
 #endif
 
-    	filelist = fileptr = (char **)malloc(argc*sizeof(char *));
+    	filelist = (char **)malloc(argc*sizeof(char *));
+    	if (filelist == NULL)
+		{
+			fprintf(stderr, "Cannot allocate memory for file list.\n");
+			exit (1);
+		}
+    	fileptr = filelist;
     	*filelist = NULL;
 
     	if((progname = strrchr(argv[0], '/')) != 0)

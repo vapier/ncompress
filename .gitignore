@@ -1,0 +1,12 @@
+*.o
+*~
+
+*.diff
+*.patch
+*.orig
+*.rej
+
+# ncompress generated files
+compress
+Makefile
+patchlevel.h

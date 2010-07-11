@@ -808,7 +808,7 @@ main(argc, argv)
 #ifdef	RECURSIVE
 						recursive = 1;
 #else
-						fprintf(stderr, "%s -r not availble (du to missing directory functions)\n", *argv);
+						fprintf(stderr, "%s -r not available (due to missing directory functions)\n", *argv);
 #endif
 						break;
 

@@ -1,3 +1,6 @@
+(N)compress version 4.2.4.4
+	o Add some spelling fixes from Kenneth J. Pronovici
+
 (N)compress version 4.2.4.3
 	o Check return value of chown().
 	o Fix from Fedora for checking malloc() return.

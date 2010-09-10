@@ -10,3 +10,5 @@
 compress
 Makefile
 patchlevel.h
+
+ncompress-*.tar.*

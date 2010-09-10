@@ -1,7 +1,11 @@
 # this assumes a recent system -- you're using GNU make right ?
 
-compress %: Makefile
+compress cleanup install: Makefile
 	$(MAKE) -f Makefile $@
+
+clean: cleanup
+distclean: cleanup
+	rm -f Makefile
 
 Makefile: Makefile.def
 	sed \
@@ -14,4 +18,4 @@ P = $(PN)-$(PV)
 dist:
 	git archive --prefix=$(P)/ HEAD | gzip -9 > $(P).tar.gz
 
-.PHONY: compress clean dist distclean
+.PHONY: clean cleanup compress dist distclean install

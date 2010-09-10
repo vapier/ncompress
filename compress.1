@@ -1,4 +1,3 @@
-.PU
 .TH COMPRESS 1 local
 .SH NAME
 compress, uncompress, zcat \- compress and expand data
@@ -44,7 +43,7 @@ compress, uncompress, zcat \- compress and expand data
 ]
 .SH DESCRIPTION
 .I Compress
-reduces the size of the named files using adaptive Lempel-Ziv coding.
+reduces the size of the named files using adaptive Lempel\-Ziv coding.
 Whenever possible,
 each file is replaced by one with the extension
 .B "\&.Z,"
@@ -117,13 +116,13 @@ along with any preprocessor flags specified during compilation, on
 stderr before doing any compression or uncompression.
 .PP
 .I Compress
-uses the modified Lempel-Ziv algorithm popularized in
+uses the modified Lempel\-Ziv algorithm popularized in
 "A Technique for High Performance Data Compression",
 Terry A. Welch,
 .I "IEEE Computer,"
-vol. 17, no. 6 (June 1984), pp. 8-19.
-Common substrings in the file are first replaced by 9-bit codes 257 and up.
-When code 512 is reached, the algorithm switches to 10-bit codes and
+vol. 17, no. 6 (June 1984), pp. 8\-19.
+Common substrings in the file are first replaced by 9\-bit codes 257 and up.
+When code 512 is reached, the algorithm switches to 10\-bit codes and
 continues to use more bits until the
 limit specified by the
 .B \-b
@@ -212,7 +211,7 @@ Recompress the file with smaller
 .IR bits \.
 .in -8
 .IR file :
-already has .Z suffix -- no change
+already has .Z suffix \-\- no change
 .in +8
 The file is assumed to be already compressed.
 Rename the file and try again.
@@ -242,13 +241,13 @@ Percentage of the input saved by compression.
 (Relevant only for
 .BR \-v \.)
 .in -8
--- not a regular file or directory: ignored
+\-\- not a regular file or directory: ignored
 .in +8
 When the input file is not a regular file or directory,
 (e.g. a symbolic link, socket, FIFO, device file), it is
 left unaltered.
 .in -8
--- has 
+\-\- has
 .I xx 
 other links: unchanged
 .in +8
@@ -256,9 +255,9 @@ The input file has links; it is left unchanged.  See
 .IR ln "(1)"
 for more information. Use the
 .B \-f
-flag to force compression of multiply-linked files.
+flag to force compression of multiply\-linked files.
 .in -8
--- file unchanged
+\-\- file unchanged
 .in +8
 No savings is achieved by
 compression.  The input remains virgin.
@@ -271,11 +270,11 @@ a small process data space (64KB or less, as exhibited by the DEC PDP
 series, the Intel 80286, etc.)
 .PP
 Invoking compress with a 
-.B \-r
+.BR \-r
 flag will occasionally cause it to produce spurious error warnings of the form
 .PP
 .in 8
-"<filename>.Z already has .Z suffix - ignored"
+"<filename>.Z already has .Z suffix \- ignored"
 .in -8
 .PP
 These warnings can be ignored. See the comments in compress42.c:compdir()

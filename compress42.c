@@ -876,7 +876,7 @@ Usage: %s [-dfvcVr] [-b maxbits] [file ...]\n\
             If -f is not used, the user will be prompted if stdin is.\n\
             a tty, otherwise, the output file will not be overwritten.\n\
        -v   Write compression statistics.\n\
-       -V   Output vesion and compile options.\n\
+       -V   Output version and compile options.\n\
        -r   Recursive. If a filename is a directory, descend\n\
             into it and compress everything in it.\n");
 

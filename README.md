@@ -48,6 +48,12 @@ Send comments, complaints and especially patches relating to
 The ncompress code is released into the public domain.  See the
 [UNLICENSE](UNLICENSE) file for more details.
 
+# Patents
+
+All existing patents on the LZW algorithm have
+[expired world-wide](http://en.wikipedia.org/wiki/LZW#Patent_issues).
+So LZW is now patent free.
+
 # Remarks
 
 - Build is a bourne shell script. On some system it is necessary to type

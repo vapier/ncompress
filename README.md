@@ -1,19 +1,11 @@
+# About
+
 This is version 4.2 of (N)compress (an improved version of compress 4.1).
 
 Compress is a fast, simple LZW file compressor.  Compress does not have
 the highest compression rate, but it is one of the fastest programs to
 compress data.  Compress is the defacto standard in the UNIX community
 for compressing files.
-
-'build' is a menu driven shell script for compiling, testing and
-installing (N)compress. So to build and install (N)compress all you have to
-do is run build.  Build will first test your system for default
-settings. The current compile settings are stored in a special file
-called compress.def.
-
-For user with problems with build there is a default makefile included
-called 'Makefile.def'. Also build is capable te generate a Makefile with
-all options (option genmake).
 
 (N)compress 4.2 has a special, fast compression hash algorithm.  This
 algorithm uses more memory than the old hash table. If you don't want
@@ -31,13 +23,29 @@ compress 2.0.  However, compress 4.2 still accepts the output of
 compress 2.0.  To generate output that is compatible with compress
 2.0, use the undocumented "-C" flag.
 
+# Building
+
+For recent systems with GNU make, you can simply run `make` as the default
+'GNUMakefile' will get picked up.
+
+'build' is a menu driven shell script for compiling, testing and
+installing (N)compress. So to build and install (N)compress all you have to
+do is run build.  Build will first test your system for default
+settings. The current compile settings are stored in a special file
+called compress.def.
+
+For user with problems with build there is a default makefile included
+called 'Makefile.def'. Also build is capable of generating a Makefile with
+all options (option genmake).
+
+# Support
+
 Send comments, complaints and especially patches relating to
-	peter@ncs.nl
+    https://github.com/vapier/ncompress/issues
 
+# Remarks
 
-REMARKS
-
-- Build is a bourne shell script. On some system it is nessesary to type
+- Build is a bourne shell script. On some system it is necessary to type
   'sh build'.
 
 - The build script usages tput for nice screen handling of the script.
@@ -50,30 +58,30 @@ REMARKS
 - The /bin/sh under Ultrix can't handle ${var:-str} so use ksh for the
   build script.
 
-- If there are any problems with the libary functions definitions in
+- If there are any problems with the library function definitions in
   compress42.c define NOFUNCDEF (-DNOFUNCDEF=1) to disable the definitions.
   IBM AIX (RS/6000) uses a different definitions of open(), define -D_IBMRT=1
   to disable the open() definition.
 
 - The output if (N)compress 4.2 is not exactly the same as compress 4.0
-  because of differente table reset point. The output of (N)compress 4.2
+  because of different table reset point. The output of (N)compress 4.2
   is 100% compatible with compress 4.0
 
 - Some systems has performance problems with reads bigger than BUFSIZ
   (The read a head function is not working as expected). For those
   system use the default BSIZE input buffer size.
 
-- (N)compress can by slower on small files (<10Kb) because of a greate 
+- (N)compress can by slower on small files (<10Kb) because of a great
   table reset overhead. Use cpio or tar to make 1 bigger file if
-  posible, it is faster and also gives a beter compression ratio most
+  possible, it is faster and also gives a better compression ratio most
   of the time.
 
 - (N)compress is slower in vax systems because of removing some
-  undocumented inline asembler.
+  undocumented inline assembler.
 
-- files compressed on a large machine with more bits than allowed by 
+- files compressed on a large machine with more bits than allowed by
   a version of compress on a smaller machine cannot be decompressed!  Use the
-  "-b12" flag to generate a file on a large machine that can be uncompressed 
+  "-b12" flag to generate a file on a large machine that can be uncompressed
   on a 16-bit machine.
 
 - compatibility with compress 3.0 has not been tested in the 4.2 release of
@@ -82,10 +90,3 @@ REMARKS
 - There has been 1 problem report in relation to GCC 2.0 on a sparc
   workstation. GCC 2.0 seems to generate a bad compress. Use the
   standard c compiler 'cc'.
-
-===============================================================================
-Peter Jannesen
-Network Communication Systems (N.C.S), The Netherlands
-Phone:  +31104130093                             Fax:    +31104146452
-Address: Westbaak 96a                            Email:  peter@ncs.nl
-         3012 KM Rotterdam, The Netherlands

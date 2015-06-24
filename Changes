@@ -1,3 +1,6 @@
+(N)compress version 4.2.4.5
+	o New homepage https://github.com/vapier/ncompress
+
 (N)compress version 4.2.4.4
 	o Add some spelling fixes from Kenneth J. Pronovici
 	o Tweak makefile syntax for make 3.82

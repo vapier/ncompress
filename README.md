@@ -43,6 +43,11 @@ all options (option genmake).
 Send comments, complaints and especially patches relating to
     https://github.com/vapier/ncompress/issues
 
+# Licensing
+
+The ncompress code is released into the public domain.  See the
+[UNLICENSE](UNLICENSE) file for more details.
+
 # Remarks
 
 - Build is a bourne shell script. On some system it is necessary to type

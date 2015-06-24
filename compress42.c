@@ -1920,6 +1920,9 @@ about()
 			REGISTERS, IBUFSIZ, OBUFSIZ, BITS);
 
 		fprintf(stderr, "\n\
+Author version 4.2.4.x (Maintenance):\n\
+     Mike Frysinger  (vapier@gmail.com)\n\
+\n\
 Author version 4.2 (Speed improvement & source cleanup):\n\
      Peter Jannesen  (peter@ncs.nl)\n\
 \n\

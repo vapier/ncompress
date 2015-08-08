@@ -130,6 +130,7 @@
  *   Add variable bit length output.
  *
  */
+#include	<stdint.h>
 #include	<stdio.h>
 #include	<stdlib.h>
 #include	<string.h>
@@ -1006,8 +1007,8 @@ comprexx(fileptr)
 
 					if (infstat.st_nlink > 1 && (!force))
 					{
-			  			fprintf(stderr, "%s has %d other links: unchanged\n",
-										tempname, infstat.st_nlink - 1);
+						fprintf(stderr, "%s has %jd other links: unchanged\n",
+										tempname, (intmax_t)(infstat.st_nlink - 1));
 						exit_code = 1;
 			  			return;
 					}

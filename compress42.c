@@ -1006,8 +1006,12 @@ comprexx(fileptr)
 
 					if (infstat.st_nlink > 1 && (!force))
 					{
-			  			fprintf(stderr, "%s has %d other links: unchanged\n",
-										tempname, infstat.st_nlink - 1);
+			  			/* There's no portable way to print an nlink_t, because it
+			  			    changes size by platform.  So, I just cast to unsigned
+			  			    long int and hope for the best.  This is basically the
+			  			    StackOverflow recommendation: http://stackoverflow.com/questions/1401526 */
+			  			fprintf(stderr, "%s has %ld other links: unchanged\n",
+										tempname, (unsigned long int) infstat.st_nlink - 1);
 						exit_code = 1;
 			  			return;
 					}

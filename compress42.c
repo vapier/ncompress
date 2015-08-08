@@ -286,7 +286,6 @@
 #	define	BYTEORDER 	4321
 #	undef	NOALLIGN
 #	define	NOALLIGN	1
-#	define	COMPILE_DATE	__DATE__
 #endif /* DOS */
 
 #ifndef	O_BINARY
@@ -1882,7 +1881,7 @@ prratio(stream, num, den)
 void
 about()
 	{
-		fprintf(stderr, "Compress version: %s, compiled: %s\n", version_id, COMPILE_DATE);
+		fprintf(stderr, "Compress version: %s\n", version_id);
 		fprintf(stderr, "Compile options:\n        ");
 #if BYTEORDER == 4321 && NOALLIGN == 1
 		fprintf(stderr, "USE_BYTEORDER, ");

@@ -566,9 +566,9 @@ do
 		echo ""
 		echo "Compiling compress ${version}"
 
-		echo ${CC} ${options} "-DCOMPILE_DATE=\"`date`\"" compress42.c ${LBOPT}
+		echo ${CC} ${options} compress42.c ${LBOPT}
 
-		if ${CC} ${options} "-DCOMPILE_DATE=\"`date`\"" compress42.c ${LBOPT}
+		if ${CC} ${options} compress42.c ${LBOPT}
 		then
 			echo ""
 			./compress -V
@@ -599,9 +599,9 @@ do
 		echo ""
 		echo "Compiling compress ${version}"
 
-		echo ${CC} ${options} "-DCOMPILE_DATE=\"`date`\"" compress42.c 
+		echo ${CC} ${options} compress42.c 
 
-		${CC} ${options} "-DCOMPILE_DATE=\"`date`\"" compress42.c 
+		${CC} ${options} compress42.c 
 		echo ""
 		echo ${n} "Press return to continue${c}"
 		read dummy
@@ -790,7 +790,7 @@ LBOPT=${LBOPT}
 
 
 compress:	Makefile compress42.c patchlevel.h
-	$(CC) -o compress $(options) "-DCOMPILE_DATE=\"\`date\`\"" compress42.c $(LBOPT)
+	$(CC) -o compress $(options) compress42.c $(LBOPT)
 
 install:	compress
 		[ -f \$(BINDIR)/compress ] && \\

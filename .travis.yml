@@ -1,0 +1,15 @@
+# Travis build integration.
+# https://docs.travis-ci.com/
+
+language: c
+compiler:
+  - clang
+  - gcc
+
+sudo: false
+
+os:
+  - linux
+  - osx
+
+script: ./travis/main.sh

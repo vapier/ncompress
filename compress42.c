@@ -1646,7 +1646,6 @@ decompress(fdin, fdout)
 
 		maxbits = inbuf[2] & BIT_MASK;
 		block_mode = inbuf[2] & BLOCK_MODE;
-		maxmaxcode = MAXCODE(maxbits);
 
 		if (maxbits > BITS)
 		{
@@ -1656,6 +1655,8 @@ decompress(fdin, fdout)
 			exit_code = 4;
 			return;
 		}
+
+		maxmaxcode = MAXCODE(maxbits);
 
 		bytes_in = insize;
 	    maxcode = MAXCODE(n_bits = INIT_BITS)-1;

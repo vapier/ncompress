@@ -1033,32 +1033,6 @@ comprexx(fileptr)
 
 				if (stat(ofname, &statbuf) == 0)
 				{
-					if ((s = strlen(ofname)) > 8)
-					{
-						c = ofname[s-1];
-						ofname[s-1] = '\0';
-
-						statbuf2 = statbuf;
-
-						if (!stat(ofname, &statbuf2) &&
-							statbuf.st_mode  == statbuf2.st_mode &&
-							statbuf.st_ino   == statbuf2.st_ino &&
-							statbuf.st_dev   == statbuf2.st_dev &&
-							statbuf.st_uid   == statbuf2.st_uid &&
-							statbuf.st_gid   == statbuf2.st_gid &&
-							statbuf.st_size  == statbuf2.st_size &&
-							statbuf.st_atime == statbuf2.st_atime &&
-							statbuf.st_mtime == statbuf2.st_mtime &&
-							statbuf.st_ctime == statbuf2.st_ctime)
-						{
-							fprintf(stderr, "%s: filename too long to tack on .Z\n", tempname);
-							exit_code = 1;
-							return;
-						}
-
-						ofname[s-1] = (char)c;
-					}
-
 					if (!force)
 					{
 		    			inbuf[0] = 'n';
@@ -1111,45 +1085,6 @@ comprexx(fileptr)
 			      	perror(tempname);
 					return;
 		    	}
-
-				if ((s = strlen(ofname)) > 8)
-				{
-					if (fstat(fdout, &statbuf))
-					{
-						fprintf(stderr, "Can't get status op output file\n");
-						perror(ofname);
-						exit_code = 1;
-						return ;
-					}
-
-					c = ofname[s-1];
-					ofname[s-1] = '\0';
-					statbuf2 = statbuf;
-
-					if (!stat(ofname, &statbuf2) &&
-						statbuf.st_mode  == statbuf2.st_mode &&
-						statbuf.st_ino   == statbuf2.st_ino &&
-						statbuf.st_dev   == statbuf2.st_dev &&
-						statbuf.st_uid   == statbuf2.st_uid &&
-						statbuf.st_gid   == statbuf2.st_gid &&
-						statbuf.st_size  == statbuf2.st_size &&
-						statbuf.st_atime == statbuf2.st_atime &&
-						statbuf.st_mtime == statbuf2.st_mtime &&
-						statbuf.st_ctime == statbuf2.st_ctime)
-					{
-						fprintf(stderr, "%s: filename too long to tack on .Z\n", tempname);
-
-						if (unlink(ofname))
-						{
-							fprintf(stderr, "can't remove bad output file\n");
-							perror(ofname);
-						}
-						exit_code = 1;
-						return;
-					}
-
-					ofname[s-1] = (char)c;
-				}
 
 				if(!quiet)
 					fprintf(stderr, "%s: ", tempname);

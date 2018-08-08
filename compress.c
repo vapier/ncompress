@@ -438,7 +438,7 @@ void Usage(int exit_status)
 
 void comprexx(char *fileptr)
 {
-	int fdin, fdout;
+	int fdin, fdout = -1;
 	char tempname[MAXPATHLEN];
 
 	if (strlen(fileptr) > sizeof(tempname) - 3) {
@@ -566,8 +566,7 @@ void comprexx(char *fileptr)
 							statbuf.st_ctime == statbuf2.st_ctime)
 						{
 							fprintf(stderr, "%s: filename too long to tack on .Z\n", tempname);
-							exit_code = 1;
-							return;
+							goto error;
 						}
 
 						ofname[s-1] = (char)c;
@@ -597,30 +596,27 @@ void comprexx(char *fileptr)
 
 						if (inbuf[0] != 'y') {
 							fprintf(stderr, "%s not overwritten\n", ofname);
-							exit_code = 1;
-							return;
+							goto error;
 						}
 					}
 
 					if (unlink(ofname)) {
 						fprintf(stderr, "Can't remove old output file\n");
 						perror(ofname);
-						exit_code = 1;
-						return;
+						goto error;
 					}
 				}
 
 				if ((fdout = open(ofname, O_WRONLY|O_CREAT|O_EXCL|O_BINARY, 0600)) == -1) {
 					perror(tempname);
-					return;
+					goto error;
 				}
 
 				if ((s = strlen(ofname)) > 8) {
 					if (fstat(fdout, &statbuf)) {
 						fprintf(stderr, "Can't get status op output file\n");
 						perror(ofname);
-						exit_code = 1;
-						return;
+						goto error;
 					}
 
 					c = ofname[s-1];
@@ -644,8 +640,7 @@ void comprexx(char *fileptr)
 							fprintf(stderr, "can't remove bad output file\n");
 							perror(ofname);
 						}
-						exit_code = 1;
-						return;
+						goto error;
 					}
 
 					ofname[s-1] = (char)c;
@@ -751,6 +746,14 @@ void comprexx(char *fileptr)
 				tempname);
 			break;
 	}
+
+	return;
+
+error:
+	exit_code = 1;
+	close (fdin);
+	if (fdout != -1)
+		close (fdout);
 }
 
 void compdir(char *dir)

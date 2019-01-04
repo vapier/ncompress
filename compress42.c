@@ -214,7 +214,6 @@
 #	define	OBUFSIZ	BUFSIZ	/* Default output buffer size							*/
 #endif
 
-#define MAXPATHLEN 1024		/* MAXPATHLEN - maximum length of a pathname we allow 	*/
 #define	SIZE_INNER_LOOP		256	/* Size of the inter (fast) compress loop			*/
 
 							/* Defines for third byte of header 					*/
@@ -535,7 +534,7 @@ char_type		outbuf[OBUFSIZ+2048];/* Output buffer								*/
 struct stat		infstat;			/* Input file status							*/
 char			*ifname;			/* Input filename								*/
 int				remove_ofname = 0;	/* Remove output file on a error				*/
-char 			ofname[MAXPATHLEN];	/* Output filename								*/
+char			*ofname = NULL;		/* Output filename								*/
 int				fgnd_flag = 0;		/* Running in background (SIGINT=SIGIGN)		*/
 
 long 			bytes_in;			/* Total number of byte from input				*/
@@ -891,17 +890,22 @@ void
 comprexx(fileptr)
 	const char	*fileptr;
 	{
-		int		fdin;
-		int		fdout = -1;
-		char	tempname[MAXPATHLEN];
+		int				 fdin = -1;
+		int				 fdout = -1;
+		int				 has_z_suffix;
+		char			*tempname;
+		unsigned long	 namesize = strlen(fileptr);
 
-		if (strlen(fileptr) > sizeof(tempname) - 3) {
-			fprintf(stderr, "Pathname too long: %s\n", fileptr);
-			exit_code = 1;
-			return;
+		/* Create a temp buffer to add/remove the .Z suffix. */
+		tempname = malloc(namesize + 3);
+		if (tempname == NULL)
+		{
+			perror("malloc");
+			goto error;
 		}
 
 		strcpy(tempname,fileptr);
+		has_z_suffix = (namesize >= 2 && strcmp(&tempname[namesize - 2], ".Z") == 0);
 		errno = 0;
 
 #ifdef	LSTAT
@@ -920,9 +924,11 @@ comprexx(fileptr)
 	      			** This is obviously the wrong thing to do if it's a 
 	      			** directory, but it shouldn't do any harm.
 	      			*/
-		      		if (strcmp(tempname + strlen(tempname) - 2, ".Z") != 0)
+					if (!has_z_suffix)
 					{
-						strcat(tempname,".Z");
+						memcpy(&tempname[namesize], ".Z", 3);
+						namesize += 2;
+						has_z_suffix = 1;
 						errno = 0;
 #ifdef	LSTAT
 						if (lstat(tempname,&infstat) == -1)
@@ -931,37 +937,32 @@ comprexx(fileptr)
 #endif
 						{
 						  	perror(tempname);
-							exit_code = 1;
-						  	return;
+							goto error;
 						}
 
 						if ((infstat.st_mode & S_IFMT) != S_IFREG)
 						{
 							fprintf(stderr, "%s: Not a regular file.\n", tempname);
-							exit_code = 1;
-							return ;
+							goto error;
 						}
 		      		}
 		      		else
 					{
 						perror(tempname);
-						exit_code = 1;
-						return;
+						goto error;
 		      		}
 
 		      		break;
 
 	    		default:
 		      		perror(tempname);
-					exit_code = 1;
-		      		return;
+					goto error;
 	    		}
 	  		}
 	  		else
 			{
 	      		perror(tempname);
-				exit_code = 1;
-	      		return;
+				goto error;
 	  		}
 		}
 
@@ -982,50 +983,60 @@ comprexx(fileptr)
 			{/* DECOMPRESSION */
 		    	if (!zcat_flg)
 				{
-			      	if (strcmp(tempname + strlen(tempname) - 2, ".Z") != 0)
+					if (!has_z_suffix)
 					{
 						if (!quiet)
 		  					fprintf(stderr,"%s - no .Z suffix\n",tempname);
 
-						return;
+						goto error;
 	      			}
 		    	}
 
-				strcpy(ofname, tempname);
+				free(ofname);
+				ofname = strdup(tempname);
+				if (ofname == NULL)
+				{
+					perror("strdup");
+					goto error;
+				}
 
 				/* Strip of .Z suffix */
-
-				if (strcmp(tempname + strlen(tempname) - 2, ".Z") == 0)
-			  		ofname[strlen(tempname) - 2] = '\0';
+				if (has_z_suffix)
+					ofname[namesize - 2] = '\0';
 	   		}
 	   		else
 			{/* COMPRESSION */
 		    	if (!zcat_flg)
 				{
-					if (strcmp(tempname + strlen(tempname) - 2, ".Z") == 0)
+					if (has_z_suffix)
 					{
 		 	 			fprintf(stderr, "%s: already has .Z suffix -- no change\n", tempname);
-			  			return;
+						free(tempname);
+						return;
 					}
 
 					if (infstat.st_nlink > 1 && (!force))
 					{
 						fprintf(stderr, "%s has %jd other links: unchanged\n",
 										tempname, (intmax_t)(infstat.st_nlink - 1));
-						exit_code = 1;
-			  			return;
+						goto error;
 					}
 				}
 
-				strcpy(ofname, tempname);
-				strcat(ofname, ".Z");
+				ofname = malloc(namesize + 3);
+				if (ofname == NULL)
+				{
+					perror("malloc");
+					goto error;
+				}
+				memcpy(ofname, tempname, namesize);
+				strcpy(&ofname[namesize], ".Z");
     		}
 
 	    	if ((fdin = open(ifname = tempname, O_RDONLY|O_BINARY)) == -1)
 			{
 		      	perror(tempname);
-				exit_code = 1;
-				return;
+				goto error;
 	    	}
 
     		if (zcat_flg == 0)
@@ -1091,7 +1102,6 @@ comprexx(fileptr)
 			else
 			{
 				fdout = 1;
-				ofname[0] = '\0';
 				remove_ofname = 0;
 			}
 
@@ -1204,11 +1214,21 @@ comprexx(fileptr)
 	  		break;
 		}
 
+		free(tempname);
+		if (!remove_ofname)
+		{
+			free(ofname);
+			ofname = NULL;
+		}
 		return;
 
 error:
+		free(ofname);
+		ofname = NULL;
+		free(tempname);
 		exit_code = 1;
-		close(fdin);
+		if (fdin != -1)
+			close(fdin);
 		if (fdout != -1)
 			close(fdout);
 	}
@@ -1800,7 +1820,7 @@ void
 write_error()
 	{
 		fprintf(stderr, "\nwrite error on");
-	    perror((ofname[0] != '\0') ? ofname : "stdout");
+	    perror(ofname ? ofname : "stdout");
 		abort_compress();
 	}
 

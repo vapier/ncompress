@@ -1224,13 +1224,28 @@ compdir(dir)
 		REG1 	struct dirent	*dp;
 #endif
 		REG2	DIR				*dirp;
-		char					 nbuf[MAXPATHLEN];
-		char					*nptr = nbuf;
+		char					*nptr;
+		char					*fptr;
+		unsigned long			 dir_size = strlen(dir);
+		/* The +256 is a lazy optimization. We'll resize on demand. */
+		unsigned long			 size = dir_size + 256;
+
+		nptr = malloc(size);
+		if (nptr == NULL)
+		{
+			perror("malloc");
+			exit_code = 1;
+			return;
+		}
+		memcpy(nptr, dir, dir_size);
+		nptr[dir_size] = '/';
+		fptr = &nptr[dir_size + 1];
 
 		dirp = opendir(dir);
 
 		if (dirp == NULL)
 		{
+			free(nptr);
 			printf("%s unreadable\n", dir);		/* not stderr! */
 			return ;
 		}
@@ -1256,20 +1271,26 @@ compdir(dir)
 			if (strcmp(dp->d_name,".") == 0 || strcmp(dp->d_name,"..") == 0)
 				continue;
 
-			if ((strlen(dir)+strlen(dp->d_name)+1) < (MAXPATHLEN - 1))
+			if (size < dir_size + strlen(dp->d_name) + 2)
 			{
-			  	strcpy(nbuf,dir);
-			  	strcat(nbuf,"/");
-			  	strcat(nbuf,dp->d_name);
-				comprexx(nptr);
+				size = dir_size + strlen(dp->d_name) + 2;
+				nptr = realloc(nptr, size);
+				if (nptr == NULL)
+				{
+					perror("realloc");
+					exit_code = 1;
+					break;
+				}
+				fptr = &nptr[dir_size + 1];
 			}
-			else
-		  		fprintf(stderr,"Pathname too long: %s/%s\n", dir, dp->d_name);
+
+			strcpy(fptr, dp->d_name);
+			comprexx(nptr);
   		}
 
 		closedir(dirp);
 
-		return;
+		free(nptr);
 	}
 #endif
 /*

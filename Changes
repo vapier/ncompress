@@ -1,5 +1,19 @@
 (N)compress version 4.2.4.5
 	o New homepage https://github.com/vapier/ncompress
+	o Switch to intmax_t for nlink_t fields when printing
+	o Make builds more reproducible by dropping datestamps
+	o Fix integer overflow in maxmaxcode computation by Jakub Wilk
+	o Don't leak file descriptor in error cases by Pavel Raiskup
+	o Drop 8.3 filename checks for old DOS/Windows
+	o Change signal ifdef logic to the signal names
+	o Fix -Werror=parentheses errors with newer compilers
+	o Define LSTAT=1 in modern builds by default
+	o Change pathnames to be dynamic to avoid hardcoded 1k limit
+	o Add a standard -h (help) option
+	o Change version output to go to stdout
+	o Start a testsuite!
+	o Add support for -- to halt option parsing
+	o Add a uncompress(1) link to compress(1)
 
 (N)compress version 4.2.4.4
 	o Add some spelling fixes from Kenneth J. Pronovici

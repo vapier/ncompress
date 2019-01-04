@@ -643,7 +643,7 @@ long 			bytes_out;			/* Total number of byte to output				*/
 
 int  	main			ARGS((int,char **));
 void  	Usage			ARGS((void));
-void  	comprexx		ARGS((char **));
+void  	comprexx		ARGS((const char *));
 void  	compdir			ARGS((char *));
 void  	compress		ARGS((int,int));
 void  	decompress		ARGS((int,int));
@@ -837,7 +837,7 @@ nextarg:	continue;
     	if (*filelist != NULL)
 		{
       		for (fileptr = filelist; *fileptr; fileptr++)
-				comprexx(fileptr);
+				comprexx(*fileptr);
     	}
 		else
 		{/* Standard input */
@@ -889,19 +889,19 @@ Usage: %s [-dfvcVr] [-b maxbits] [file ...]\n\
 
 void
 comprexx(fileptr)
-	char	**fileptr;
+	const char	*fileptr;
 	{
 		int		fdin;
 		int		fdout = -1;
 		char	tempname[MAXPATHLEN];
 
-		if (strlen(*fileptr) > sizeof(tempname) - 3) {
-			fprintf(stderr, "Pathname too long: %s\n", *fileptr);
+		if (strlen(fileptr) > sizeof(tempname) - 3) {
+			fprintf(stderr, "Pathname too long: %s\n", fileptr);
 			exit_code = 1;
 			return;
 		}
 
-		strcpy(tempname,*fileptr);
+		strcpy(tempname,fileptr);
 		errno = 0;
 
 #ifdef	LSTAT
@@ -1261,7 +1261,7 @@ compdir(dir)
 			  	strcpy(nbuf,dir);
 			  	strcat(nbuf,"/");
 			  	strcat(nbuf,dp->d_name);
-		  		comprexx(&nptr);
+				comprexx(nptr);
 			}
 			else
 		  		fprintf(stderr,"Pathname too long: %s/%s\n", dir, dp->d_name);

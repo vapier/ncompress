@@ -12,10 +12,13 @@ Makefile: Makefile.def GNUmakefile
 		-e 's:options= :options= $$(CFLAGS) -DNOFUNCDEF -DUTIME_H -DLSTAT $$(LDFLAGS) :' \
 		Makefile.def > Makefile
 
+check:
+	./tests/runtests.sh
+
 PN = ncompress
 PV = $(shell awk '{print $$NF; exit}' Changes)
 P = $(PN)-$(PV)
 dist:
 	git archive --prefix=$(P)/ HEAD | gzip -9 > $(P).tar.gz
 
-.PHONY: clean cleanup compress dist distclean install
+.PHONY: check clean cleanup compress dist distclean install

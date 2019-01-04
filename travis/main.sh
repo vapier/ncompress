@@ -4,6 +4,7 @@
 
 main() {
 	m
+	m check
 	m install DESTDIR="${PWD}/root"
 }
 main "$@"

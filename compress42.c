@@ -702,7 +702,7 @@ main(argc, argv)
 		REG4	char		**fileptr;
 
 #ifdef SIGINT
-    	if (fgnd_flag = (signal(SIGINT, SIG_IGN) != SIG_IGN))
+		if ((fgnd_flag = (signal(SIGINT, SIG_IGN)) != SIG_IGN))
 			signal(SIGINT, (SIG_TYPE)abort_compress);
 #endif
 
@@ -1248,7 +1248,7 @@ compdir(dir)
 		** think it's worth it. -- Dave Mack
 		*/
 
-		while (dp = readdir(dirp))
+		while ((dp = readdir(dirp)) != NULL)
 		{
 			if (dp->d_ino == 0)
 				continue;

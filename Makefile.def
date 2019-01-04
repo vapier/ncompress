@@ -54,8 +54,8 @@ install:	compress
 		ln -f $(DESTDIR)$(BINDIR)/compress $(DESTDIR)$(BINDIR)/zcat
 		cp zcmp zdiff zmore $(DESTDIR)$(BINDIR)/.
 		chmod 0755 $(DESTDIR)$(BINDIR)/compress $(DESTDIR)$(BINDIR)/zcmp $(DESTDIR)$(BINDIR)/zdiff $(DESTDIR)$(BINDIR)/zmore
-		cp compress.1 zcmp.1 zmore.1 $(DESTDIR)$(MANDIR)/.
-		chmod 0644 $(DESTDIR)$(MANDIR)/compress.1 $(DESTDIR)$(MANDIR)/zcmp.1 $(DESTDIR)$(MANDIR)/zmore.1
+		cp compress.1 uncompress.1 zcmp.1 zmore.1 $(DESTDIR)$(MANDIR)/.
+		chmod 0644 $(DESTDIR)$(MANDIR)/compress.1 $(DESTDIR)$(MANDIR)/uncompress.1 $(DESTDIR)$(MANDIR)/zcmp.1 $(DESTDIR)$(MANDIR)/zmore.1
 
 cleanup:
 		rm -f compress compress.def comp.log

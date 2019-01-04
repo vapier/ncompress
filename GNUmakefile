@@ -7,7 +7,7 @@ clean: cleanup
 distclean: cleanup
 	rm -f Makefile
 
-Makefile: Makefile.def
+Makefile: Makefile.def GNUmakefile
 	sed \
 		-e 's:options= :options= $$(CFLAGS) -DNOFUNCDEF -DUTIME_H -DLSTAT $$(LDFLAGS) :' \
 		Makefile.def > Makefile

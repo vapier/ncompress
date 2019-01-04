@@ -1868,45 +1868,45 @@ prratio(stream, num, den)
 void
 about()
 	{
-		fprintf(stderr, "Compress version: %s\n", version_id);
-		fprintf(stderr, "Compile options:\n        ");
+		printf("Compress version: %s\n", version_id);
+		printf("Compile options:\n        ");
 #if BYTEORDER == 4321 && NOALLIGN == 1
-		fprintf(stderr, "USE_BYTEORDER, ");
+		printf("USE_BYTEORDER, ");
 #endif
 #ifdef FAST
-		fprintf(stderr, "FAST, ");
+		printf("FAST, ");
 #endif
 #ifdef vax
-		fprintf(stderr, "vax, ");
+		printf("vax, ");
 #endif
 #ifdef DIRENT
-		fprintf(stderr,"DIRENT, ");
+		printf("DIRENT, ");
 #endif
 #ifdef SYSDIR
-		fprintf(stderr,"SYSDIR, ");
+		printf("SYSDIR, ");
 #endif
 #ifdef NO_UCHAR
-		fprintf(stderr, "NO_UCHAR, ");
+		printf("NO_UCHAR, ");
 #endif
 #ifdef SIGNED_COMPARE_SLOW
-		fprintf(stderr, "SIGNED_COMPARE_SLOW, ");
+		printf("SIGNED_COMPARE_SLOW, ");
 #endif
 #ifdef MAXSEG_64K
-		fprintf(stderr, "MAXSEG_64K, ");
+		printf("MAXSEG_64K, ");
 #endif
 #ifdef DOS
-		fprintf(stderr, "DOS, ");
+		printf("DOS, ");
 #endif
 #ifdef DEBUG
-		fprintf(stderr, "DEBUG, ");
+		printf("DEBUG, ");
 #endif
 #ifdef LSTAT
-		fprintf(stderr, "LSTAT, ");
+		printf("LSTAT, ");
 #endif
-		fprintf(stderr, "\n        REGISTERS=%d IBUFSIZ=%d, OBUFSIZ=%d, BITS=%d\n", 
+		printf("\n        REGISTERS=%d IBUFSIZ=%d, OBUFSIZ=%d, BITS=%d\n",
 			REGISTERS, IBUFSIZ, OBUFSIZ, BITS);
 
-		fprintf(stderr, "\n\
+		printf("\n\
 Author version 4.2.4.x (Maintenance):\n\
      Mike Frysinger  (vapier@gmail.com)\n\
 \n\

@@ -3,7 +3,7 @@
 
 set -e
 
-TESTDIR="$(dirname "$(realpath "$0")")"
+TESTDIR="$(dirname "$(realpath "$0" 2>/dev/null || readlink -f "$0")")"
 TOP_SRCDIR="$(dirname "${TESTDIR}")"
 
 if [ -z "${COMPRESS}" ]; then

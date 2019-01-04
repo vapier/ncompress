@@ -18,6 +18,8 @@ compress, uncompress, zcat \- compress and expand data
 .B \-b
 .I bits
 ] [
+.B \-\-
+] [
 .I "name \&..."
 ]
 .ll -8
@@ -32,12 +34,16 @@ compress, uncompress, zcat \- compress and expand data
 ] [
 .B \-V
 ] [
+.B \-\-
+] [
 .I "name \&..."
 ]
 .br
 .B zcat
 [
 .B \-V
+] [
+.B \-\-
 ] [
 .I "name \&..."
 ]
@@ -174,6 +180,10 @@ Under the
 option,
 a message is printed yielding the percentage of
 reduction for each file compressed.
+.PP
+.B \-\-
+may be used to halt option parsing and force all remaining arguments to be
+treated as paths.
 .SH "DIAGNOSTICS"
 Exit status is normally 0;
 if the last file is larger after (attempted) compression, the status is 2;

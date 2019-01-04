@@ -53,6 +53,14 @@ out=$(compress -X 2>/dev/null) || :
 out=$(compress -X 2>&1) || :
 [ -n "${out}" ]
 
+: "### Check -- handling"
+cp input ./-X
+compress -- -X
+[ -e ./-X.Z ]
+uncompress -- -X
+[ -e ./-X ]
+rm ./-X
+
 : "### Check compression"
 compress input
 [ ! -e input ]

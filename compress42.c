@@ -701,11 +701,15 @@ main(argc, argv)
     	REG3	char		**filelist;
 		REG4	char		**fileptr;
 
+#ifdef SIGINT
     	if (fgnd_flag = (signal(SIGINT, SIG_IGN) != SIG_IGN))
 			signal(SIGINT, (SIG_TYPE)abort_compress);
+#endif
 
+#ifdef SIGTERM
 		signal(SIGTERM, (SIG_TYPE)abort_compress);
-#ifndef DOS
+#endif
+#ifdef SIGHUP
 		signal(SIGHUP, (SIG_TYPE)abort_compress);
 #endif
 

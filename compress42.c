@@ -699,6 +699,7 @@ main(argc, argv)
 	{
     	REG3	char		**filelist;
 		REG4	char		**fileptr;
+		int		seen_double_dash = 0;
 
 #ifdef SIGINT
 		if ((fgnd_flag = (signal(SIGINT, SIG_IGN)) != SIG_IGN))
@@ -752,7 +753,13 @@ main(argc, argv)
 
     	for (argc--, argv++; argc > 0; argc--, argv++)
 		{
-			if (**argv == '-')
+			if (strcmp(*argv, "--") == 0)
+			{
+				seen_double_dash = 1;
+				continue;
+			}
+
+			if (seen_double_dash == 0 && **argv == '-')
 			{/* A flag argument */
 		    	while (*++(*argv))
 				{/* Process all flags in this arg */
@@ -873,7 +880,7 @@ void
 Usage(int status)
 	{
 		fprintf(status ? stderr : stdout, "\
-Usage: %s [-dfhvcVr] [-b maxbits] [file ...]\n\
+Usage: %s [-dfhvcVr] [-b maxbits] [--] [file ...]\n\
        -d   If given, decompression is done instead.\n\
        -c   Write output on stdout, don't remove original.\n\
        -b   Parameter limits the max number of bits/code.\n", progname);

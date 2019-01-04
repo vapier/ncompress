@@ -641,7 +641,7 @@ long 			bytes_out;			/* Total number of byte to output				*/
 #endif
 
 int  	main			ARGS((int,char **));
-void  	Usage			ARGS((void));
+void  	Usage			ARGS((int));
 void  	comprexx		ARGS((const char *));
 void  	compdir			ARGS((char *));
 void  	compress		ARGS((int,int));
@@ -793,7 +793,7 @@ main(argc, argv)
 						if (!ARGVAL())
 						{
 					    	fprintf(stderr, "Missing maxbits\n");
-					    	Usage();
+							Usage(1);
 						}
 
 						maxbits = atoi(*argv);
@@ -815,9 +815,13 @@ main(argc, argv)
 #endif
 						break;
 
+					case 'h':
+						Usage(0);
+						break;
+
 			    	default:
 						fprintf(stderr, "Unknown flag: '%c'; ", **argv);
-						Usage();
+						Usage(1);
 					}
 		    	}
 			}
@@ -866,24 +870,25 @@ nextarg:	continue;
 	}
 
 void
-Usage()
+Usage(int status)
 	{
-		fprintf(stderr, "\
-Usage: %s [-dfvcVr] [-b maxbits] [file ...]\n\
+		fprintf(status ? stderr : stdout, "\
+Usage: %s [-dfhvcVr] [-b maxbits] [file ...]\n\
        -d   If given, decompression is done instead.\n\
        -c   Write output on stdout, don't remove original.\n\
        -b   Parameter limits the max number of bits/code.\n", progname);
-		fprintf(stderr, "\
+		fprintf(status ? stderr : stdout, "\
        -f   Forces output file to be generated, even if one already.\n\
             exists, and even if no space is saved by compressing.\n\
             If -f is not used, the user will be prompted if stdin is.\n\
             a tty, otherwise, the output file will not be overwritten.\n\
+       -h   This help output.\n\
        -v   Write compression statistics.\n\
        -V   Output version and compile options.\n\
        -r   Recursive. If a filename is a directory, descend\n\
             into it and compress everything in it.\n");
 
-    		exit(1);
+    		exit(status);
 	}
 
 void

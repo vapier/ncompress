@@ -9,7 +9,7 @@ distclean: cleanup
 
 Makefile: Makefile.def
 	sed \
-		-e 's:options= :options= $$(CFLAGS) -DNOFUNCDEF -DUTIME_H $$(LDFLAGS) :' \
+		-e 's:options= :options= $$(CFLAGS) -DNOFUNCDEF -DUTIME_H -DLSTAT $$(LDFLAGS) :' \
 		Makefile.def > Makefile
 
 PN = ncompress

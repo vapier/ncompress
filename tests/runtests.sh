@@ -7,7 +7,7 @@ fullpath() {
 	# Because portability is a pita.
 	realpath "$0" 2>/dev/null && return 0
 	readlink -f "$0" 2>/dev/null && return 0
-	python -c 'import os, sys; print(os.path.realpathf(sys.argv[1]))' "$0"
+	python -c 'import os, sys; print(os.path.realpath(sys.argv[1]))' "$0"
 }
 
 SCRIPT="$(fullpath "$@")"

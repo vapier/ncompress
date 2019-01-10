@@ -185,6 +185,15 @@
 #	define	lstat	stat
 #endif
 
+#if defined(DOS) || defined(WINDOWS)
+#	define	F_OK	0
+static inline access(const char *pathname, int mode)
+{
+	struct stat st;
+	return lstat(pathname, &st) == 0;
+}
+#endif
+
 #ifdef	DEF_ERRNO
 	extern int	errno;
 #endif

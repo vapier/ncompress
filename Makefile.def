@@ -16,8 +16,6 @@ MANDIR=/usr/local/man/man1
 # options is a collection of:
 #
 #	-DAMIGA=1					Amiga support.
-#	-DNOFUNCDEF=1				Disable libary function definitions in
-#								compress42.c
 #	-DDIRENT=1					Use dirent.h
 #	-DSYSDIR=1					Use sys/dir.h
 #	-DLSTAT=1					Use lstat for finding symlinks.

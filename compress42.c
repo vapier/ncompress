@@ -178,6 +178,7 @@
 #if defined(AMIGA) || defined(DOS) || defined(WINDOWS)
 #	define	chmod(pathname, mode) 0
 #	define	chown(pathname, owner, group) 0
+#	define	utime(pathname, times) 0
 #endif
 
 #ifndef	LSTAT

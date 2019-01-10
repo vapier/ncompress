@@ -130,6 +130,11 @@
  *   Add variable bit length output.
  *
  */
+
+#ifdef _MSC_VER
+#	define	WINDOWS
+#endif
+
 #include	<stdint.h>
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -170,7 +175,7 @@
 #	define	SIG_TYPE	void (*)()
 #endif
 
-#if defined(AMIGA) || defined(DOS)
+#if defined(AMIGA) || defined(DOS) || defined(WINDOWS)
 #	define	chmod(pathname, mode) 0
 #	define	chown(pathname, owner, group) 0
 #endif

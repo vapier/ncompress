@@ -170,8 +170,6 @@
 #	define	SIG_TYPE	void (*)()
 #endif
 
-#define	MARK(a)	{ asm(" .globl M.a"); asm("M.a:"); }
-
 #ifdef	DEF_ERRNO
 	extern int	errno;
 #endif
@@ -187,8 +185,6 @@
 #ifndef	OBUFSIZ
 #	define	OBUFSIZ	BUFSIZ	/* Default output buffer size							*/
 #endif
-
-#define	SIZE_INNER_LOOP		256	/* Size of the inter (fast) compress loop			*/
 
 							/* Defines for third byte of header 					*/
 #define	MAGIC_1		(char_type)'\037'/* First byte of compressed file				*/

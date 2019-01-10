@@ -170,6 +170,11 @@
 #	define	SIG_TYPE	void (*)()
 #endif
 
+#if defined(AMIGA) || defined(DOS)
+#	define	chmod(pathname, mode) 0
+#	define	chown(pathname, owner, group) 0
+#endif
+
 #ifdef	DEF_ERRNO
 	extern int	errno;
 #endif
@@ -1158,22 +1163,20 @@ comprexx(fileptr)
 						exit_code = 1;
 					}
 
-#ifndef	AMIGA
 					if (chmod(ofname, infstat.st_mode & 07777))		/* Copy modes */
 					{
 						fprintf(stderr, "\nchmod error (ignored) ");
 				    	perror(ofname);
 						exit_code = 1;
 					}
-#ifndef	DOS
+
 					if (chown(ofname, infstat.st_uid, infstat.st_gid))	/* Copy ownership */
 					{
 						fprintf(stderr, "\nchown error (ignored) ");
 						perror(ofname);
 						exit_code = 1;
 					}
-#endif
-#endif
+
 					remove_ofname = 0;
 
 					if (unlink(ifname))	/* Remove input file */

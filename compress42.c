@@ -180,6 +180,10 @@
 #	define	chown(pathname, owner, group) 0
 #endif
 
+#ifndef	LSTAT
+#	define	lstat	stat
+#endif
+
 #ifdef	DEF_ERRNO
 	extern int	errno;
 #endif
@@ -900,11 +904,7 @@ comprexx(fileptr)
 		has_z_suffix = (namesize >= 2 && strcmp(&tempname[namesize - 2], ".Z") == 0);
 		errno = 0;
 
-#ifdef	LSTAT
 		if (lstat(tempname,&infstat) == -1)
-#else
-		if (stat(tempname,&infstat) == -1)
-#endif
 		{
 		  	if (do_decomp)
 			{
@@ -922,11 +922,7 @@ comprexx(fileptr)
 						namesize += 2;
 						has_z_suffix = 1;
 						errno = 0;
-#ifdef	LSTAT
 						if (lstat(tempname,&infstat) == -1)
-#else
-						if (stat(tempname,&infstat) == -1)
-#endif
 						{
 						  	perror(tempname);
 							goto error;

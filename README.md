@@ -71,11 +71,6 @@ So LZW is now patent free.
 - The /bin/sh under Ultrix can't handle ${var:-str} so use ksh for the
   build script.
 
-- If there are any problems with the library function definitions in
-  compress42.c define NOFUNCDEF (-DNOFUNCDEF=1) to disable the definitions.
-  IBM AIX (RS/6000) uses a different definitions of open(), define -D_IBMRT=1
-  to disable the open() definition.
-
 - The output if (N)compress 4.2 is not exactly the same as compress 4.0
   because of different table reset point. The output of (N)compress 4.2
   is 100% compatible with compress 4.0

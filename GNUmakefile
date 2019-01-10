@@ -9,7 +9,7 @@ distclean: cleanup
 
 Makefile: Makefile.def GNUmakefile
 	sed \
-		-e 's:options= :options= $$(CFLAGS) -DNOFUNCDEF -DUTIME_H -DLSTAT $$(LDFLAGS) :' \
+		-e 's:options= :options= $$(CFLAGS) -DUTIME_H -DLSTAT $$(LDFLAGS) :' \
 		Makefile.def > Makefile
 
 check:

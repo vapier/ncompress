@@ -166,36 +166,10 @@
 #	define	ARGS(a)				()
 #endif
 
-#define	LARGS(a)	()	/* Relay on include files for libary func defs. */
-
 #ifndef SIG_TYPE
 #	define	SIG_TYPE	void (*)()
 #endif
 
-#ifndef NOFUNCDEF
-	extern	void	*malloc	LARGS((int));
-	extern	void	free	LARGS((void *));
-#ifndef _IBMR2
-	extern	int		open	LARGS((char const *,int,...));
-#endif
-	extern	int		close	LARGS((int));
-	extern	int		read	LARGS((int,void *,int));
-	extern	int		write	LARGS((int,void const *,int));
-	extern	int		chmod	LARGS((char const *,int));
-	extern	int		unlink	LARGS((char const *));
-	extern	int		chown	LARGS((char const *,int,int));
-	extern	int		utime	LARGS((char const *,struct utimbuf const *));
-	extern	char	*strcpy	LARGS((char *,char const *));
-	extern	char	*strcat	LARGS((char *,char const *));
-	extern	int		strcmp	LARGS((char const *,char const *));
-	extern	unsigned strlen	LARGS((char const *));
-	extern	void	*memset	LARGS((void *,char,unsigned int));
-	extern	void	*memcpy	LARGS((void *,void const *,unsigned int));
-	extern	int		atoi	LARGS((char const *));
-	extern	void	exit	LARGS((int));
-	extern	int		isatty	LARGS((int));
-#endif
-	
 #define	MARK(a)	{ asm(" .globl M.a"); asm("M.a:"); }
 
 #ifdef	DEF_ERRNO

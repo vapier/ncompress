@@ -189,6 +189,16 @@
 #	define	utime(pathname, times) 0
 #endif
 
+#if defined(WINDOWS)
+#	define isatty(fd) 0
+#	define open _open
+#	define close _close
+#	define read _read
+#	define strdup _strdup
+#	define unlink _unlink
+#	define write _write
+#endif
+
 #ifndef	LSTAT
 #	define	lstat	stat
 #endif

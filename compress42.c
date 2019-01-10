@@ -135,6 +135,11 @@
 #	define	WINDOWS
 #endif
 
+#ifdef __MINGW32__
+#	define	DIRENT
+#	define	MINGW
+#endif
+
 #include	<stdint.h>
 #include	<stdio.h>
 #include	<stdlib.h>
@@ -178,7 +183,7 @@
 #	define	SIG_TYPE	void (*)()
 #endif
 
-#if defined(AMIGA) || defined(DOS) || defined(WINDOWS)
+#if defined(AMIGA) || defined(DOS) || defined(MINGW) || defined(WINDOWS)
 #	define	chmod(pathname, mode) 0
 #	define	chown(pathname, owner, group) 0
 #	define	utime(pathname, times) 0

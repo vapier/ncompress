@@ -1327,6 +1327,14 @@ compdir(dir)
 		free(nptr);
 	}
 #endif
+
+#define RESET_COMPRESS_N_BITS \
+	n_bits = INIT_BITS; \
+	if (n_bits < maxbits) \
+		extcode = MAXCODE(n_bits)+1; \
+	else \
+		extcode = MAXCODE(n_bits);
+
 /*
  * compress fdin to fdout
  *
@@ -1374,7 +1382,7 @@ compress(fdin, fdout)
 
 		ratio = 0;
 		checkpoint = CHECK_GAP;
-		extcode = MAXCODE(n_bits = INIT_BITS)+1;
+		RESET_COMPRESS_N_BITS
 		stcode = 1;
 		free_ent = FIRST;
 
@@ -1446,7 +1454,7 @@ compress(fdin, fdout)
 						output(outbuf,outbits,CLEAR,n_bits);
 						boff = outbits = (outbits-1)+((n_bits<<3)-
 								  	((outbits-boff-1+(n_bits<<3))%(n_bits<<3)));
-						extcode = MAXCODE(n_bits = INIT_BITS)+1;
+						RESET_COMPRESS_N_BITS
 						free_ent = FIRST;
 						stcode = 1;
 					}
@@ -1589,6 +1597,14 @@ endlop:			if (fcode.e.ent >= FIRST && rpos < rsize)
 		return;
 	}
 
+#define RESET_DECOMPRESS_N_BITS \
+	n_bits = INIT_BITS; \
+	if (n_bits == maxbits) \
+		maxcode = maxmaxcode; \
+	else \
+		maxcode = MAXCODE(n_bits)-1; \
+	bitmask = (1<<n_bits)-1;
+
 /*
  * Decompress stdin to stdout.  This routine adapts to the codes in the
  * file building the "string" table on-the-fly; requiring no table to
@@ -1654,8 +1670,7 @@ decompress(fdin, fdout)
 		maxmaxcode = MAXCODE(maxbits);
 
 		bytes_in = insize;
-	    maxcode = MAXCODE(n_bits = INIT_BITS)-1;
-		bitmask = (1<<n_bits)-1;
+		RESET_DECOMPRESS_N_BITS
 		oldcode = -1;
 		finchar = 0;
 		outpos = 0;
@@ -1734,8 +1749,7 @@ resetbuf:	;
 	    			free_ent = FIRST - 1;
 					posbits = ((posbits-1) + ((n_bits<<3) -
 								(posbits-1+(n_bits<<3))%(n_bits<<3)));
-				    maxcode = MAXCODE(n_bits = INIT_BITS)-1;
-					bitmask = (1<<n_bits)-1;
+					RESET_DECOMPRESS_N_BITS
 					goto resetbuf;
 				}
 

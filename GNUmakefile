@@ -1,6 +1,6 @@
 # this assumes a recent system -- you're using GNU make right ?
 
-compress cleanup install: Makefile
+compress cleanup install install_core install_extra: Makefile
 	$(MAKE) -f Makefile $@
 
 clean: cleanup

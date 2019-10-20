@@ -6,11 +6,14 @@
 # Install prefix
 DESTDIR=
 
+# Base install directory
+PREFIX=/usr/local
+
 # Install directory for binarys
-BINDIR=/usr/local/bin
+BINDIR=$(PREFIX)/bin
 
 # Install directory for manual
-MANDIR=/usr/local/man/man1
+MANDIR=$(PREFIX)/man/man1
 
 # compiler options:
 # options is a collection of:
@@ -38,7 +41,7 @@ LBOPT= $(LDFLAGS)
 compress:	Makefile compress42.c patchlevel.h
 	$(CC) -o compress $(options) compress42.c $(LBOPT)
 
-install:	compress
+install_core:	compress
 		[ -f $(DESTDIR)$(BINDIR)/compress ] && \
 			{ rm -f $(DESTDIR)$(BINDIR)/compress.old ; \
 	  		mv $(DESTDIR)$(BINDIR)/compress $(DESTDIR)$(BINDIR)/compress.old ; } || :
@@ -48,12 +51,19 @@ install:	compress
 		strip $(DESTDIR)$(BINDIR)/compress
 		rm -f $(DESTDIR)$(BINDIR)/uncompress
 		ln $(DESTDIR)$(BINDIR)/compress $(DESTDIR)$(BINDIR)/uncompress
+		cp compress.1 uncompress.1 $(DESTDIR)$(MANDIR)/.
+		chmod 0644 $(DESTDIR)$(MANDIR)/compress.1 $(DESTDIR)$(MANDIR)/uncompress.1
+
+install_extra: install_core
+		mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)
 		rm -f $(DESTDIR)$(BINDIR)/zcat
 		ln -f $(DESTDIR)$(BINDIR)/compress $(DESTDIR)$(BINDIR)/zcat
 		cp zcmp zdiff zmore $(DESTDIR)$(BINDIR)/.
 		chmod 0755 $(DESTDIR)$(BINDIR)/compress $(DESTDIR)$(BINDIR)/zcmp $(DESTDIR)$(BINDIR)/zdiff $(DESTDIR)$(BINDIR)/zmore
-		cp compress.1 uncompress.1 zcmp.1 zmore.1 $(DESTDIR)$(MANDIR)/.
-		chmod 0644 $(DESTDIR)$(MANDIR)/compress.1 $(DESTDIR)$(MANDIR)/uncompress.1 $(DESTDIR)$(MANDIR)/zcmp.1 $(DESTDIR)$(MANDIR)/zmore.1
+		cp zcmp.1 zmore.1 $(DESTDIR)$(MANDIR)/.
+		chmod 0644 $(DESTDIR)$(MANDIR)/zcmp.1 $(DESTDIR)$(MANDIR)/zmore.1
+
+install: install_extra
 
 cleanup:
 		rm -f compress compress.def comp.log

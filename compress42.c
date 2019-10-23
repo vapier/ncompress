@@ -1141,7 +1141,6 @@ comprexx(fileptr)
 					{
 						fprintf(stderr, "\nunlink error (ignored) ");
 	    				perror(ofname);
-						exit_code = 1;
 					}
 		
 					remove_ofname = 0;
@@ -1189,21 +1188,18 @@ comprexx(fileptr)
 					{
 						fprintf(stderr, "\nutime error (ignored) ");
 				    	perror(ofname);
-						exit_code = 1;
 					}
 
 					if (chmod(ofname, infstat.st_mode & 07777))		/* Copy modes */
 					{
 						fprintf(stderr, "\nchmod error (ignored) ");
 				    	perror(ofname);
-						exit_code = 1;
 					}
 
 					if (chown(ofname, infstat.st_uid, infstat.st_gid))	/* Copy ownership */
 					{
 						fprintf(stderr, "\nchown error (ignored) ");
 						perror(ofname);
-						exit_code = 1;
 					}
 
 					remove_ofname = 0;
@@ -1212,7 +1208,6 @@ comprexx(fileptr)
 					{
 						fprintf(stderr, "\nunlink error (ignored) ");
 	    				perror(ifname);
-						exit_code = 1;
 					}
     			}
     		}

@@ -13,7 +13,7 @@ PREFIX=/usr/local
 BINDIR=$(PREFIX)/bin
 
 # Install directory for manual
-MANDIR=$(PREFIX)/man/man1
+MANDIR=$(PREFIX)/share/man/man1
 
 # compiler options:
 # options is a collection of:

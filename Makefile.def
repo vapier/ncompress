@@ -48,7 +48,6 @@ install_core:	compress
 		rm -f $(DESTDIR)$(BINDIR)/uncompress $(DESTDIR)$(BINDIR)/zcat
 		mkdir -p $(DESTDIR)$(BINDIR) $(DESTDIR)$(MANDIR)
 		cp compress $(DESTDIR)$(BINDIR)/compress
-		strip $(DESTDIR)$(BINDIR)/compress
 		rm -f $(DESTDIR)$(BINDIR)/uncompress
 		ln $(DESTDIR)$(BINDIR)/compress $(DESTDIR)$(BINDIR)/uncompress
 		cp compress.1 uncompress.1 $(DESTDIR)$(MANDIR)/.

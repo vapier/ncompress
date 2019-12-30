@@ -1,4 +1,23 @@
 (N)compress version 4.2.4.6
+	* Fix tests under macOS
+	* Drop support for NOFUNCDEF
+	* Drop old unused MARK & SIZE_INNER_LOOP defines
+	* Add chmod/chown stubs for AMIGA/DOS
+	* Add a WINDOWS define for disabling chmod/chown
+	* Simplify LSTAT checking
+	* Disable utime usage on AMIGA/DOS/WINDOWS
+	* Add a fallback for access() for DOS & WINDOWS
+	* Disable unistd.h include on DOS & WINDOWS
+	* Disable chmod/chown/utime for mingw builds
+	* Add xxx->_xxx redirects on WINDOWS for filesystem funcs
+	* Add support for Windows in Travis
+	* Add PREFIX conformance, add option to only install main program by Eli Schwartz
+	* Don't strip binaries by default by Eli Schwartz
+	* Set the mandir to use $(PREFIX)/share/man by default by Eli Schwartz
+	* Do not set exit_code when an error is ignored by Petr Kubat
+	* Use default CFLAGS when using GNU make
+	* Fix typos in Makefile.def
+	* Tweak Changes style for better markdown integration
 
 (N)compress version 4.2.4.5
 	* New homepage https://github.com/vapier/ncompress

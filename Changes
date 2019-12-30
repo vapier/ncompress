@@ -1,116 +1,116 @@
 (N)compress version 4.2.4.6
 
 (N)compress version 4.2.4.5
-	o New homepage https://github.com/vapier/ncompress
-	o Switch to intmax_t for nlink_t fields when printing
-	o Make builds more reproducible by dropping datestamps
-	o Fix integer overflow in maxmaxcode computation by Jakub Wilk
-	o Don't leak file descriptor in error cases by Pavel Raiskup
-	o Drop 8.3 filename checks for old DOS/Windows
-	o Change signal ifdef logic to the signal names
-	o Fix -Werror=parentheses errors with newer compilers
-	o Define LSTAT=1 in modern builds by default
-	o Change pathnames to be dynamic to avoid hardcoded 1k limit
-	o Add a standard -h (help) option
-	o Change version output to go to stdout
-	o Start a testsuite!
-	o Add support for -- to halt option parsing
-	o Add a uncompress(1) link to compress(1)
+	* New homepage https://github.com/vapier/ncompress
+	* Switch to intmax_t for nlink_t fields when printing
+	* Make builds more reproducible by dropping datestamps
+	* Fix integer overflow in maxmaxcode computation by Jakub Wilk
+	* Don't leak file descriptor in error cases by Pavel Raiskup
+	* Drop 8.3 filename checks for old DOS/Windows
+	* Change signal ifdef logic to the signal names
+	* Fix -Werror=parentheses errors with newer compilers
+	* Define LSTAT=1 in modern builds by default
+	* Change pathnames to be dynamic to avoid hardcoded 1k limit
+	* Add a standard -h (help) option
+	* Change version output to go to stdout
+	* Start a testsuite!
+	* Add support for -- to halt option parsing
+	* Add a uncompress(1) link to compress(1)
 
 (N)compress version 4.2.4.4
-	o Add some spelling fixes from Kenneth J. Pronovici
-	o Tweak makefile syntax for make 3.82
-	o Tweak by Kenneth J. Pronovici to escape hyphens in man pages for groff
+	* Add some spelling fixes from Kenneth J. Pronovici
+	* Tweak makefile syntax for make 3.82
+	* Tweak by Kenneth J. Pronovici to escape hyphens in man pages for groff
 
 (N)compress version 4.2.4.3
-	o Check return value of chown().
-	o Fix from Fedora for checking malloc() return.
-	o Fix from Fedora/gzip to avoid integer overflow for CVE-2010-0001.
+	* Check return value of chown().
+	* Fix from Fedora for checking malloc() return.
+	* Fix from Fedora/gzip to avoid integer overflow for CVE-2010-0001.
 
 (N)compress version 4.2.4.2
-	o Integrate build/man touchups from Debian.
-	o Add fix from Fedora for handling of 0 byte files.
-	o Pull in POSIX standard headers for prototypes (stdlib,string,unistd).
-	o Replace rindex() with strrchr().
-	o Don't set CC by default in Makefile.def and add CFLAGS/CPPFLAGS/LDFLAGS
+	* Integrate build/man touchups from Debian.
+	* Add fix from Fedora for handling of 0 byte files.
+	* Pull in POSIX standard headers for prototypes (stdlib,string,unistd).
+	* Replace rindex() with strrchr().
+	* Don't set CC by default in Makefile.def and add CFLAGS/CPPFLAGS/LDFLAGS
 	  where appropriate by default.
-	o Add support for DESTDIR to the install target.
+	* Add support for DESTDIR to the install target.
 
 (N)compress version 4.2.4.1
-	o Fix possible bss buffer underflow CVE-2006-1168
-	o New homepage http://ncompress.sourceforge.net/
+	* Fix possible bss buffer underflow CVE-2006-1168
+	* New homepage http://ncompress.sourceforge.net/
 
 (N)compress version 4.2.4
-	o Fix '-c' flag.
-	o Fix utime error.
-	o Added AMIGA support (Sascha Wildner).
-	o Div. remarks added.
+	* Fix '-c' flag.
+	* Fix utime error.
+	* Added AMIGA support (Sascha Wildner).
+	* Div. remarks added.
 
 (N)compress version 4.2.3
-	o Comp.source.reveiwed release.
+	* Comp.source.reveiwed release.
 
 (N)compress version 4.2.2
 	Minor changes after the reviewes from comp.sources.reviewed
-	o Change the name to ncompress because of version problems.
-	o Start all scripts with ':'
-	o Added libary options to buidl script.
-	o Install zmore zcmp zdiff and manuals.
-	o Added patchlevel.h
-	o Updated README file. Created LZW.INFO
-	o a complete grammatical go-round
-	o Use utime.h if availble
-	o Change de default input/output buffer size to BUFSIZ. Because
+	* Change the name to ncompress because of version problems.
+	* Start all scripts with ':'
+	* Added libary options to buidl script.
+	* Install zmore zcmp zdiff and manuals.
+	* Added patchlevel.h
+	* Updated README file. Created LZW.INFO
+	* a complete grammatical go-round
+	* Use utime.h if availble
+	* Change de default input/output buffer size to BUFSIZ. Because
 	  of performance problems with read a head on systems.
-	o Build generates a makefile.
+	* Build generates a makefile.
 
 compress version 4.2.1 improvements
-	o Change the name to ncompress because of version problems.
-	o Completly rewrite of the compress and decompress functions.
+	* Change the name to ncompress because of version problems.
+	* Completly rewrite of the compress and decompress functions.
 	  compress speedup 25-50% (user cpu time).
 	  decompress speedup 20-30% (user cpu time).
     o Add special fast compress hash algorithm.
-	o Fix some minor things.
-	o use #include <utime.h> if availble.
-	o Cleanup the source code (I think so).
-	o Test if filename is not to long. This is done on runtime no fix length
+	* Fix some minor things.
+	* use #include <utime.h> if availble.
+	* Cleanup the source code (I think so).
+	* Test if filename is not to long. This is done on runtime no fix length
       size any more.
-	o Powerfull build script (test almost every thing).
+	* Powerfull build script (test almost every thing).
 
 Modifications for version 4.1: 
-	o Added -r command line flag to allow recursive compression/
+	* Added -r command line flag to allow recursive compression/
 	  decompression of directory trees. As a side-effect, compress
 	  no longer tries to compress/decompress anything that isn't
 	  a regular file. In particular, it ignores symbolic links.
-	o zcat no longer cares whether a filename ends in .Z or
+	* zcat no longer cares whether a filename ends in .Z or
 	  not - it relies on the magic number in the file. If zcat
 	  is given a filename that doesn't end with .Z and the file
 	  referenced doesn't exist, zcat will append a .Z and try
 	  to open that instead.
-	o compress -f will now compress multiply hardlinked files.
+	* compress -f will now compress multiply hardlinked files.
 	  Uncompress does not recreate the hard link, it creates
 	  a new file.
-	o Removed compressdir/uncompressdir - no longer needed.
-	o Removed atob/btoa/tarmail/untarmail - my versions are
+	* Removed compressdir/uncompressdir - no longer needed.
+	* Removed atob/btoa/tarmail/untarmail - my versions are
 	  based on btoa 5.2 which is not compatible with the atob
 	  included with compress4.0.
 
 Compress version 4.0 improvements:
-	o compress() speedup (10-50%) by changing division hash to xor
-	o decompress() speedup (5-10%)
-	o Memory requirements reduced (3-30%)
-	o Stack requirements reduced to less than 4kb
-	o Removed 'Big+Fast' compress code (FBITS) because of compress speedup
-	o Portability mods for Z8000 and PC/XT (but not zeus 3.2)
-	o Default to 'quiet' mode
-	o Unification of 'force' flags
-	o Manual page overhaul
-	o Portability enhancement for M_XENIX
-	o Removed text on #else and #endif
-	o Added "-V" switch to print version and options
-	o Added #defines for SIGNED_COMPARE_SLOW
-	o Added Makefile and "usermem" program
-	o Removed all floating point computations
-	o New programs:
+	* compress() speedup (10-50%) by changing division hash to xor
+	* decompress() speedup (5-10%)
+	* Memory requirements reduced (3-30%)
+	* Stack requirements reduced to less than 4kb
+	* Removed 'Big+Fast' compress code (FBITS) because of compress speedup
+	* Portability mods for Z8000 and PC/XT (but not zeus 3.2)
+	* Default to 'quiet' mode
+	* Unification of 'force' flags
+	* Manual page overhaul
+	* Portability enhancement for M_XENIX
+	* Removed text on #else and #endif
+	* Added "-V" switch to print version and options
+	* Added #defines for SIGNED_COMPARE_SLOW
+	* Added Makefile and "usermem" program
+	* Removed all floating point computations
+	* New programs:
 		compressdir - compress all files on a directory
 		uncompressdir - uncompress all files on a directory
 		zcmp - cmp compressed files

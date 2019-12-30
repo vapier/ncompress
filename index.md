@@ -29,7 +29,7 @@ The latest downloads can be found here:
 ## Specifications
 
 You can find plenty of info on the LZW algorithm (just use
-[Google](https://www.google.com/search?q=lzw), but for fun, here's some helpful
+[Google](https://www.google.com/search?q=lzw)), but for fun, here's some helpful
 links.
 
 * [LZW Wikipedia Entry][LZW]

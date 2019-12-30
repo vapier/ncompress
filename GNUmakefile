@@ -1,5 +1,10 @@
 # this assumes a recent system -- you're using GNU make right ?
 
+# POSIX make doesn't support default values, so we export from here.
+CFLAGS ?= -O2 -g
+CFLAGS += -Wall
+export CFLAGS
+
 compress cleanup install install_core install_extra: Makefile
 	$(MAKE) -f Makefile $@
 
@@ -9,7 +14,7 @@ distclean: cleanup
 
 Makefile: Makefile.def GNUmakefile
 	sed \
-		-e 's:options= :options= $$(CFLAGS) -DUTIME_H -DLSTAT $$(LDFLAGS) :' \
+		-e 's:options= :options= -DUTIME_H -DLSTAT :' \
 		Makefile.def > Makefile
 
 check:

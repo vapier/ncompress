@@ -24,7 +24,7 @@ All releases will continue to be [public domain].
 ## Downloads
 
 The latest downloads can be found here:
-https://github.com/vapier/ncompress/releases
+<https://github.com/vapier/ncompress/releases>
 
 ## Specifications
 

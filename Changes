@@ -1,3 +1,5 @@
+(N)compress version 4.2.4.7
+
 (N)compress version 4.2.4.6
 	* Fix tests under macOS
 	* Drop support for NOFUNCDEF

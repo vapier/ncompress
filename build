@@ -563,9 +563,9 @@ do
 		echo ""
 		echo "Compiling compress"
 
-		echo ${CC} ${options} compress42.c ${LBOPT}
+		echo ${CC} ${options} compress.c ${LBOPT}
 
-		if ${CC} ${options} compress42.c ${LBOPT}
+		if ${CC} ${options} compress.c ${LBOPT}
 		then
 			echo ""
 			./compress -V
@@ -596,9 +596,9 @@ do
 		echo ""
 		echo "Compiling compress"
 
-		echo ${CC} ${options} compress42.c 
+		echo ${CC} ${options} compress.c
 
-		${CC} ${options} compress42.c 
+		${CC} ${options} compress.c
 		echo ""
 		echo ${n} "Press return to continue${c}"
 		read dummy
@@ -784,8 +784,8 @@ options=${options}
 LBOPT=${LBOPT}
 
 
-compress:	Makefile compress42.c patchlevel.h
-	$(CC) -o compress $(options) compress42.c $(LBOPT)
+compress:	Makefile compress.c patchlevel.h
+	$(CC) -o compress $(options) compress.c $(LBOPT)
 
 install:	compress
 		[ -f \$(BINDIR)/compress ] && \\
@@ -811,14 +811,14 @@ cleanup:
 	mkshar)
 		xshar -sc -opart -l64 MANIFEST Acknowleds zmore Changes compress.1 \
             zcmp zmore.1 README LZW.INFO zcmp.1 zdiff build Makefile.def \
-			compress42.c patchlevel.h
+			compress.c patchlevel.h
 		;;
 
 	mktar)
 		rm -f comp.tar
 		tar cvf comp.tar MANIFEST Acknowleds zmore Changes compress.1 \
             zcmp zmore.1 README LZW.INFO zcmp.1 zdiff build Makefile.def \
-			compress42.c patchlevel.h
+			compress.c patchlevel.h
 		;;
 
 	cleanup)

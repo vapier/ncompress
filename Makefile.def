@@ -38,8 +38,8 @@ options= $(CFLAGS) $(CPPFLAGS) -DDIRENT=1 -DUSERMEM=800000 -DREGISTERS=3
 LBOPT= $(LDFLAGS)
 
 
-compress:	Makefile compress42.c patchlevel.h
-	$(CC) -o compress $(options) compress42.c $(LBOPT)
+compress:	Makefile compress.c patchlevel.h
+	$(CC) -o compress $(options) compress.c $(LBOPT)
 
 install_core:	compress
 		[ -f $(DESTDIR)$(BINDIR)/compress ] && \

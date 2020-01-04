@@ -1,4 +1,4 @@
-/* (N)compress42.c - File compression ala IEEE Computer, Mar 1992.
+/* (N)compress.c - File compression ala IEEE Computer, Mar 1992.
  *
  * Authors:
  *   Spencer W. Thomas   (decvax!harpo!utah-cs!utah-gr!thomas)

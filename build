@@ -1,9 +1,6 @@
-:
 #!/bin/sh
-#
-version="4.2.4"
 
-echo "Build (N)compress ${version}"
+echo "Build (N)compress"
 CLS=`sh -c 'tput clear' 2>/dev/null`
 
 if expr `echo "foo\c"` : '.*c' >/dev/null
@@ -24,7 +21,7 @@ while true
 do
 	if [ "${DEFINED}" = yes ]
 	then
-		echo "${CLS}    Build (N)compress ${version}
+		echo "${CLS}    Build (N)compress
 
  1.  Directory to install compress in: ${BINDIR}
                           manual in  : ${MANDIR}
@@ -547,7 +544,7 @@ do
 
 		DEFINED=yes
 		echo ""
-		echo "I have now create the default options for compiling compress ${version}"
+		echo "I have now create the default options for compiling compress"
 	;;
 
 	c|C)
@@ -564,7 +561,7 @@ do
 		options="${options} ${EXTRA}"
 
 		echo ""
-		echo "Compiling compress ${version}"
+		echo "Compiling compress"
 
 		echo ${CC} ${options} compress42.c ${LBOPT}
 
@@ -597,7 +594,7 @@ do
 		options="${options} ${EXTRA}"
 
 		echo ""
-		echo "Compiling compress ${version}"
+		echo "Compiling compress"
 
 		echo ${CC} ${options} compress42.c 
 

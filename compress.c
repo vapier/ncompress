@@ -10,6 +10,7 @@
  *   Dave Mack           (csu@alembic.acs.com)
  *   Peter Jannesen, Network Communication Systems
  *                       (peter@ncs.nl)
+ *   Mike Frysinger      (vapier@gmail.com)
  *
  * Revision 4.2.3  92/03/14 peter@ncs.nl
  *   Optimise compress and decompress function and a lot of cleanups.
@@ -1911,6 +1912,7 @@ about()
 			REGISTERS, IBUFSIZ, OBUFSIZ, BITS);
 
 		printf("\n\
+Author version 5.x (Modernization):\n\
 Author version 4.2.4.x (Maintenance):\n\
      Mike Frysinger  (vapier@gmail.com)\n\
 \n\

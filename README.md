@@ -1,27 +1,26 @@
 # About
 
-This is version 4.2 of (N)compress (an improved version of compress 4.1).
+This is (N)compress.  It is an improved version of compress 4.1.
 
 Compress is a fast, simple LZW file compressor.  Compress does not have
 the highest compression rate, but it is one of the fastest programs to
 compress data.  Compress is the defacto standard in the UNIX community
 for compressing files.
 
-(N)compress 4.2 has a special, fast compression hash algorithm.  This
-algorithm uses more memory than the old hash table. If you don't want
+(N)compress 4.2 introduced a special, fast compression hash algorithm.
+This algorithm uses more memory than the old hash table. If you don't want
 the faster hash table algorithm set 'Memory free for compress' below
 800000.
 
-zcmp, zdiff, zmore were copied from version 4.1 without any changes.
+Starting with compress 3.0, the output format changed in a backwards
+incompatible way.  This is not a big deal as compress 3.0 was first released
+in Jan 1985, while the first release of compress was available less than a
+year prior.  There shouldn't be any need to produce files that only older
+versions of compress would accept.
 
-The output of (N)compress 4.2 is fully compatible with that of compress 3.0.
-In other words, the output of (N)compress 4.2 may be fed into uncompress 3.0 or
-the output of compress 3.0 may be fed into uncompress 4.2.
-
-The output of (N)compress 4.2 is not compatible with that of
-compress 2.0.  However, compress 4.2 still accepts the output of
-compress 2.0.  To generate output that is compatible with compress
-2.0, use the undocumented "-C" flag.
+Newer versions of compress are still able to handle the output of older versions
+though -- i.e. compress 3.0+ is able to decompress files produced by compress
+2.0 and older.
 
 # Building
 
@@ -71,30 +70,20 @@ So LZW is now patent free.
 - The /bin/sh under Ultrix can't handle ${var:-str} so use ksh for the
   build script.
 
-- The output if (N)compress 4.2 is not exactly the same as compress 4.0
-  because of different table reset point. The output of (N)compress 4.2
-  is 100% compatible with compress 4.0
+- The output of (N)compress 4.2+ is not exactly the same as compress 4.0
+  because of different table reset point. The output of (N)compress 4.2+
+  is 100% compatible with compress 4.0.
 
 - Some systems has performance problems with reads bigger than BUFSIZ
   (The read a head function is not working as expected). For those
   system use the default BSIZE input buffer size.
 
-- (N)compress can by slower on small files (<10Kb) because of a great
+- compress can be slower on small files (<10Kb) because of a great
   table reset overhead. Use cpio or tar to make 1 bigger file if
   possible, it is faster and also gives a better compression ratio most
   of the time.
-
-- (N)compress is slower in vax systems because of removing some
-  undocumented inline assembler.
 
 - files compressed on a large machine with more bits than allowed by
   a version of compress on a smaller machine cannot be decompressed!  Use the
   "-b12" flag to generate a file on a large machine that can be uncompressed
   on a 16-bit machine.
-
-- compatibility with compress 3.0 has not been tested in the 4.2 release of
-  (N)compress.
-
-- There has been 1 problem report in relation to GCC 2.0 on a sparc
-  workstation. GCC 2.0 seems to generate a bad compress. Use the
-  standard c compiler 'cc'.

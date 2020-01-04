@@ -1,9 +1,6 @@
 Acknowledgments:
 
-(N)compress, Version 4.2
-
-Thanks to the previous authors whom I didn't contact, for making
-the program available originally.
+The previous authors who did most of the real work on "compress"!
    Spencer W. Thomas   (decvax!harpo!utah-cs!utah-gr!thomas)
    Jim McKie           (decvax!mcvax!jim)
    Steve Davies        (decvax!vax135!petsd!peora!srd)
@@ -12,9 +9,11 @@ the program available originally.
    Joe Orost           (decvax!vax135!petsd!joe)
    Dave Mack           (csu@alembic.acs.com)
 
+Thanks to Peter Jannesen for the "ncompress" update, and to the people
+who helped him out in the process:
 Also thanks to Frans Meulenbroeks, Jan Christiaan van Winkel,
 Peter van Hooft and the testers of comp.sources.reveiwed for testing
 this version on different platforms.
- 
+
 -- 
-Peter Jannesen
+Mike Frysinger

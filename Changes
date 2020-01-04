@@ -1,4 +1,5 @@
-(N)compress version 4.2.4.7
+(N)compress version 5.0
+	* New stream for cleanups
 
 (N)compress version 4.2.4.6
 	* Fix tests under macOS

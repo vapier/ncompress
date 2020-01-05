@@ -108,6 +108,10 @@ if compress -r emptydir; then false; fi
 : "### Check directory compression"
 compress -r subdir
 
+: "### Check directory compression resume"
+uncompress subdir/i
+compress -r subdir
+
 : "### Check empty directory decompression"
 if uncompress -r emptydir; then false; fi
 
@@ -116,6 +120,10 @@ uncompress -r subdir
 
 : "### Check uncompressed directory decompression"
 if uncompress -r subdir; then false; fi
+
+: "### Check directory decompression resume"
+compress subdir/i
+uncompress -r subdir
 
 : "### Check various error edge cases"
 if compress missing; then false; fi

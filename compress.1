@@ -114,6 +114,8 @@ will operate recursively. If any of the file names specified on the command
 line are directories, 
 .I compress
 will descend into the directory and compress all the files it finds there.
+When compressing, any files already compressed will be ignored, and when
+decompressing, any files already decompressed will be ignored.
 .PP
 The
 .B \-V
@@ -278,17 +280,6 @@ Although compressed files are compatible between machines with large memory,
 should be used for file transfer to architectures with 
 a small process data space (64KB or less, as exhibited by the DEC PDP
 series, the Intel 80286, etc.)
-.PP
-Invoking compress with a 
-.BR \-r
-flag will occasionally cause it to produce spurious error warnings of the form
-.PP
-.in 8
-"<filename>.Z already has .Z suffix \- ignored"
-.in -8
-.PP
-These warnings can be ignored. See the comments in compress.c:compdir()
-in the source distribution for an explanation.
 .SH "SEE ALSO"
 .BR pack (1),
 .BR compact (1)

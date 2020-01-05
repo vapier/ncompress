@@ -881,6 +881,9 @@ nextarg:	continue;
 				decompress(0, 1);
 		}
 
+		if (recursive && exit_code == -1) {
+			fprintf(stderr, "no files processed after recursive search\n");
+		}
 		exit((exit_code== -1) ? 1:exit_code);
 	}
 
@@ -997,6 +1000,18 @@ comprexx(fileptr)
 				{
 					if (!has_z_suffix)
 					{
+						/* Ignore this scenario in recursive mode: while we
+						 * decompress files in this dir, our readdir scan
+						 * might turn up those new files.  There is no way
+						 * to efficiently handle this on very large dirs,
+						 * so we ignore it.  This also allows the user to
+						 * easily resume partial decompressions.
+						 */
+						if (recursive) {
+							free(tempname);
+							return;
+						}
+
 						if (!quiet)
 		  					fprintf(stderr,"%s - no .Z suffix\n",tempname);
 
@@ -1022,7 +1037,11 @@ comprexx(fileptr)
 				{
 					if (has_z_suffix)
 					{
-		 	 			fprintf(stderr, "%s: already has .Z suffix -- no change\n", tempname);
+						/* Ignore this scenario in recursive mode.
+						 * See comment above in the decompress path.
+						 */
+						if (!recursive)
+							fprintf(stderr, "%s: already has .Z suffix -- no change\n", tempname);
 						free(tempname);
 						return;
 					}
@@ -1274,19 +1293,6 @@ compdir(dir)
 			printf("%s unreadable\n", dir);		/* not stderr! */
 			return ;
 		}
-		/*
-		** WARNING: the following algorithm will occasionally cause
-		** compress to produce error warnings of the form "<filename>.Z
-		** already has .Z suffix - ignored". This occurs when the
-		** .Z output file is inserted into the directory below
-		** readdir's current pointer.
-		** These warnings are harmless but annoying. The alternative
-		** to allowing this would be to store the entire directory
-		** list in memory, then compress the entries in the stored
-		** list. Given the depth-first recursive algorithm used here,
-		** this could use up a tremendous amount of memory. I don't
-		** think it's worth it. -- Dave Mack
-		*/
 
 		while ((dp = readdir(dirp)) != NULL)
 		{

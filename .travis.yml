@@ -2,15 +2,34 @@
 # https://docs.travis-ci.com/
 
 language: c
-compiler:
-  - clang
-  - gcc
 
-sudo: false
+matrix:
+  include:
+    - os: osx
+      compiler: clang
 
-os:
-  - linux
-  - osx
-  - windows
+    - os: windows
+      compiler: clang
+
+    - os: linux
+      arch: amd64
+      compiler: clang
+    - os: linux
+      arch: amd64
+      compiler: gcc
+
+    - os: linux
+      arch: arm64
+      compiler: clang
+    - os: linux
+      arch: arm64
+      compiler: gcc
+
+    - os: linux
+      arch: s390x
+      compiler: clang
+    - os: linux
+      arch: s390x
+      compiler: gcc
 
 script: ./travis/main.sh

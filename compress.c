@@ -259,20 +259,6 @@ static inline access(const char *pathname, int mode)
  * machine variants which require cc -Dmachine:  pdp11, z8000, DOS
  */
 
-#ifdef interdata	/* Perkin-Elmer													*/
-#	define SIGNED_COMPARE_SLOW	/* signed compare is slower than unsigned 			*/
-#endif
-
-#ifdef pdp11	 	/* PDP11: don't forget to compile with -i 						*/
-#	define	BITS 		12	/* max bits/code for 16-bit machine 					*/
-#	define	NO_UCHAR		/* also if "unsigned char" functions as signed char 	*/
-#endif /* pdp11 */
-
-#ifdef z8000		/* Z8000: 														*/
-#	define	BITS 	12	/* 16-bits processor max 12 bits							*/
-#	undef	vax			/* weird preprocessor 										*/
-#endif /* z8000 */
-
 #ifdef	DOS			/* PC/XT/AT (8088) processor									*/
 #	define	BITS   16	/* 16-bits processor max 12 bits							*/
 #	if BITS == 16
@@ -1743,12 +1729,6 @@ about()
 		printf("Compile options:\n        ");
 #ifdef FAST
 		printf("FAST, ");
-#endif
-#ifdef vax
-		printf("vax, ");
-#endif
-#ifdef NO_UCHAR
-		printf("NO_UCHAR, ");
 #endif
 #ifdef SIGNED_COMPARE_SLOW
 		printf("SIGNED_COMPARE_SLOW, ");

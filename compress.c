@@ -370,91 +370,6 @@ typedef	unsigned char	char_type;
 
 #define MAXCODE(n)	(1L << (n))
 
-#ifndef	REGISTERS
-#	define	REGISTERS	2
-#endif
-#define	REG1	
-#define	REG2	
-#define	REG3	
-#define	REG4	
-#define	REG5	
-#define	REG6	
-#define	REG7	
-#define	REG8	
-#define	REG9	
-#define	REG10
-#define	REG11	
-#define	REG12	
-#define	REG13
-#define	REG14
-#define	REG15
-#define	REG16
-#if REGISTERS >= 1
-#	undef	REG1
-#	define	REG1	register
-#endif
-#if REGISTERS >= 2
-#	undef	REG2
-#	define	REG2	register
-#endif
-#if REGISTERS >= 3
-#	undef	REG3
-#	define	REG3	register
-#endif
-#if REGISTERS >= 4
-#	undef	REG4
-#	define	REG4	register
-#endif
-#if REGISTERS >= 5
-#	undef	REG5
-#	define	REG5	register
-#endif
-#if REGISTERS >= 6
-#	undef	REG6
-#	define	REG6	register
-#endif
-#if REGISTERS >= 7
-#	undef	REG7
-#	define	REG7	register
-#endif
-#if REGISTERS >= 8
-#	undef	REG8
-#	define	REG8	register
-#endif
-#if REGISTERS >= 9
-#	undef	REG9
-#	define	REG9	register
-#endif
-#if REGISTERS >= 10
-#	undef	REG10
-#	define	REG10	register
-#endif
-#if REGISTERS >= 11
-#	undef	REG11
-#	define	REG11	register
-#endif
-#if REGISTERS >= 12
-#	undef	REG12
-#	define	REG12	register
-#endif
-#if REGISTERS >= 13
-#	undef	REG13
-#	define	REG13	register
-#endif
-#if REGISTERS >= 14
-#	undef	REG14
-#	define	REG14	register
-#endif
-#if REGISTERS >= 15
-#	undef	REG15
-#	define	REG15	register
-#endif
-#if REGISTERS >= 16
-#	undef	REG16
-#	define	REG16	register
-#endif
-
-
 union	bytes
 {
 	long	word;
@@ -485,7 +400,7 @@ union	bytes
 						}
 #else
 #ifdef BYTEORDER
-#define	output(b,o,c,n)	{	REG1 char_type	*p = &(b)[(o)>>3];				\
+#define	output(b,o,c,n)	{	char_type	*p = &(b)[(o)>>3];					\
 							union bytes i;									\
 							i.word = ((long)(c))<<((o)&0x7);				\
 							p[0] |= i.bytes.b1;								\
@@ -494,8 +409,8 @@ union	bytes
 							(o) += (n);										\
 						}
 #else
-#define	output(b,o,c,n)	{	REG1 char_type	*p = &(b)[(o)>>3];				\
-							REG2 long		 i = ((long)(c))<<((o)&0x7);	\
+#define	output(b,o,c,n)	{	char_type	*p = &(b)[(o)>>3];					\
+							long		 i = ((long)(c))<<((o)&0x7);		\
 							p[0] |= (char_type)(i);							\
 							p[1] |= (char_type)(i>>8);						\
 							p[2] |= (char_type)(i>>16);						\
@@ -509,7 +424,7 @@ union	bytes
 							(o) += (n);										\
 						}
 #else
-#define	input(b,o,c,n,m){	REG1 char_type 		*p = &(b)[(o)>>3];			\
+#define	input(b,o,c,n,m){	char_type 		*p = &(b)[(o)>>3];				\
 							(c) = ((((long)(p[0]))|((long)(p[1])<<8)|		\
 									 ((long)(p[2])<<16))>>((o)&0x7))&(m);	\
 							(o) += (n);										\
@@ -694,12 +609,12 @@ void  	about			ARGS((void));
  */ 
 int
 main(argc, argv)
-	REG1	int 	 argc;
-	REG2	char	*argv[];
+	int 	 argc;
+	char	*argv[];
 	{
-    	REG3	char		**filelist;
-		REG4	char		**fileptr;
-		int		seen_double_dash = 0;
+		char **filelist;
+		char **fileptr;
+		int seen_double_dash = 0;
 
 #ifdef SIGINT
 		if ((fgnd_flag = (signal(SIGINT, SIG_IGN)) != SIG_IGN))
@@ -1248,10 +1163,10 @@ error:
 #ifdef	RECURSIVE
 void
 compdir(dir)
-	REG3	char	*dir;
+	char	*dir;
 	{
-		REG1 	struct dirent	*dp;
-		REG2	DIR				*dirp;
+		struct dirent *dp;
+		DIR *dirp;
 		char					*nptr;
 		char					*fptr;
 		unsigned long			 dir_size = strlen(dir);
@@ -1328,21 +1243,19 @@ compress(fdin, fdout)
 	int		fdin;
 	int		fdout;
 	{
-		REG2	long		hp;
-		REG3	int			rpos;
-#if REGISTERS >= 5
-		REG5	long		fc;
-#endif
-		REG6	int			outbits;
-		REG7    int			rlop;
-		REG8	int			rsize;
-		REG9	int			stcode;
-		REG10	code_int	free_ent;
-		REG11	int			boff;
-		REG12	int			n_bits;
-		REG13	int			ratio;
-		REG14	long		checkpoint;
-		REG15	code_int	extcode;
+		long hp;
+		int rpos;
+		long fc;
+		int outbits;
+		int rlop;
+		int rsize;
+		int stcode;
+		code_int free_ent;
+		int boff;
+		int n_bits;
+		int ratio;
+		long checkpoint;
+		code_int extcode;
 		union
 		{
 			long			code;
@@ -1403,7 +1316,7 @@ compress(fdin, fdout)
 
 				if (!stcode && bytes_in >= checkpoint && fcode.e.ent < FIRST)
 				{
-					REG1 long int rat;
+					long int rat;
 
 					checkpoint = bytes_in + CHECK_GAP;
 
@@ -1447,7 +1360,7 @@ compress(fdin, fdout)
 				}
 
 				{
-					REG1	int		i;
+					int i;
 
 					i = rsize-rlop;
 
@@ -1469,12 +1382,8 @@ next:  			if (rpos >= rlop)
 next2: 			fcode.e.c = inbuf[rpos++];
 #ifndef FAST
 				{
-					REG1 	code_int	i;
-#if REGISTERS >= 5
+					code_int i;
 					fc = fcode.code;
-#else
-#	define			fc fcode.code
-#endif
 					hp = (((long)(fcode.e.c)) << (BITS-8)) ^ (long)(fcode.e.ent);
 
 					if ((i = htabof(hp)) == fc)
@@ -1482,7 +1391,7 @@ next2: 			fcode.e.c = inbuf[rpos++];
 
 					if (i != -1)
 					{
-						REG4 long		disp;
+						long disp;
 
 						disp = (HSIZE - hp)-1;	/* secondary hash (after G. Knott) */
 
@@ -1498,13 +1407,9 @@ next2: 			fcode.e.c = inbuf[rpos++];
 				}
 #else
 				{
-					REG1 long	i;
-					REG4 long	p;
-#if REGISTERS >= 5
+					long i;
+					long p;
 					fc = fcode.code;
-#else
-#	define			fc fcode.code
-#endif
 					hp = ((((long)(fcode.e.c)) << (HBITS-8)) ^ (long)(fcode.e.ent));
 
 					if ((i = htabof(hp)) == fc)	goto hfound;
@@ -1527,13 +1432,8 @@ out:			;
 				output(outbuf,outbits,fcode.e.ent,n_bits);
 
 				{
-#if REGISTERS < 5
-#	undef	fc
-					REG1 long	fc;
-					fc = fcode.code;
-#endif
+					long fc = fcode.code;
 					fcode.e.ent = fcode.e.c;
-
 
 					if (stcode)
 					{
@@ -1582,21 +1482,21 @@ decompress(fdin, fdout)
 	int		fdin;
 	int		fdout;
 	{
-	    REG2 	char_type 		*stackp;
-	    REG3	code_int		 code;
-    	REG4	int				 finchar;
-		REG5	code_int		 oldcode;
-		REG6	code_int		 incode;
-		REG7	int				 inbits;
-		REG8	int				 posbits;
-		REG9	int				 outpos;
-		REG10	int				 insize;
-		REG11	int				 bitmask;
-		REG12	code_int		 free_ent;
-		REG13	code_int		 maxcode;
-		REG14	code_int		 maxmaxcode;
-		REG15	int				 n_bits;
-		REG16	int				 rsize;
+		char_type *stackp;
+		code_int code;
+		int finchar;
+		code_int oldcode;
+		code_int incode;
+		int inbits;
+		int posbits;
+		int outpos;
+		int insize;
+		int bitmask;
+		code_int free_ent;
+		code_int maxcode;
+		code_int maxmaxcode;
+		int n_bits;
+		int rsize;
 		int block_mode;
 
 		bytes_in = 0;
@@ -1655,9 +1555,9 @@ decompress(fdin, fdout)
 		{
 resetbuf:	;
 			{
-				REG1	 int	i;
-				int				e;
-				int				o;
+				int i;
+				int e;
+				int o;
 
 				o = posbits >> 3;
 				e = o <= insize ? insize - o : 0;
@@ -1728,7 +1628,7 @@ resetbuf:	;
 				{
 					if (code > free_ent)
 					{
-						REG1 char_type 		*p;
+						char_type *p;
 
 						posbits -= n_bits;
 						p = &inbuf[posbits>>3];
@@ -1754,7 +1654,7 @@ resetbuf:	;
 			/* And put them out in forward order */
 
 				{
-					REG1 int	i;
+					int i;
 
 					if (outpos+(i = (de_stack-stackp)) >= OBUFSIZ)
 					{
@@ -1835,7 +1735,7 @@ prratio(stream, num, den)
 	long int	 num;
 	long int	 den;
 	{
-		REG1 int q;			/* Doesn't need to be long */
+		int q;			/* Doesn't need to be long */
 
 		if (den > 0)
 		{
@@ -1888,8 +1788,8 @@ about()
 #ifdef LSTAT
 		printf("LSTAT, ");
 #endif
-		printf("\n        REGISTERS=%d IBUFSIZ=%d, OBUFSIZ=%d, BITS=%d\n",
-			REGISTERS, IBUFSIZ, OBUFSIZ, BITS);
+		printf("\n        IBUFSIZ=%d, OBUFSIZ=%d, BITS=%d\n",
+			IBUFSIZ, OBUFSIZ, BITS);
 
 		printf("\n\
 Author version 5.x (Modernization):\n\

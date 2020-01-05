@@ -31,7 +31,6 @@ do
  5.  Compiler options                : ${CCOPT:---none--}
  6.  Libary options                  : ${LBOPT:---none--}
  7.  Special options for your system : ${EXTRA:---none--}
- 8.  Number of register variable     : ${REGISTERS}
  9.  Symbolic links                  : ${LSTAT}
 10.  Use include <utime.h>           : ${UTIME_H}"
 
@@ -48,7 +47,7 @@ do
 		(
 			echo "# Current parameters."
 			for var in CC CCOPT LBOPT BINDIR MANDIR IBUFSIZ \
-						OBUFSIZ USERMEM REGISTERS LSTAT BYTEORDER NOALLIGN \
+						OBUFSIZ USERMEM LSTAT BYTEORDER NOALLIGN \
 						EXTRA DEFINED UTIME_H
 			do
 				echo "${var}='`eval echo \$\{${var}\}`'"
@@ -156,16 +155,6 @@ do
 		[ ".${var1}" != . ] && EXTRA="${var1} ${var2} ${var3} ${var4} ${varr}"
 		;;	
 
-	8)
-		if [ ".${var1}" = . ]
-		then
-			echo ${n} "Number of register variable (default:${REGISTERS}) ? ${c}"
-			read var1 dummy
-		fi
-
-		REGISTERS="${var1:-${REGISTERS}}"
-		;;
-
 	9)
 		if [ ".${var1}" = . ]
 		then
@@ -224,7 +213,6 @@ do
 		IBUFSIZ=2048
 		OBUFSIZ=2048
 		USERMEM=0
-		REGISTERS=2
 		LSTAT=no
 		CCOPT='-O'
 		LBOPT=
@@ -330,42 +318,6 @@ do
 		NOALLIGN="${NOALLIGN:-yes}"
 		echo ${NOALLIGN}
 		rm -f /tmp/sh$$.c a.out core
-
-		echo ${n} "Test number of register vars. Registers var: ${c}"
-		cat >/tmp/sh$$.c <<!
-		main()
-			{
-				long			l11;
-				long			l12;
-				long			l13;
-				long			l1;
-				register long	rl01; register long	rl02;
-				register long	rl03; register long	rl04;
-				register long	rl05; register long	rl06;
-				register long	rl07; register long	rl08;
-				register long	rl09; register long	rl10;
-				register long	rl11; register long	rl12;
-				register long	rl13; register long	rl14;
-				register long	rl15; register long	rl16;
-				register long	rl17; register long	rl18;
-				register long	rl19; register long	rl20;
-				long			l2;
-				long			l22;
-				long			l23;
-				long			l24;
-
-				l1 = (char *)&l1-(char *)&l2;
-				if (l1 < 0)	l1 = -l1;
-				l1 = 21-(l1/sizeof(long));
-				if (l1 > 0 && l1 < 21)
-					printf("%ld", l1);
-				exit(0);
-			}
-!
-		cc /tmp/sh$$.c && REGISTERS=`./a.out`
-		REGISTERS=${REGISTERS:-2};
-		echo ${REGISTERS}
-		rm -f a.out /tmp/sh$$.c
 
 		echo ${n} "Test if system support symbolic links? ${c}"
 		cat >/tmp/sh$$.c <<!
@@ -487,7 +439,6 @@ do
 		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
-		options="${options} -DREGISTERS=${REGISTERS}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} -DBYTEORDER=${BYTEORDER}"
 		[ "${NOALLIGN}" = no ] && options="${options} -DNOALLIGN=1"
@@ -518,7 +469,6 @@ do
 		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
-		options="${options} -DREGISTERS=${REGISTERS}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} -DBYTEORDER=${BYTEORDER}"
 		[ "${NOALLIGN}" = no ] && options="${options} -DNOALLIGN=1"
@@ -672,7 +622,6 @@ do
 		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
-		options="${options} -DREGISTERS=${REGISTERS}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} -DBYTEORDER=${BYTEORDER}"
 		[ "${NOALLIGN}" = no ] && options="${options} -DNOALLIGN=1"
@@ -697,7 +646,6 @@ MANDIR=${MANDIR}
 #	-DLSTAT=1					Use lstat for finding symlinks.
 #	-DUTIME_H=1					Use utime.h
 #	-DUSERMEM=<size>			Availble memory for compress (default 800k).
-#	-DREGISTERS=<nbr>			Number of registers (default 2).
 #	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
 #	-DBYTEORDER=<order>			Byte order (default: unknown).

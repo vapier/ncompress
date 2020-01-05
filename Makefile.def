@@ -22,14 +22,13 @@ MANDIR=$(PREFIX)/share/man/man1
 #	-DLSTAT=1					Use lstat for finding symlinks.
 #	-DUTIME_H=1					Use utime.h
 #	-DUSERMEM=<size>			Available memory for compress (default 800k).
-#	-DREGISTERS=<nbr>			Number of registers (default 2).
 #	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
 #	-DBYTEORDER=<order>			Byte order (default: unknown).
 #	-DNOALLIGN=1				Data word alignment (default: yes).
 #	-DMAXSEG_64K=1 -BITS=16		Support segment processor like 80286.
 #
-options= $(CFLAGS) $(CPPFLAGS) -DUSERMEM=800000 -DREGISTERS=3
+options= $(CFLAGS) $(CPPFLAGS) -DUSERMEM=800000
 
 # library options
 LBOPT= $(LDFLAGS)

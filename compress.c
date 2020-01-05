@@ -535,7 +535,6 @@ int				do_decomp = 0;		/* Decompress mode								*/
 int				force = 0;			/* Force overwrite of files and links			*/
 int				nomagic = 0;		/* Use a 3-byte magic number header,			*/
 									/* unless old file 								*/
-int				block_mode = BLOCK_MODE;/* Block compress mode -C compatible with 2.0*/
 int				maxbits = BITS;		/* user settable max # bits/code 				*/
 int 			zcat_flg = 0;		/* Write output on stdout, suppress messages 	*/
 int				recursive = 0;  	/* compress directories 						*/
@@ -803,10 +802,6 @@ main(argc, argv)
 
 			    	case 'n':
 						nomagic = 1;
-						break;
-
-			    	case 'C':
-						block_mode = 0;
 						break;
 
 			    	case 'b':
@@ -1378,7 +1373,7 @@ compress(fdin, fdout)
 		bytes_out = 0; bytes_in = 0;
 		outbuf[0] = MAGIC_1;
 		outbuf[1] = MAGIC_2;
-		outbuf[2] = (char)(maxbits | block_mode);
+		outbuf[2] = (char)(maxbits | BLOCK_MODE);
 		boff = outbits = (3<<3);
 		fcode.code = 0;
 
@@ -1612,6 +1607,7 @@ decompress(fdin, fdout)
 		REG14	code_int		 maxmaxcode;
 		REG15	int				 n_bits;
 		REG16	int				 rsize;
+		int block_mode;
 
 		bytes_in = 0;
 		bytes_out = 0;

@@ -137,7 +137,6 @@
 #endif
 
 #ifdef __MINGW32__
-#	define	DIRENT
 #	define	MINGW
 #endif
 
@@ -153,18 +152,11 @@
 #include	<errno.h>
 
 #if !defined(DOS) && !defined(WINDOWS)
+#	include	<dirent.h>
+#	define RECURSIVE 1
 #	include	<unistd.h>
 #endif
 
-#ifdef DIRENT
-#	include	<dirent.h>
-#	define	RECURSIVE		1
-#	undef	SYSDIR
-#endif
-#ifdef SYSDIR
-#	include	<sys/dir.h>
-#	define	RECURSIVE		1
-#endif
 #ifdef UTIME_H
 #	include	<utime.h>
 #else
@@ -1258,11 +1250,7 @@ void
 compdir(dir)
 	REG3	char	*dir;
 	{
-#ifndef	DIRENT
-		REG1 	struct direct	*dp;
-#else
 		REG1 	struct dirent	*dp;
-#endif
 		REG2	DIR				*dirp;
 		char					*nptr;
 		char					*fptr;
@@ -1881,12 +1869,6 @@ about()
 #endif
 #ifdef vax
 		printf("vax, ");
-#endif
-#ifdef DIRENT
-		printf("DIRENT, ");
-#endif
-#ifdef SYSDIR
-		printf("SYSDIR, ");
 #endif
 #ifdef NO_UCHAR
 		printf("NO_UCHAR, ");

@@ -35,18 +35,6 @@ do
  9.  Symbolic links                  : ${LSTAT}
 10.  Use include <utime.h>           : ${UTIME_H}"
 
-		if [ ".${DIRENT}" = .yes ] 
-		then
-			echo "11.  Your system support dirent.h"
-		else
-			if [ ".${SYSDIR}" = .yes -a ".${DIRENT}" != .yes ]
-			then
-				echo "11.  Your system support sys/dir.h"
-			else
-				echo "11.  No directory support -r disabled."
-			fi
-		fi
-	
 		echo "12.  Word must start at even addres: ${NOALLIGN}, Bytorder on your system: ${BYTEORDER} (1=msb)"
 		echo "
  d. Set default settings                    mkshar.  Create shell archive
@@ -59,7 +47,7 @@ do
 
 		(
 			echo "# Current parameters."
-			for var in CC CCOPT LBOPT BINDIR MANDIR DIRENT SYSDIR IBUFSIZ \
+			for var in CC CCOPT LBOPT BINDIR MANDIR IBUFSIZ \
 						OBUFSIZ USERMEM REGISTERS LSTAT BYTEORDER NOALLIGN \
 						EXTRA DEFINED UTIME_H
 			do
@@ -185,7 +173,7 @@ do
 			read var1 dummy
 		fi
 
-		case "${var1:-${DIRENT}}" in
+		case "${var1}" in
 		y|Y|yes|YES) LSTAT=yes; ;;
 		*)			 LSTAT=no; ;;
 		esac
@@ -198,38 +186,9 @@ do
 			read var1 dummy
 		fi
 
-		case "${var1:-${DIRENT}}" in
+		case "${var1}" in
 		y|Y|yes|YES) UTIME_H=yes; ;;
 		*)			 UTIME_H=no; ;;
-		esac
-		;;
-
-	11)
-		case "${var1}" in
-		dirent)
-			DIRENT=yes; SYSDIR=no;
-			;;
-		sys/dir) 
-			DIRENT=no; SYSDIR=yes;
-			;;
-		*)
-			echo ${n} "Do your system support dirent.h (default:${DIRENT}) ? ${c}"
-			read var1 dummy
-			case "${var1:-${DIRENT}}" in
-			y|Y|yes|YES) DIRENT=yes; SYSDIR=no; ;;
-			*)			 DIRENT=no; SYSDIR=no; ;;
-			esac
-
-			if [ ${DIRENT} = no ]
-			then
-				echo ${n} "Do your system support sys/dir.h (default:${SYSDIR}) ? ${c}"
-    			read var1 dummy
-				case "${var1:-${SYSDIR}}" in
-				y|Y|yes|YES) DIRENT=no; SYSDIR=yes; ;;
-				*)			 DIRENT=no; SYSDIR=no; ;;
-				esac
-			fi
-			;;
 		esac
 		;;
 
@@ -261,8 +220,6 @@ do
 		echo "Testing the system to find out what kind of system we have."
 		BINDIR=/usr/bin
 		MANDIR=/usr/man/man1
-		DIRENT=no
-		SYSDIR=no
 		UTIME_H=no
 		IBUFSIZ=2048
 		OBUFSIZ=2048
@@ -272,8 +229,6 @@ do
 		CCOPT='-O'
 		LBOPT=
 		EXTRA=
-		[ -f /usr/include/sys/dir.h ] && { SYSDIR=yes; }
-		[ -f /usr/include/dirent.h ] && { DIRENT=yes; }
 		[ -f /usr/include/utime.h ] && { UTIME_H=yes; }
 		[ -d /usr/local/bin ] && { BINDIR=/usr/local/bin; }
 		[ -d /usr/local/man ] && { BINDIR=/usr/local/man/man1; }
@@ -529,8 +484,6 @@ do
 
 	c|C)
 		options="${CCOPT} -o compress"
-		[ "${DIRENT}" = yes ] && options="${options} -DDIRENT=1"
-		[ "${SYSDIR}" = yes ] && options="${options} -DSYSDIR=1"
 		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
@@ -562,8 +515,6 @@ do
 
 	s|S)
 		options="-O -S"
-		[ "${DIRENT}" = yes ] && options="${options} -DDIRENT=1"
-		[ "${SYSDIR}" = yes ] && options="${options} -DSYSDIR=1"
 		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
@@ -718,8 +669,6 @@ do
 
 	genmake)
 		options=
-		[ "${DIRENT}" = yes ] && options="${options} -DDIRENT=1"
-		[ "${SYSDIR}" = yes ] && options="${options} -DSYSDIR=1"
 		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
@@ -745,8 +694,6 @@ MANDIR=${MANDIR}
 # options is a collection of:
 #
 #	-DAMIGA=1					Amiga support.
-#	-DDIRENT=1					Use dirent.h
-#	-DSYSDIR=1					Use sys/dir.h
 #	-DLSTAT=1					Use lstat for finding symlinks.
 #	-DUTIME_H=1					Use utime.h
 #	-DUSERMEM=<size>			Availble memory for compress (default 800k).

@@ -19,8 +19,6 @@ MANDIR=$(PREFIX)/share/man/man1
 # options is a collection of:
 #
 #	-DAMIGA=1					Amiga support.
-#	-DDIRENT=1					Use dirent.h
-#	-DSYSDIR=1					Use sys/dir.h
 #	-DLSTAT=1					Use lstat for finding symlinks.
 #	-DUTIME_H=1					Use utime.h
 #	-DUSERMEM=<size>			Available memory for compress (default 800k).
@@ -31,7 +29,7 @@ MANDIR=$(PREFIX)/share/man/man1
 #	-DNOALLIGN=1				Data word alignment (default: yes).
 #	-DMAXSEG_64K=1 -BITS=16		Support segment processor like 80286.
 #
-options= $(CFLAGS) $(CPPFLAGS) -DDIRENT=1 -DUSERMEM=800000 -DREGISTERS=3
+options= $(CFLAGS) $(CPPFLAGS) -DUSERMEM=800000 -DREGISTERS=3
 
 # library options
 LBOPT= $(LDFLAGS)

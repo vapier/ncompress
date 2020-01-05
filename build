@@ -412,26 +412,6 @@ do
 		echo ${REGISTERS}
 		rm -f a.out /tmp/sh$$.c
 
-		echo ${n} "Test if errno is declared in errno.h: ${c}"
-		cat >/tmp/sh$$.c <<!
-#include	<stdio.h>
-#include	<errno.h>
-		main()
-			{
-				return	errno;
-			}
-!
-		if cc /tmp/sh$$.c
-		then
-			echo "Yes"
-		else
-			echo "No"
-			EXTRA="${EXTRA} -DDEF_ERRNO=1"
-		fi
-
-		rm -f a.out /tmp/sh$$.c
-
-
 		echo ${n} "Test if system support symbolic links? ${c}"
 		cat >/tmp/sh$$.c <<!
 		main()
@@ -775,7 +755,6 @@ MANDIR=${MANDIR}
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
 #	-DBYTEORDER=<order>			Byte order (default: unknown).
 #	-DNOALLIGN=1				Data word allignment (default: yes).
-#	-DDEF_ERRNO=1				Define error (not defined in errno.h).
 #	-DMAXSEG_64K=1 -BITS=16		Support segment processsor like 80286.
 #
 options=${options}

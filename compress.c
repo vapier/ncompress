@@ -213,10 +213,6 @@ static inline access(const char *pathname, int mode)
 }
 #endif
 
-#ifdef	DEF_ERRNO
-	extern int	errno;
-#endif
-
 #include "patchlevel.h"
 
 #undef	min

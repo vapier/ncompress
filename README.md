@@ -1,5 +1,8 @@
 # About
 
+Note: This branch is now closed for development.  Please switch to the
+master branch and the new 5.0+ release series.
+
 This is version 4.2 of (N)compress (an improved version of compress 4.1).
 
 Compress is a fast, simple LZW file compressor.  Compress does not have

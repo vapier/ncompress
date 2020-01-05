@@ -5,24 +5,44 @@ Compress does not have the highest compression rate, but it is one of the
 fastest programs to compress data.
 Compress is the defacto standard in the UNIX community for compressing files.
 
-The ncompress code is released into the [public domain].
+The ncompress code is, and will continue to be, released into the
+[public domain] as the original authors intended.
 
 Also note that all existing patents on the LZW algorithm have
 [expired world-wide](https://en.wikipedia.org/wiki/LZW#Patents).
 
 # Status
 
-The last "upstream" release will be supported in minor bug fix mode only.
-These will be the 4.2.4.x releases.
+The master branch is tracking the 5.x release series.
 
-Anything above and beyond that will be the 4.2.5.x releases.
+We will always support the output of older compress versions (including the
+compress-2.0 format), and we will never produce files that compress-3.0 is
+unable to process.
 
-All releases will continue to be [public domain].
+The ncompress-4.2.4 branch was used to track a series of bugfix releases.
+It is no longer used.  See the history section below for more details.
 
 # Downloads
 
 The latest downloads can be found here:
 <https://github.com/vapier/ncompress/releases>
+
+# Portability Requirements
+
+Our goal is to remain portable and to rely on the compiler for low level
+optimization.  In other words, improved algorithms will be considered, but not
+compiler-specific tricks or (ab)use of keywords like `inline` or `register` or
+inline assembly.
+
+We require [C99] compilers which means 1999-era software should work OK.
+We aim for [POSIX/IEEE Std 1003.1-2001][POSIX-2001] compliance.
+That is, we will try to avoid functionality that is not defined there.
+
+If those requirements are too new for your system, older releases of compress
+are always available for download.
+
+[C99]: https://en.wikipedia.org/wiki/C99
+[POSIX-2001]: https://pubs.opengroup.org/onlinepubs/009695399/
 
 # Contact
 

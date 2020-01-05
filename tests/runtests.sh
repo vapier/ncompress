@@ -25,7 +25,17 @@ echo "using compress: ${COMPRESS}"
 echo "Setting up test env"
 
 TMPDIR=""
-trap 'rm -rf "${TMPDIR}"' EXIT
+cleanup() {
+	# See if we're exiting due to an error.
+	local ret=$1
+	# Don't allow failures in this hook to prevent final cleanup.
+	set +e
+	if [ ${ret} -ne 0 ]; then
+		ls -Ral "${TMPDIR}"
+	fi
+	rm -rf "${TMPDIR}"
+}
+trap 'cleanup $?' EXIT
 TMPDIR="$(mktemp -d)"
 
 cd "${TMPDIR}"

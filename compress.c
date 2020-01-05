@@ -255,10 +255,6 @@ static inline access(const char *pathname, int mode)
 #	define	BYTEORDER	0000
 #endif
 
-#ifndef	NOALLIGN
-#	define	NOALLIGN	0
-#endif
-
 /*
  * machine variants which require cc -Dmachine:  pdp11, z8000, DOS
  */
@@ -284,8 +280,6 @@ static inline access(const char *pathname, int mode)
 #	endif
 #	undef	BYTEORDER
 #	define	BYTEORDER 	4321
-#	undef	NOALLIGN
-#	define	NOALLIGN	1
 #endif /* DOS */
 
 #ifndef	O_BINARY
@@ -393,12 +387,6 @@ union	bytes
 #endif
 	} bytes;
 } ;
-#if BYTEORDER == 4321 && NOALLIGN == 1
-#define	output(b,o,c,n)	{													\
-							*(long *)&((b)[(o)>>3]) |= ((long)(c))<<((o)&0x7);\
-							(o) += (n);										\
-						}
-#else
 #ifdef BYTEORDER
 #define	output(b,o,c,n)	{	char_type	*p = &(b)[(o)>>3];					\
 							union bytes i;									\
@@ -417,19 +405,11 @@ union	bytes
 							(o) += (n);										\
 						}
 #endif
-#endif
-#if BYTEORDER == 4321 && NOALLIGN == 1
-#define	input(b,o,c,n,m){													\
-							(c) = (*(long *)(&(b)[(o)>>3])>>((o)&0x7))&(m);	\
-							(o) += (n);										\
-						}
-#else
 #define	input(b,o,c,n,m){	char_type 		*p = &(b)[(o)>>3];				\
 							(c) = ((((long)(p[0]))|((long)(p[1])<<8)|		\
 									 ((long)(p[2])<<16))>>((o)&0x7))&(m);	\
 							(o) += (n);										\
 						}
-#endif
 
 char			*progname;			/* Program name									*/
 int 			silent = 0;			/* don't tell me about errors					*/
@@ -1761,9 +1741,6 @@ about()
 	{
 		printf("Compress version: %s\n", version_id);
 		printf("Compile options:\n        ");
-#if BYTEORDER == 4321 && NOALLIGN == 1
-		printf("USE_BYTEORDER, ");
-#endif
 #ifdef FAST
 		printf("FAST, ");
 #endif

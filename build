@@ -34,7 +34,6 @@ do
  9.  Symbolic links                  : ${LSTAT}
 10.  Use include <utime.h>           : ${UTIME_H}"
 
-		echo "12.  Word must start at even addres: ${NOALLIGN}, Bytorder on your system: ${BYTEORDER} (1=msb)"
 		echo "
  d. Set default settings                    mkshar.  Create shell archive
  c. Compile compress                        mktar.   Create tar archive
@@ -47,7 +46,7 @@ do
 		(
 			echo "# Current parameters."
 			for var in CC CCOPT LBOPT BINDIR MANDIR IBUFSIZ \
-						OBUFSIZ USERMEM LSTAT BYTEORDER NOALLIGN \
+						OBUFSIZ USERMEM LSTAT BYTEORDER \
 						EXTRA DEFINED UTIME_H
 			do
 				echo "${var}='`eval echo \$\{${var}\}`'"
@@ -181,30 +180,6 @@ do
 		esac
 		;;
 
-	12)
-		if [ ".${var1}" = . ]
-		then
-			echo "If your system don't need word allignment for words (like 80386)"
-			echo "compress can use this fact to by faster. If your are not sure type y"
-			echo ${n} "Must words start at a even address (default:${NOALLIGN}) ? ${c}"
-			read var1 var2 varr
-		fi
-
-		if [ ".${var2}" = . ]
-		then
-			echo ${n} "Byteorder on your system (default:${BYTEORDER}) ? ${c}"
-			read var2 varr 
-		fi
-
-		case "${var1}" in
-		n|no|N|NO)	var1=no; ;;
-		*)			var1=yes; ;;
-		esac
-
- 		NOALLIGN="${var1:-${NOALLIGN}}"
- 		BYTEORDER="${var2:-${BYTEORDER}}"
-		;;
-
 	d|D)
 		echo "Testing the system to find out what kind of system we have."
 		BINDIR=/usr/bin
@@ -283,41 +258,6 @@ do
 		BYTEORDER="${BYTEORDER:-0000}"
 		echo ${BYTEORDER}
 		rm -f /tmp/sh$$.c a.out
-
-
-		echo ${n} "Test word allignment. Must words be allign: ${c}"
-		cat >/tmp/sh$$.c <<!
-		sig() {exit(1);}
-		main()
-			{
-				int		i;
-				char	bfr1[6];
-				char	bfr2[6];
-				long	test;
-		extern	int		write();
-
-				for (i = 1 ; i <= 15 ; ++i)
-					signal(i, sig);
-	
-				bfr1[0]=' ';bfr1[1]='1';bfr1[2]='2';
-				bfr1[3]='3';bfr1[4]='4';bfr1[5]=' ';
-				bfr2[0]='X';bfr2[1]='X';bfr2[2]='X';
-				bfr2[3]='X';bfr2[4]='X';bfr2[5]='X';
-
-				test = *(long *)(bfr1+1);
-				*(long *)(bfr2+0) = test;
-	
-				if (bfr2[0] == '1' && bfr2[1] == '2' && bfr2[2] == '3' &&
-					bfr2[3] == '4' && bfr2[4] == 'X')
-					write(1, "no", 2);
-
-				return 0;
-			}
-!
-		${CC} /tmp/sh$$.c && NOALLIGN=`( ./a.out ) 2>/dev/null`
-		NOALLIGN="${NOALLIGN:-yes}"
-		echo ${NOALLIGN}
-		rm -f /tmp/sh$$.c a.out core
 
 		echo ${n} "Test if system support symbolic links? ${c}"
 		cat >/tmp/sh$$.c <<!
@@ -441,7 +381,6 @@ do
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} -DBYTEORDER=${BYTEORDER}"
-		[ "${NOALLIGN}" = no ] && options="${options} -DNOALLIGN=1"
 		options="${options} ${EXTRA}"
 
 		echo ""
@@ -471,7 +410,6 @@ do
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} -DBYTEORDER=${BYTEORDER}"
-		[ "${NOALLIGN}" = no ] && options="${options} -DNOALLIGN=1"
 		options="${options} ${EXTRA}"
 
 		echo ""
@@ -624,7 +562,6 @@ do
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} -DBYTEORDER=${BYTEORDER}"
-		[ "${NOALLIGN}" = no ] && options="${options} -DNOALLIGN=1"
 		options="${options} ${EXTRA}"
 
 		cat - <<! >Makefile
@@ -649,7 +586,6 @@ MANDIR=${MANDIR}
 #	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
 #	-DBYTEORDER=<order>			Byte order (default: unknown).
-#	-DNOALLIGN=1				Data word allignment (default: yes).
 #	-DMAXSEG_64K=1 -BITS=16		Support segment processsor like 80286.
 #
 options=${options}

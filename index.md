@@ -13,7 +13,7 @@ Also note that all existing patents on the LZW algorithm have
 
 # Status
 
-The master branch is tracking the 5.x release series.
+The main branch is tracking the 5.x release series.
 
 We will always support the output of older compress versions (including the
 compress-2.0 format), and we will never produce files that compress-3.0 is

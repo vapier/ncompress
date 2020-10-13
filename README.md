@@ -39,7 +39,7 @@ all options (option genmake).
 
 # Support
 
-[![Build Status](https://travis-ci.org/vapier/ncompress.svg?branch=master)](https://travis-ci.org/vapier/ncompress)
+[![Build Status](https://travis-ci.org/vapier/ncompress.svg?branch=main)](https://travis-ci.org/vapier/ncompress)
 
 Send comments, complaints and especially patches relating to
     https://github.com/vapier/ncompress/issues

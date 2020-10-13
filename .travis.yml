@@ -5,18 +5,8 @@ language: c
 
 matrix:
   include:
-    - os: osx
-      compiler: clang
-
     - os: windows
       compiler: clang
-
-    - os: linux
-      arch: amd64
-      compiler: clang
-    - os: linux
-      arch: amd64
-      compiler: gcc
 
     - os: linux
       arch: arm64

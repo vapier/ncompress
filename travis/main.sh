@@ -16,6 +16,7 @@ build_windows() {
 	v ${CC} -o compress \
 		-Wall \
 		-DNOFUNCDEF -DUSERMEM=800000 -DREGISTERS=3 \
+		-D_CRT_SECURE_NO_WARNINGS \
 		compress.c
 	# The tests currently fail on Windows.  No idea why.
 	./tests/runtests.sh || :

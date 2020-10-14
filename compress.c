@@ -155,6 +155,8 @@
 #	include	<dirent.h>
 #	define RECURSIVE 1
 #	include	<unistd.h>
+#else
+#	include	<io.h>
 #endif
 
 #ifdef UTIME_H

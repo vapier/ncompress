@@ -201,7 +201,7 @@
 static inline access(const char *pathname, int mode)
 {
 	struct stat st;
-	return lstat(pathname, &st) == 0;
+	return lstat(pathname, &st);
 }
 #endif
 

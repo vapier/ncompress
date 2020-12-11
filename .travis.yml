@@ -21,5 +21,12 @@ matrix:
     - os: linux
       arch: s390x
       compiler: gcc
+    - os: linux
+      arch: ppc64le
+      compiler: clang
+    - os: linux
+      arch: ppc64le
+      compiler: gcc
+
 
 script: ./travis/main.sh

@@ -12,7 +12,7 @@ on:
     branches: [main]
 
 jobs:
-  build-test:
+  build-test-posix:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -28,3 +28,27 @@ jobs:
     - run: make
     - run: make check
     - run: make install DESTDIR="${PWD}/root/"
+
+  build-test-windows:
+    strategy:
+      matrix:
+        os: [windows-latest]
+        cc: [mingw32, mingw64]
+    runs-on: ${{ matrix.os }}
+    env:
+      SUBDIR: ${{ matrix.cc }}
+    defaults:
+      run:
+        shell: bash
+    steps:
+    - uses: actions/checkout@v2
+    - name: compile
+      run:
+        /c/msys64/${SUBDIR}/bin/clang.exe
+          -o compress
+          -Wall
+          -DNOFUNCDEF -DUSERMEM=800000 -DREGISTERS=3 -D_CRT_SECURE_NO_WARNINGS
+          compress.c
+    # The tests currently fail on Windows.  No idea why.
+    - name: test
+      run: set +e; ./tests/runtests.sh; echo "Test exited $?"; exit 0

@@ -12,7 +12,7 @@ on:
     branches: [main]
 
 jobs:
-  build-test:
+  build-test-posix:
     strategy:
       matrix:
         os: [ubuntu-latest, macos-latest]
@@ -28,3 +28,21 @@ jobs:
     - run: make
     - run: make check
     - run: make install DESTDIR="${PWD}/root/"
+
+  build-test-windows:
+    strategy:
+      matrix:
+        os: [windows-latest]
+        cc: [clang]
+    runs-on: ${{ matrix.os }}
+    env:
+      CC: ${{ matrix.cc }}.exe
+    steps:
+    - uses: actions/checkout@v2
+    - name: compile
+      run: ${CC} -o compress \
+             -Wall \
+             -DNOFUNCDEF -DUSERMEM=800000 -DREGISTERS=3 \
+             -D_CRT_SECURE_NO_WARNINGS \
+             compress.c
+    - run: ./tests/runtests.sh

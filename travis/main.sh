@@ -10,18 +10,6 @@ build_make() {
 
 build_linux() { build_make; }
 
-build_osx() { build_make; }
-
-build_windows() {
-	v ${CC} -o compress \
-		-Wall \
-		-DNOFUNCDEF -DUSERMEM=800000 -DREGISTERS=3 \
-		-D_CRT_SECURE_NO_WARNINGS \
-		compress.c
-	# The tests currently fail on Windows.  No idea why.
-	./tests/runtests.sh || :
-}
-
 main() {
 	"build_${TRAVIS_OS_NAME}"
 }

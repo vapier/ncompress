@@ -192,6 +192,8 @@
 #	define strdup _strdup
 #	define unlink _unlink
 #	define write _write
+#else
+#	define setmode(fd, mode) 0
 #endif
 
 #ifndef	LSTAT
@@ -734,6 +736,9 @@ nextarg:	continue;
 			exit_code = 0;
 			remove_ofname = 0;
 
+			setmode(0, O_BINARY);
+			setmode(1, O_BINARY);
+
 			if (do_decomp == 0)
 			{
 				compress(0, 1);
@@ -1004,6 +1009,7 @@ comprexx(fileptr)
 			else
 			{
 				fdout = 1;
+				setmode(fdout, O_BINARY);
 				remove_ofname = 0;
 			}
 

@@ -184,7 +184,7 @@
 #	define	utime(pathname, times) 0
 #endif
 
-#if defined(WINDOWS)
+#if defined(MINGW) || defined(WINDOWS)
 #	define isatty(fd) 0
 #	define open _open
 #	define close _close

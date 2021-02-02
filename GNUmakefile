@@ -21,7 +21,11 @@ check:
 	./tests/runtests.sh
 
 PN = ncompress
-PV = $(shell awk '{print $$NF; exit}' Changes)
+PV := $(shell awk '{print $$NF; exit}' Changes)
+PATCHVER := $(shell sed -n '1{s:.* ::;s:".*::;p}' patchlevel.h)
+ifneq ($(PV),$(PATCHVER))
+$(error Changes has version $(PV) but patchlevel.h has $(PATCHVER))
+endif
 P = $(PN)-$(PV)
 dist:
 	git archive --prefix=$(P)/ HEAD | gzip -9 > $(P).tar.gz

@@ -409,6 +409,7 @@ int 			silent = 0;			/* don't tell me about errors					*/
 int 			quiet = 1;			/* don't tell me about compression 				*/
 int				do_decomp = 0;		/* Decompress mode								*/
 int				force = 0;			/* Force overwrite of files and links			*/
+int				keep = 0;			/* Keep input files								*/
 int				nomagic = 0;		/* Use a 3-byte magic number header,			*/
 									/* unless old file 								*/
 int				maxbits = BITS;		/* user settable max # bits/code 				*/
@@ -631,6 +632,7 @@ main(argc, argv)
      	 * -d => do_decomp
      	 * -v => unquiet
      	 * -f => force overwrite of output file
+		 * -k => keep input files
      	 * -n => no header: useful to uncompress old files
      	 * -b maxbits => maxbits.  If -b is specified, then maxbits MUST be given also.
      	 * -c => cat all output to stdout
@@ -669,6 +671,10 @@ main(argc, argv)
 
 			    	case 'd':
 						do_decomp = 1;
+						break;
+
+					case 'k':
+						keep = 1;
 						break;
 
 			    	case 'f':
@@ -774,6 +780,7 @@ Usage: %s [-dfhvcVr] [-b maxbits] [--] [path ...]\n\
   --   Halt option processing and treat all remaining args as paths.\n\
   -d   If given, decompression is done instead.\n\
   -c   Write output on stdout, don't remove original.\n\
+  -k   Keep input files (do not automatically remove).\n\
   -b   Parameter limits the max number of bits/code.\n\
   -f   Forces output file to be generated, even if one already.\n\
        exists, and even if no space is saved by compressing.\n\
@@ -1099,7 +1106,7 @@ comprexx(fileptr)
 
 					remove_ofname = 0;
 
-					if (unlink(ifname))	/* Remove input file */
+					if (!keep && unlink(ifname))	/* Remove input file */
 					{
 						fprintf(stderr, "\nunlink error (ignored) ");
 	    				perror(ifname);

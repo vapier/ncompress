@@ -7,6 +7,8 @@ compress, uncompress, zcat \- compress and expand data
 [
 .B \-f
 ] [
+.B \-k
+] [
 .B \-v
 ] [
 .B \-c
@@ -27,6 +29,8 @@ compress, uncompress, zcat \- compress and expand data
 .B uncompress
 [
 .B \-f
+] [
+.B \-k
 ] [
 .B \-v
 ] [
@@ -86,6 +90,12 @@ file without the
 .B "\&.Z."
 The uncompressed file will have the mode, ownership and
 timestamps of the compressed file.
+.PP
+The
+.B \-k
+option makes
+.I compress/uncompress
+keep the input files instead of automatically removing them.
 .PP
 The
 .B \-c

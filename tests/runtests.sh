@@ -166,4 +166,12 @@ uncompress i
 compress i
 uncompress i.Z
 
+: "### Check keep option"
+compress -k i
+[ -e i -a -e i.Z ]
+rm i
+uncompress -k i
+[ -e i -a -e i.Z ]
+rm i.Z
+
 : "### All passed!"

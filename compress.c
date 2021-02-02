@@ -770,20 +770,20 @@ void
 Usage(int status)
 	{
 		fprintf(status ? stderr : stdout, "\
-Usage: %s [-dfhvcVr] [-b maxbits] [--] [file ...]\n\
-       -d   If given, decompression is done instead.\n\
-       -c   Write output on stdout, don't remove original.\n\
-       -b   Parameter limits the max number of bits/code.\n", progname);
-		fprintf(status ? stderr : stdout, "\
-       -f   Forces output file to be generated, even if one already.\n\
-            exists, and even if no space is saved by compressing.\n\
-            If -f is not used, the user will be prompted if stdin is.\n\
-            a tty, otherwise, the output file will not be overwritten.\n\
-       -h   This help output.\n\
-       -v   Write compression statistics.\n\
-       -V   Output version and compile options.\n\
-       -r   Recursive. If a filename is a directory, descend\n\
-            into it and compress everything in it.\n");
+Usage: %s [-dfhvcVr] [-b maxbits] [--] [path ...]\n\
+  --   Halt option processing and treat all remaining args as paths.\n\
+  -d   If given, decompression is done instead.\n\
+  -c   Write output on stdout, don't remove original.\n\
+  -b   Parameter limits the max number of bits/code.\n\
+  -f   Forces output file to be generated, even if one already.\n\
+       exists, and even if no space is saved by compressing.\n\
+       If -f is not used, the user will be prompted if stdin is.\n\
+       a tty, otherwise, the output file will not be overwritten.\n\
+  -h   This help output.\n\
+  -v   Write compression statistics.\n\
+  -V   Output version and compile options.\n\
+  -r   Recursive. If a path is a directory, compress everything in it.\n",
+			progname);
 
     		exit(status);
 	}

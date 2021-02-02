@@ -193,7 +193,10 @@
 #	define unlink _unlink
 #	define write _write
 #else
-#	define setmode(fd, mode) 0
+static inline int setmode(int fd, int mode)
+{
+	return 0;
+}
 #endif
 
 #ifndef	LSTAT

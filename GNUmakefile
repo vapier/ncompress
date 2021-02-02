@@ -22,7 +22,7 @@ check:
 
 PN = ncompress
 PV := $(shell awk '{print $$NF; exit}' Changes)
-PATCHVER := $(shell sed -n '1{s:.* ::;s:".*::;p}' patchlevel.h)
+PATCHVER := $(shell awk '{print $$NF; exit}' patchlevel.h | cut -d\" -f1)
 ifneq ($(PV),$(PATCHVER))
 $(error Changes has version $(PV) but patchlevel.h has $(PATCHVER))
 endif

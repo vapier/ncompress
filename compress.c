@@ -193,10 +193,8 @@
 #	define unlink _unlink
 #	define write _write
 #else
-static inline int setmode(int fd, int mode)
-{
-	return 0;
-}
+/* NB: macOS has a setmode() that is different from Windows. */
+#	define setmode(fd, mode)
 #endif
 
 #ifndef	LSTAT

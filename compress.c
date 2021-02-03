@@ -402,6 +402,24 @@ union	bytes
 							(o) += (n);										\
 						}
 
+#define reset_n_bits_for_compressor(n_bits, stcode, free_ent, extcode, maxbits) {	\
+	n_bits = INIT_BITS;								\
+	stcode = 1;									\
+	free_ent = FIRST;								\
+	extcode = MAXCODE(n_bits);							\
+	if (n_bits < maxbits)								\
+		extcode++;								\
+}
+
+#define reset_n_bits_for_decompressor(n_bits, bitmask, maxbits, maxcode, maxmaxcode) {	\
+	n_bits = INIT_BITS;								\
+	bitmask = (1<<n_bits)-1;							\
+	if (n_bits == maxbits)								\
+		maxcode = maxmaxcode;							\
+	else										\
+		maxcode = MAXCODE(n_bits)-1;						\
+}
+
 char			*progname;			/* Program name									*/
 int 			silent = 0;			/* don't tell me about errors					*/
 int 			quiet = 1;			/* don't tell me about compression 				*/
@@ -1250,9 +1268,7 @@ compress(fdin, fdout)
 
 		ratio = 0;
 		checkpoint = CHECK_GAP;
-		extcode = MAXCODE(n_bits = INIT_BITS)+1;
-		stcode = 1;
-		free_ent = FIRST;
+		reset_n_bits_for_compressor(n_bits, stcode, free_ent, extcode, maxbits);
 
 		memset(outbuf, 0, sizeof(outbuf));
 		bytes_out = 0; bytes_in = 0;
@@ -1322,9 +1338,7 @@ compress(fdin, fdout)
 						output(outbuf,outbits,CLEAR,n_bits);
 						boff = outbits = (outbits-1)+((n_bits<<3)-
 								  	((outbits-boff-1+(n_bits<<3))%(n_bits<<3)));
-						extcode = MAXCODE(n_bits = INIT_BITS)+1;
-						free_ent = FIRST;
-						stcode = 1;
+						reset_n_bits_for_compressor(n_bits, stcode, free_ent, extcode, maxbits);
 					}
 				}
 
@@ -1518,8 +1532,7 @@ decompress(fdin, fdout)
 		maxmaxcode = MAXCODE(maxbits);
 
 		bytes_in = insize;
-	    maxcode = MAXCODE(n_bits = INIT_BITS)-1;
-		bitmask = (1<<n_bits)-1;
+		reset_n_bits_for_decompressor(n_bits, bitmask, maxbits, maxcode, maxmaxcode);
 		oldcode = -1;
 		finchar = 0;
 		outpos = 0;
@@ -1598,8 +1611,7 @@ resetbuf:	;
 	    			free_ent = FIRST - 1;
 					posbits = ((posbits-1) + ((n_bits<<3) -
 								(posbits-1+(n_bits<<3))%(n_bits<<3)));
-				    maxcode = MAXCODE(n_bits = INIT_BITS)-1;
-					bitmask = (1<<n_bits)-1;
+					reset_n_bits_for_decompressor(n_bits, bitmask, maxbits, maxcode, maxmaxcode);
 					goto resetbuf;
 				}
 

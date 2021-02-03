@@ -174,4 +174,9 @@ uncompress -k i
 [ -e i -a -e i.Z ]
 rm i.Z
 
+: "### Check nine bits on large input"
+compress -b 9 <$COMPRESS >input.Z
+uncompress -c input.Z >input.new
+cmp $COMPRESS input.new
+
 : "### All passed!"

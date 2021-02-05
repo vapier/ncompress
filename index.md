@@ -146,16 +146,17 @@ been widely integrated into other projects.
   [sourceforge.net](https://sf.net/p/ncompress/).  It is based on the v4.2.4
   release and aims to unify patches distros have been carrying for years.
   A public [VCS] repository using [Subversion] is used for development.
-* 29 Sep 2006: Mike Frysinger releases v4.2.4.1.
-* 07 Sep 2007: Mike Frysinger releases v4.2.4.2.
+* 29 Sep 2006: Mike Frysinger releases [v4.2.4.1].
+* 07 Sep 2007: Mike Frysinger releases [v4.2.4.2].
 * 29 Jan 2010: [VCS] is migrated to [Git].
-* 29 Jan 2010: Mike Frysinger releases v4.2.4.3.
-* 09 Sep 2010: Mike Frysinger releases v4.2.4.4.
+* 29 Jan 2010: Mike Frysinger releases [v4.2.4.3].
+* 09 Sep 2010: Mike Frysinger releases [v4.2.4.4].
 * 24 Jun 2015: Mike Frysinger moves
   [hosting to GitHub](https://github.com/vapier/ncompress/).
-* 04 Jan 2019: Mike Frysinger releases v4.2.4.5.
-* 30 Dec 2019: Mike Frysinger releases v4.2.4.6.
-* 05 Jan 2020: Mike Frysinger switches to v5.0 series.
+* 04 Jan 2019: Mike Frysinger releases [v4.2.4.5].
+* 30 Dec 2019: Mike Frysinger releases [v4.2.4.6].
+* 05 Jan 2020: Mike Frysinger switches to v5.x series.
+* 02 Feb 2021: Mike Frysinger releases [v5.0].
 
 [1.4]: https://groups.google.com/d/topic/net.sources/fonve4JCDpQ/discussion
 [1.6]: https://groups.google.com/d/topic/net.sources/mXX0Ic7sPgg/discussion
@@ -169,6 +170,13 @@ been widely integrated into other projects.
 [4.3-dead]: https://groups.google.com/d/msg/comp.sources.bugs/nsa_VVpnkJs/96p7OirdHg4J
 [confuse1]: https://groups.google.com/d/msg/comp.sources.bugs/Qh9Fol0By_k/mY2GDjjiulQJ
 [confuse2]: https://groups.google.com/d/topic/comp.sources.bugs/nsa_VVpnkJs/discussion
+[v4.2.4.1]: https://github.com/vapier/ncompress/releases/tag/v4.2.4.1
+[v4.2.4.2]: https://github.com/vapier/ncompress/releases/tag/v4.2.4.2
+[v4.2.4.3]: https://github.com/vapier/ncompress/releases/tag/v4.2.4.3
+[v4.2.4.4]: https://github.com/vapier/ncompress/releases/tag/v4.2.4.4
+[v4.2.4.5]: https://github.com/vapier/ncompress/releases/tag/v4.2.4.5
+[v4.2.4.6]: https://github.com/vapier/ncompress/releases/tag/v4.2.4.6
+[v5.0]: https://github.com/vapier/ncompress/releases/tag/v5.0
 [walnut-iso]: https://archive.org/details/CDROM_March92
 
 [A Technique for High Performance Data Compression]: https://www.cs.duke.edu/courses/spring03/cps296.5/papers/welch_1984_technique_for.pdf

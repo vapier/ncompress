@@ -84,6 +84,8 @@
 
 (N)compress version 4.2.3
 	* Comp.source.reveiwed release.
+	* Optimise compress and decompress function and a lot of cleanups.
+	* New fast hash algoritme added (if more than 800Kb available).
 
 (N)compress version 4.2.2
 	Minor changes after the reviewes from comp.sources.reviewed
@@ -104,15 +106,15 @@ compress version 4.2.1 improvements
 	* Completly rewrite of the compress and decompress functions.
 	  compress speedup 25-50% (user cpu time).
 	  decompress speedup 20-30% (user cpu time).
-    o Add special fast compress hash algorithm.
+	* Add special fast compress hash algorithm.
 	* Fix some minor things.
 	* use #include <utime.h> if availble.
 	* Cleanup the source code (I think so).
 	* Test if filename is not to long. This is done on runtime no fix length
-      size any more.
+	  size any more.
 	* Powerfull build script (test almost every thing).
 
-Modifications for version 4.1: 
+Modifications for version 4.1:
 	* Added -r command line flag to allow recursive compression/
 	  decompression of directory trees. As a side-effect, compress
 	  no longer tries to compress/decompress anything that isn't
@@ -146,6 +148,7 @@ Compress version 4.0 improvements:
 	* Added #defines for SIGNED_COMPARE_SLOW
 	* Added Makefile and "usermem" program
 	* Removed all floating point computations
+	* Removed ferror() calls in output routine on every output except first
 	* New programs:
 		compressdir - compress all files on a directory
 		uncompressdir - uncompress all files on a directory
@@ -157,7 +160,127 @@ Compress version 4.0 improvements:
 		tarmail - tar, compress, btoa, and mail files
 		untarmail - restore "tarmail" files
 
-		WARNING: These last few programs are not compatible 
+		WARNING: These last few programs are not compatible
 		with the original ones from the net.  The encoding
 		has changed.  See btoa.c for more info.
 
+Compress version 3.6:
+	* Remove much wasted storage by overlaying hash table with the tables
+	  used by decompress: tab_suffix[1<<BITS], stack[8000].
+	* Updated USERMEM computations.
+	* Fixed dump_tab() DEBUG routine.
+
+Compress version 3.5:
+	* Change hash function to use exclusive-or.
+	* Rip out hash cache.
+	* These speedups render the megamemory version defunct, for now.
+	* Make decoder stack global.
+	* Parts of the RCS trunks 2.7, 2.6, and 2.1 no longer apply.
+
+Compress version 3.4:
+	* Get rid of all floating-point calculations by doing all compression ratio
+	  calculations in fixed point.
+
+Compress version 3.3:
+	* Incorporate portability suggestion for M_XENIX.
+	* Got rid of text on #else and #endif lines.
+	* Cleaned up #ifdefs for vax and interdata.
+
+Compress version 3.2:
+	* Incorporate portability suggestions for Z8000, IBM PC/XT from mailing list.
+	* Default to "quiet" output (no compression statistics).
+
+Compress version 3.1:
+	* Integrate decompress() stack speedups (from early pointer mods by McKie).
+	* Repair multi-file USERMEM gaffe.
+	* Unify 'force' flags to mimic semantics of SVR2 'pack'.
+	* Streamline block-compress table clear logic.
+	* Increase output byte count by magic number size.
+
+Compress version 3.0:
+	* Set HSIZE depending on BITS.
+	* Set BITS depending on USERMEM.
+	* Unrolled loops in clear routines.
+	* Added "-C" flag for 2.0 compatibility.
+	* Used unsigned compares on Perkin-Elmer.
+	* Fixed foreground check.
+
+Compress version 2.7:
+	* Cache common hash codes based on input statistics; this improves
+	  performance for low-density raster images.
+	* Pass on #ifdef bundle from Turkowski.
+
+Compress version 2.6:
+	* Vary size of hash tables to reduce time for small files.
+	* Tune PDP-11 hash function.
+
+Compress version 2.5:
+	* Junk chaining; replace with the simpler (and, on the VAX, faster)
+	  double hashing, discussed within.
+	* Make block compression standard.
+
+Compress version 2.4:
+	* Introduce adaptive reset for block compression, to boost the rate
+	  another several percent.  (See mailing list notes.)
+
+Compress version 2.3:
+	* Implemented "-B" block compress.
+	* Implemented REVERSE sorting of tab_next.
+	* Bug fix for last bits.
+	* Changed fwrite to putchar loop everywhere.
+
+Compress version 2.2:
+	* Fold in news changes, small machine typedef from thomas,
+	* #ifdef interdata from joe.
+
+Compress version 2.1:
+	* Configured fast table lookup for 32-bit machines.
+	* This cuts user time in half for b <= FBITS, and is useful for news
+	* batching from VAX to PDP sites.
+	* Also sped up decompress() [fwrite->putc] and added signal catcher
+	  [plus beef in write_error()] to delete effluvia.
+
+Compress version 2.0:
+	* Add check for foreground before prompting user.
+	* Insert maxbits into compressed file.
+	* Force file being uncompressed to end with ".Z".
+	* Added "-c" flag and "zcat".
+	* Prepared for release.
+
+Compress version 1.10:
+	* Will only compress regular files (no directories).
+	* Added a magic number header.
+	* Plus an undocumented -n flag to handle old files without headers.
+	* Added -f flag to force overwriting of possibly existing destination file,
+	  otherwise the user is prompted for a response.
+	* Will tack on a .Z to a filename if it doesn't have one when decompressing.
+	* Will only replace file if it was compressed.
+
+Compress version 1.9:
+	* Removed scanargs() & getopt().
+	* Added .Z extension and unlimited number of filenames to compress.
+	* Flags may be clustered (-Ddvb12) or separated (-D -d -v -b 12), or
+	  combination thereof.
+	* Modes and other status is copied with copystat().
+	* -O bug for 4.2 seems to have disappeared with 1.8.
+
+Compress version 1.8:
+	* Made it compatible with vax version, installed jim's fixes/enhancements.
+
+Compress version 1.6:
+	* Sped up algorithm significantly by sorting the compress chain.
+
+Compress version 1.5:
+	* Added C version of vax asm routines.
+	* Changed structure to arrays to save much memory.
+	* Do unsigned compares where possible (faster on Perkin-Elmer).
+
+Compress version 1.4:
+	* Clean up the code a little and lint it.  (Lint complains about all
+	  the regs used in the asm, but I'm not going to "fix" this.)
+
+Compress version 1.3:
+	* Minor fixes.
+
+Compress version 1.2:
+	* Add variable bit length output.

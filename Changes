@@ -1,3 +1,6 @@
+(N)compress version 5.1
+	* Fix nine bits processing
+
 (N)compress version 5.0
 	* New stream for cleanups
 	* Drop support for 2.0 output & -C option

@@ -49,12 +49,6 @@
 	};
 #endif
 
-#ifdef	__STDC__
-#	define	ARGS(a)				a
-#else
-#	define	ARGS(a)				()
-#endif
-
 #ifndef SIG_TYPE
 #	define	SIG_TYPE	void (*)()
 #endif
@@ -365,17 +359,16 @@ unsigned short	codetab[HSIZE];
 	} ;
 #endif
 
-int  	main			ARGS((int,char **));
-void  	Usage			ARGS((int));
-void  	comprexx		ARGS((const char *));
-void  	compdir			ARGS((char *));
-void  	compress		ARGS((int,int));
-void  	decompress		ARGS((int,int));
-void  	read_error		ARGS((void));
-void  	write_error		ARGS((void));
-void 	abort_compress	ARGS((void));
-void  	prratio			ARGS((FILE *,long,long));
-void  	about			ARGS((void));
+void  	Usage			(int);
+void  	comprexx		(const char *);
+void  	compdir			(char *);
+void  	compress		(int, int);
+void  	decompress		(int, int);
+void  	read_error		(void);
+void  	write_error		(void);
+void 	abort_compress	(void);
+void  	prratio			(FILE *, long, long);
+void  	about			(void);
 
 /*****************************************************************
  * TAG( main )
@@ -418,9 +411,7 @@ void  	about			ARGS((void));
  *   procedure needs no input table, but tracks the way the table was built.
  */ 
 int
-main(argc, argv)
-	int 	 argc;
-	char	*argv[];
+main(int argc, char *argv[])
 	{
 		char **filelist;
 		char **fileptr;
@@ -632,8 +623,7 @@ Usage: %s [-dfhvcVr] [-b maxbits] [--] [path ...]\n\
 	}
 
 void
-comprexx(fileptr)
-	const char	*fileptr;
+comprexx(const char	*fileptr)
 	{
 		int				 fdin = -1;
 		int				 fdout = -1;
@@ -982,8 +972,7 @@ error:
 
 #ifdef	RECURSIVE
 void
-compdir(dir)
-	char	*dir;
+compdir(char *dir)
 	{
 		struct dirent *dp;
 		DIR *dirp;
@@ -1059,9 +1048,7 @@ compdir(dir)
  * questions about this implementation to ames!jaw.
  */
 void
-compress(fdin, fdout)
-	int		fdin;
-	int		fdout;
+compress(int fdin, int fdout)
 	{
 		long hp;
 		int rpos;
@@ -1294,9 +1281,7 @@ endlop:			if (fcode.e.ent >= FIRST && rpos < rsize)
  */
 
 void
-decompress(fdin, fdout)
-	int		fdin;
-	int		fdout;
+decompress(int fdin, int fdout)
 	{
 		char_type *stackp;
 		code_int code;
@@ -1519,7 +1504,7 @@ resetbuf:	;
 	}
 
 void
-read_error()
+read_error(void)
 	{
 		fprintf(stderr, "\nread error on");
 	    perror((ifname[0] != '\0') ? ifname : "stdin");
@@ -1527,7 +1512,7 @@ read_error()
 	}
 
 void
-write_error()
+write_error(void)
 	{
 		fprintf(stderr, "\nwrite error on");
 	    perror(ofname ? ofname : "stdout");
@@ -1535,7 +1520,7 @@ write_error()
 	}
 
 void
-abort_compress()
+abort_compress(void)
 	{
 		if (remove_ofname)
 	    	unlink(ofname);
@@ -1544,10 +1529,7 @@ abort_compress()
 	}
 
 void
-prratio(stream, num, den)
-	FILE		*stream;
-	long int	 num;
-	long int	 den;
+prratio(FILE *stream, long int num, long int den)
 	{
 		int q;			/* Doesn't need to be long */
 
@@ -1571,7 +1553,7 @@ prratio(stream, num, den)
 	}
 
 void
-about()
+about(void)
 	{
 		printf("Compress version: %s\n", version_id);
 		printf("Compile options:\n        ");

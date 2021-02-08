@@ -1,4 +1,5 @@
 (N)compress version 5.1
+	* Use modern standard C function prototypes
 	* Drop support for MAXSEG_64K
 	* Fix nine bits processing
 

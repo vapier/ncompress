@@ -131,18 +131,12 @@ static inline int access(const char *pathname, int mode)
 #	define USERMEM 	450000	/* default user memory */
 #endif
 
-#ifndef	BYTEORDER
-#	define	BYTEORDER	0000
-#endif
-
 /*
  * machine variants which require cc -Dmachine:  pdp11, z8000, DOS
  */
 
 #ifdef	DOS			/* PC/XT/AT (8088) processor									*/
 #	define	BITS   16	/* 16-bits processor max 12 bits							*/
-#	undef	BYTEORDER
-#	define	BYTEORDER 	4321
 #endif /* DOS */
 
 #ifndef	O_BINARY
@@ -222,39 +216,6 @@ typedef	unsigned char	char_type;
 
 #define MAXCODE(n)	(1L << (n))
 
-union	bytes
-{
-	long	word;
-	struct
-	{
-#if BYTEORDER == 4321
-		char_type	b1;
-		char_type	b2;
-		char_type	b3;
-		char_type	b4;
-#else
-#if BYTEORDER == 1234
-		char_type	b4;
-		char_type	b3;
-		char_type	b2;
-		char_type	b1;
-#else
-#	undef	BYTEORDER
-		int				dummy;
-#endif
-#endif
-	} bytes;
-} ;
-#ifdef BYTEORDER
-#define	output(b,o,c,n)	{	char_type	*p = &(b)[(o)>>3];					\
-							union bytes i;									\
-							i.word = ((long)(c))<<((o)&0x7);				\
-							p[0] |= i.bytes.b1;								\
-							p[1] |= i.bytes.b2;								\
-							p[2] |= i.bytes.b3;								\
-							(o) += (n);										\
-						}
-#else
 #define	output(b,o,c,n)	{	char_type	*p = &(b)[(o)>>3];					\
 							long		 i = ((long)(c))<<((o)&0x7);		\
 							p[0] |= (char_type)(i);							\
@@ -262,7 +223,6 @@ union	bytes
 							p[2] |= (char_type)(i>>16);						\
 							(o) += (n);										\
 						}
-#endif
 #define	input(b,o,c,n,m){	char_type 		*p = &(b)[(o)>>3];				\
 							(c) = ((((long)(p[0]))|((long)(p[1])<<8)|		\
 									 ((long)(p[2])<<16))>>((o)&0x7))&(m);	\

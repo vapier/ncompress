@@ -24,7 +24,6 @@ MANDIR=$(PREFIX)/share/man/man1
 #	-DUSERMEM=<size>			Available memory for compress (default 800k).
 #	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
-#	-DBYTEORDER=<order>			Byte order (default: unknown).
 #
 options= $(CFLAGS) $(CPPFLAGS) -DUSERMEM=800000
 

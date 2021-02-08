@@ -46,7 +46,7 @@ do
 		(
 			echo "# Current parameters."
 			for var in CC CCOPT LBOPT BINDIR MANDIR IBUFSIZ \
-						OBUFSIZ USERMEM LSTAT BYTEORDER \
+						OBUFSIZ USERMEM LSTAT \
 						EXTRA DEFINED UTIME_H
 			do
 				echo "${var}='`eval echo \$\{${var}\}`'"
@@ -242,23 +242,6 @@ do
 		OBUFSIZ=${IBUFSIZ}
 		echo "${IBUFSIZ}"
 
-		echo ${n} "Test byte order of system: ${c}"
-		cat >/tmp/sh$$.c <<!
-		main()
-			{
-				long	test;
-		extern	int		write();
-		
-				test = 0x31323334L;
-				write(1, (char *)&test, 4);
-				return 0;
-			}
-!
-		${CC} /tmp/sh$$.c && BYTEORDER=`./a.out`
-		BYTEORDER="${BYTEORDER:-0000}"
-		echo ${BYTEORDER}
-		rm -f /tmp/sh$$.c a.out
-
 		echo ${n} "Test if system support symbolic links? ${c}"
 		cat >/tmp/sh$$.c <<!
 		main()
@@ -323,7 +306,6 @@ do
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
-		options="${options} -DBYTEORDER=${BYTEORDER}"
 		options="${options} ${EXTRA}"
 
 		echo ""
@@ -352,7 +334,6 @@ do
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
-		options="${options} -DBYTEORDER=${BYTEORDER}"
 		options="${options} ${EXTRA}"
 
 		echo ""
@@ -504,7 +485,6 @@ do
 		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
-		options="${options} -DBYTEORDER=${BYTEORDER}"
 		options="${options} ${EXTRA}"
 
 		cat - <<! >Makefile
@@ -528,7 +508,6 @@ MANDIR=${MANDIR}
 #	-DUSERMEM=<size>			Availble memory for compress (default 800k).
 #	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
-#	-DBYTEORDER=<order>			Byte order (default: unknown).
 #
 options=${options}
 

@@ -147,9 +147,6 @@ static inline int access(const char *pathname, int mode)
 
 #ifdef	DOS			/* PC/XT/AT (8088) processor									*/
 #	define	BITS   16	/* 16-bits processor max 12 bits							*/
-#	if BITS == 16
-#		define	MAXSEG_64K
-#	endif
 #	undef	BYTEORDER
 #	define	BYTEORDER 	4321
 #endif /* DOS */
@@ -159,12 +156,8 @@ static inline int access(const char *pathname, int mode)
 #endif
 
 #ifdef M_XENIX			/* Stupid compiler can't handle arrays with */
-#	if BITS == 16 		/* more than 65535 bytes - so we fake it */
-# 		define MAXSEG_64K
-#	else
 #	if BITS > 13			/* Code only handles BITS = 12, 13, or 16 */
 #		define BITS	13
-#	endif
 #	endif
 #endif
 
@@ -198,7 +191,6 @@ static inline int access(const char *pathname, int mode)
 #	define	HMASK	   (HSIZE-1)
 #	define	HPRIME		 9941
 #	define	BITS		   16
-#	undef	MAXSEG_64K
 #else
 #	if BITS == 16
 #		define HSIZE	69001		/* 95% occupancy */
@@ -326,67 +318,14 @@ int				fgnd_flag = 0;		/* Running in background (SIGINT=SIGIGN)		*/
 long 			bytes_in;			/* Total number of byte from input				*/
 long 			bytes_out;			/* Total number of byte to output				*/
 
-/*
- * 8086 & 80286 Has a problem with array bigger than 64K so fake the array
- * For processors with a limited address space and segments.
- */
-/*
- * To save much memory, we overlay the table used by compress() with those
- * used by decompress().  The tab_prefix table is the same size and type
- * as the codetab.  The tab_suffix table needs 2**BITS characters.  We
- * get this from the beginning of htab.  The output stack uses the rest
- * of htab, and contains characters.  There is plenty of room for any
- * possible stack (stack used to be 8000 characters).
- */
-#ifdef MAXSEG_64K
-	count_int htab0[8192];
-	count_int htab1[8192];
-	count_int htab2[8192];
-	count_int htab3[8192];
-	count_int htab4[8192];
-	count_int htab5[8192];
-	count_int htab6[8192];
-	count_int htab7[8192];
-	count_int htab8[HSIZE-65536];
-	count_int * htab[9] = {htab0,htab1,htab2,htab3,htab4,htab5,htab6,htab7,htab8};
+count_int		htab[HSIZE];
+unsigned short	codetab[HSIZE];
 
-	unsigned short code0tab[16384];
-	unsigned short code1tab[16384];
-	unsigned short code2tab[16384];
-	unsigned short code3tab[16384];
-	unsigned short code4tab[16384];
-	unsigned short * codetab[5] = {code0tab,code1tab,code2tab,code3tab,code4tab};
-
-#	define	htabof(i)			(htab[(i) >> 13][(i) & 0x1fff])
-#	define	codetabof(i)		(codetab[(i) >> 14][(i) & 0x3fff])
-#	define	tab_prefixof(i)		codetabof(i)
-#	define	tab_suffixof(i)		((char_type *)htab[(i)>>15])[(i) & 0x7fff]
-#	define	de_stack			((char_type *)(&htab2[8191]))
-	void	clear_htab()
-	{
-		memset(htab0, -1, sizeof(htab0));
-		memset(htab1, -1, sizeof(htab1));
-		memset(htab2, -1, sizeof(htab2));
-		memset(htab3, -1, sizeof(htab3));
-		memset(htab4, -1, sizeof(htab4));
-		memset(htab5, -1, sizeof(htab5));
-		memset(htab6, -1, sizeof(htab6));
-		memset(htab7, -1, sizeof(htab7));
-		memset(htab8, -1, sizeof(htab8));
-	 }
-#	define	clear_tab_prefixof()	memset(code0tab, 0, 256);
-#else	/* Normal machine */
-	count_int		htab[HSIZE];
-	unsigned short	codetab[HSIZE];
-
-#	define	htabof(i)				htab[i]
-#	define	codetabof(i)			codetab[i]
-#	define	tab_prefixof(i)			codetabof(i)
-#	define	tab_suffixof(i)			((char_type *)(htab))[i]
-#	define	de_stack				((char_type *)&(htab[HSIZE-1]))
-#	define	clear_htab()			memset(htab, -1, sizeof(htab))
-#	define	clear_tab_prefixof()	memset(codetab, 0, 256);
-#endif	/* MAXSEG_64K */
+#define	tab_prefixof(i)			codetab[i]
+#define	tab_suffixof(i)			((char_type *)(htab))[i]
+#define	de_stack				((char_type *)&(htab[HSIZE-1]))
+#define	clear_htab()			memset(htab, -1, sizeof(htab))
+#define	clear_tab_prefixof()	memset(codetab, 0, 256);
 
 #ifdef FAST
 	int primetab[256] =		/* Special secudary hash table.		*/
@@ -1253,7 +1192,7 @@ compress(fdin, fdout)
 				}
 
 				goto next;
-hfound:			fcode.e.ent = codetabof(hp);
+hfound:			fcode.e.ent = codetab[hp];
 next:  			if (rpos >= rlop)
 	   				goto endlop;
 next2: 			fcode.e.c = inbuf[rpos++];
@@ -1263,7 +1202,7 @@ next2: 			fcode.e.c = inbuf[rpos++];
 					fc = fcode.code;
 					hp = (((long)(fcode.e.c)) << (BITS-8)) ^ (long)(fcode.e.ent);
 
-					if ((i = htabof(hp)) == fc)
+					if ((i = htab[hp]) == fc)
 						goto hfound;
 
 					if (i != -1)
@@ -1276,7 +1215,7 @@ next2: 			fcode.e.c = inbuf[rpos++];
 						{
 							if ((hp -= disp) < 0)	hp += HSIZE;
 
-							if ((i = htabof(hp)) == fc)
+							if ((i = htab[hp]) == fc)
 								goto hfound;
 						}
 						while (i != -1);
@@ -1289,18 +1228,18 @@ next2: 			fcode.e.c = inbuf[rpos++];
 					fc = fcode.code;
 					hp = ((((long)(fcode.e.c)) << (HBITS-8)) ^ (long)(fcode.e.ent));
 
-					if ((i = htabof(hp)) == fc)	goto hfound;
+					if ((i = htab[hp]) == fc)	goto hfound;
 					if (i == -1)				goto out;
 
 					p = primetab[fcode.e.c];
 lookup:				hp = (hp+p)&HMASK;
-					if ((i = htabof(hp)) == fc)	goto hfound;
+					if ((i = htab[hp]) == fc)	goto hfound;
 					if (i == -1)				goto out;
 					hp = (hp+p)&HMASK;
-					if ((i = htabof(hp)) == fc)	goto hfound;
+					if ((i = htab[hp]) == fc)	goto hfound;
 					if (i == -1)				goto out;
 					hp = (hp+p)&HMASK;
-					if ((i = htabof(hp)) == fc)	goto hfound;
+					if ((i = htab[hp]) == fc)	goto hfound;
 					if (i == -1)				goto out;
 					goto lookup;
 				}
@@ -1314,8 +1253,8 @@ out:			;
 
 					if (stcode)
 					{
-						codetabof(hp) = (unsigned short)free_ent++;
-						htabof(hp) = fc;
+						codetab[hp] = (unsigned short)free_ent++;
+						htab[hp] = fc;
 					}
 				} 
 
@@ -1641,9 +1580,6 @@ about()
 #endif
 #ifdef SIGNED_COMPARE_SLOW
 		printf("SIGNED_COMPARE_SLOW, ");
-#endif
-#ifdef MAXSEG_64K
-		printf("MAXSEG_64K, ");
 #endif
 #ifdef DOS
 		printf("DOS, ");

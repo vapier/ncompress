@@ -1,4 +1,5 @@
 (N)compress version 5.1
+	* Drop support for MAXSEG_64K
 	* Fix nine bits processing
 
 (N)compress version 5.0

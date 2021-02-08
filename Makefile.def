@@ -25,7 +25,6 @@ MANDIR=$(PREFIX)/share/man/man1
 #	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
 #	-DBYTEORDER=<order>			Byte order (default: unknown).
-#	-DMAXSEG_64K=1 -BITS=16		Support segment processor like 80286.
 #
 options= $(CFLAGS) $(CPPFLAGS) -DUSERMEM=800000
 

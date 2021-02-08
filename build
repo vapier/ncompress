@@ -312,63 +312,6 @@ do
 
 		echo ""
 
-		if [ ${USERMEM} = 0 ]
-		then
-			echo ${n} "Memory size is 0, segmented processor: ${c}"
-			cat >/tmp/sh$$.c <<!
-			long htab0[8192];
-			long htab1[8192];
-			long htab2[8192];
-			long htab3[8192];
-			long htab4[8192];
-			long htab5[8192];
-			long htab6[8192];
-			long htab7[8192];
-			long htab8[8192];
-			short code0tab[16384];
-			short code1tab[16384];
-			short code2tab[16384];
-			short code3tab[16384];
-			short code4tab[16384];
-			main() {return 0;}
-!
-			rm -f ./a.out
-			if ${CC} /tmp/sh$$.c >/dev/null 2>&1 
-			then
-				:
-			else
-				opt="-Ml"
-
-				while [ ".${opt}" != . ]
-				do
-					if ${CC} ${opt} /tmp/sh$$.c >/dev/null 2>&1 
-					then
-						:
-					else
-						CCOPT="${CCOPT} ${opt}"
-						break
-					fi
-
-					echo ${n} "Large model compile option: ${c}"
-					read opt dummy
-				done
-			fi
-
-			if [ -f ./a.out ]
-			then
-				if ./a.out
-				then
-					echo "Yes"
-					MEMSIZE=0
-					EXTRA="${EXTRA} -DMAXSEG_64K=1 -DBITS=16"
-				else
-					echo "No"
-				fi
-			fi
-
-			rm ./a.out /tmp/sh$$.c
-		fi
-
 		DEFINED=yes
 		echo ""
 		echo "I have now create the default options for compiling compress"
@@ -586,7 +529,6 @@ MANDIR=${MANDIR}
 #	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
 #	-DBYTEORDER=<order>			Byte order (default: unknown).
-#	-DMAXSEG_64K=1 -BITS=16		Support segment processsor like 80286.
 #
 options=${options}
 

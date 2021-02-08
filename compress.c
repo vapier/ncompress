@@ -359,16 +359,16 @@ unsigned short	codetab[HSIZE];
 	} ;
 #endif
 
-void  	Usage			(int);
-void  	comprexx		(const char *);
-void  	compdir			(char *);
-void  	compress		(int, int);
-void  	decompress		(int, int);
-void  	read_error		(void);
-void  	write_error		(void);
-void 	abort_compress	(void);
-void  	prratio			(FILE *, long, long);
-void  	about			(void);
+static void Usage(int);
+static void comprexx(const char *);
+static void compdir(char *);
+static void compress(int, int);
+static void decompress(int, int);
+static void read_error(void);
+static void write_error(void);
+static void abort_compress(void);
+static void prratio(FILE *, long, long);
+static void about(void);
 
 /*****************************************************************
  * TAG( main )

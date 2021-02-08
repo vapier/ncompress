@@ -282,7 +282,7 @@ unsigned short	codetab[HSIZE];
 #define	clear_tab_prefixof()	memset(codetab, 0, 256);
 
 #ifdef FAST
-	int primetab[256] =		/* Special secudary hash table.		*/
+static const int primetab[256] =		/* Special secudary hash table.		*/
 	{
     	 1013, -1061, 1109, -1181, 1231, -1291, 1361, -1429,
     	 1481, -1531, 1583, -1627, 1699, -1759, 1831, -1889,

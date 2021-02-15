@@ -11,6 +11,17 @@ The ncompress code is, and will continue to be, released into the
 Also note that all existing patents on the LZW algorithm have
 [expired world-wide](https://en.wikipedia.org/wiki/LZW#Patents).
 
+# Specifications
+
+You can find plenty of info on the LZW algorithm (just use
+[Google](https://www.google.com/search?q=lzw)), but for fun, here's some helpful
+links.
+
+* [LZW Wikipedia Entry][LZW]
+* [LZW Data Compression] by [Mark Nelson]
+* [LZW Encoding Discussion and Implementation](http://michael.dipperstein.com/lzw) by Michael Dipperstein
+* [LZW NIST Reference Page](https://www.nist.gov/dads/HTML/lempelZivWelch.html)
+
 # Status
 
 The main branch is tracking the 5.x release series.
@@ -50,17 +61,6 @@ Please use the [issue tracker][tracker] to contact us for bugs, questions, etc..
 
 Current primary maintainer:
 <a href="mailto:vapier@gmail.com">Mike Frysinger</a>
-
-# Specifications
-
-You can find plenty of info on the LZW algorithm (just use
-[Google](https://www.google.com/search?q=lzw)), but for fun, here's some helpful
-links.
-
-* [LZW Wikipedia Entry][LZW]
-* [LZW Data Compression](https://www.dogma.net/markn/articles/lzw/lzw.htm) by Mark Nelson
-* [LZW Encoding Discussion and Implementation](http://michael.dipperstein.com/lzw) by Michael Dipperstein
-* [LZW NIST Reference Page](https://www.nist.gov/dads/HTML/lempelZivWelch.html)
 
 # History
 
@@ -193,6 +193,8 @@ been widely integrated into other projects.
 [IEEE Computer Vol 17, No 6]: https://ieeexplore.ieee.org/document/1659158
 [LZ78]: https://en.wikipedia.org/wiki/LZ78
 [LZW]: https://en.wikipedia.org/wiki/LZW
+[LZW Data Compression]: https://marknelson.us/posts/2011/11/08/lzw-revisited.html
+[Mark Nelson]: https://marknelson.us/
 [public domain]: https://en.wikipedia.org/wiki/Public_domain
 [U.S. Patent 4,464,650]: https://patents.google.com/patent/US4464650
 [U.S. Patent 4,558,302]: https://patents.google.com/patent/US4558302

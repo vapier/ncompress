@@ -91,36 +91,36 @@
 	* Div. remarks added.
 
 (N)compress version 4.2.3
-	* Comp.source.reveiwed release.
+	* Comp.source.reviewed release.
 	* Optimise compress and decompress function and a lot of cleanups.
 	* New fast hash algoritme added (if more than 800Kb available).
 
 (N)compress version 4.2.2
-	Minor changes after the reviewes from comp.sources.reviewed
+	Minor changes after the reviews from comp.sources.reviewed
 	* Change the name to ncompress because of version problems.
 	* Start all scripts with ':'
-	* Added libary options to buidl script.
+	* Added library options to build script.
 	* Install zmore zcmp zdiff and manuals.
 	* Added patchlevel.h
 	* Updated README file. Created LZW.INFO
 	* a complete grammatical go-round
-	* Use utime.h if availble
+	* Use utime.h if available
 	* Change de default input/output buffer size to BUFSIZ. Because
 	  of performance problems with read a head on systems.
 	* Build generates a makefile.
 
 compress version 4.2.1 improvements
 	* Change the name to ncompress because of version problems.
-	* Completly rewrite of the compress and decompress functions.
+	* Completely rewrite of the compress and decompress functions.
 	  compress speedup 25-50% (user cpu time).
 	  decompress speedup 20-30% (user cpu time).
 	* Add special fast compress hash algorithm.
 	* Fix some minor things.
-	* use #include <utime.h> if availble.
+	* use #include <utime.h> if available.
 	* Cleanup the source code (I think so).
 	* Test if filename is not to long. This is done on runtime no fix length
 	  size any more.
-	* Powerfull build script (test almost every thing).
+	* Powerful build script (test almost every thing).
 
 Modifications for version 4.1:
 	* Added -r command line flag to allow recursive compression/

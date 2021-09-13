@@ -402,7 +402,7 @@ main(int argc, char *argv[])
     	fileptr = filelist;
     	*filelist = NULL;
 
-    	if((progname = strrchr(argv[0], '/')) != 0)
+    	if ((progname = strrchr(argv[0], '/')) != 0)
 			progname++;
 		else
 			progname = argv[0];
@@ -797,7 +797,7 @@ comprexx(const char	*fileptr)
 					goto error;
 		    	}
 
-				if(!quiet)
+				if (!quiet)
 					fprintf(stderr, "%s: ", tempname);
 
 				remove_ofname = 1;
@@ -823,7 +823,7 @@ comprexx(const char	*fileptr)
 			{
 				if (remove_ofname)
 				{
-					if(!quiet)
+					if (!quiet)
 						fprintf(stderr, "No compression -- %s unchanged\n", ifname);
 					if (unlink(ofname))	/* Remove input file */
 					{
@@ -842,7 +842,7 @@ comprexx(const char	*fileptr)
 
 		    	if (!do_decomp && bytes_out >= bytes_in && (!force))
 				{/* No compression: remove file.Z */
-					if(!quiet)
+					if (!quiet)
 						fprintf(stderr, "No compression -- %s unchanged\n", ifname);
 
 			    	if (unlink(ofname))
@@ -856,7 +856,7 @@ comprexx(const char	*fileptr)
 		    	}
 				else
 				{/* ***** Successful Compression ***** */
-					if(!quiet)
+					if (!quiet)
 					{
 						fprintf(stderr, " -- replaced with %s",ofname);
 

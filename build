@@ -84,13 +84,13 @@ do
 			echo "Compress use a lot of memory, the more memory it can just the faster"
 			echo "the program is and the better compression is."
 			echo ${n} "Memory free for compress (default:${USERMEM}) ? ${c}"
-			read var1 dummy 
+			read var1 dummy
 		fi
 
 		USERMEM="${var1:-${USERMEM}}"
 		;;
 
-	3)	
+	3)
 		if [ ".${var1}" = . ]
 		then
 			echo "For input and output compress use buffers. A bigger buffer reduce"
@@ -100,10 +100,10 @@ do
 			echo ${n} "Best input buffer size (default:${IBUFSIZ}) ? ${c}"
 			read var1 var2 dummy
 
-			if [ ".${var2}" = . ] 
+			if [ ".${var2}" = . ]
 			then
 				echo ${n} "Best output buffer size (default:${OBUFSIZ}) ? ${c}"
-				read D dummy 
+				read D dummy
 			fi
 		fi
 
@@ -114,7 +114,7 @@ do
 
 	4)
 		if [ ".${var1}" = . ]
-		then	
+		then
 			echo "C compiler to use for compilation (must by cc compatible)".
 			echo ${n} "C Compiler (default:${CC}) ? ${c}"
 			read var1 dummy
@@ -131,7 +131,7 @@ do
 		fi
 
 		[ ".${var1}" != . ] && CCOPT="${var1} ${var2} ${var3} ${var4} ${varr}"
-		;;	
+		;;
 
 	6)
 		if [ ".${var1}" = . ]
@@ -141,7 +141,7 @@ do
 		fi
 
 		[ ".${var1}" != . ] && LBOPT="${var1} ${var2} ${var3} ${var4} ${varr}"
-		;;	
+		;;
 
 	7)
 		if [ ".${var1}" = . ]
@@ -152,7 +152,7 @@ do
 		fi
 
 		[ ".${var1}" != . ] && EXTRA="${var1} ${var2} ${var3} ${var4} ${varr}"
-		;;	
+		;;
 
 	9)
 		if [ ".${var1}" = . ]
@@ -196,7 +196,7 @@ do
 		[ -d /usr/local/bin ] && { BINDIR=/usr/local/bin; }
 		[ -d /usr/local/man ] && { BINDIR=/usr/local/man/man1; }
 		[ -f /usr/bin/compress ] && { BINDIR=/usr/bin; }
-	
+
 		if [ ".${CC}" = . ]
 		then
 			echo ${n} "Find compiler. Compiler is: ${c}"
@@ -227,7 +227,7 @@ do
 		main()
 			{
 				int		size;
-	
+
 				size = 1024;
 #ifdef BUFSIZ
 				if (size < BUFSIZ)	size = BUFSIZ;
@@ -259,23 +259,23 @@ do
 		do
 			cat >/tmp/sh$$.c <<!
 			char	test[${size}+128000];
-	
+
 			extern	int				alarm();
 			extern	int				exit();
 			extern	int				signal();
-	
+
 			sig() {exit(1);}
 
 			main()
 				{
 					register int	i;
 					register long	j;
-	
+
 					for (i = 1 ; i <= 15 ; ++i)
-						signal(i, sig);		
+						signal(i, sig);
 
 					alarm(2);
-	
+
 					for (i = 0 ; i < 10 ; ++i)
 						for (j = 0 ; j < sizeof(test) ; j+= 1024)
 							test[j] = i;
@@ -302,8 +302,8 @@ do
 
 	c|C)
 		options="${CCOPT} -o compress"
-		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
-		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
+		[ "${LSTAT}" != no ] && options="${options} -DLSTAT=1"
+		[ "${UTIME_H}" != no ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} ${EXTRA}"
@@ -330,8 +330,8 @@ do
 
 	s|S)
 		options="-O -S"
-		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
-		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
+		[ "${LSTAT}" != no ] && options="${options} -DLSTAT=1"
+		[ "${UTIME_H}" != no ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} ${EXTRA}"
@@ -401,9 +401,9 @@ do
 							( time $1 -v 2>/tmp/sh$$.tm1 ) |
 							( time $2 -d 2>/tmp/sh$$.tm2 ) |
 							( cpio -ivt >/tmp/sh$$.fo )
-		
+
 						awk </tmp/sh$$.fo '{print $8}'  >/tmp/sh$$.foo
-	
+
 						if cmp /tmp/sh$$.fi /tmp/sh$$.foo
 						then
 							:
@@ -452,7 +452,7 @@ do
 			strip ${BINDIR}/compress
 			rm -f ${BINDIR}/uncompress || exit 1
 			ln ${BINDIR}/compress ${BINDIR}/uncompress || exit 1
-			rm -f  ${BINDIR}/zcat || exit 1
+			rm -f ${BINDIR}/zcat || exit 1
 			ln -f ${BINDIR}/compress ${BINDIR}/zcat || exit 1
 			cp zcmp zdiff zmore ${BINDIR}/. || exit 1
 			chmod 0755 ${BINDIR}/compress ${BINDIR}/zcmp ${BINDIR}/zdiff \
@@ -466,11 +466,11 @@ do
 				chown ${var1} ${BINDIR}/compress ${BINDIR}/zcmp \
                               ${BINDIR}/zdiff ${BINDIR}/zmore \
 							  ${MANDIR}/compress.1 ${MANDIR}/zcmp.1 \
-				   			  ${MANDIR}/zmore.1 
+				   			  ${MANDIR}/zmore.1
 			fi
 !
 		) | (
-			if [ ".${var1}" = . ] ;	then sh 
+			if [ ".${var1}" = . ] ;	then sh
 									else su - ${var1} -c sh ; fi
 		)
 
@@ -481,8 +481,8 @@ do
 
 	genmake)
 		options=
-		[ "${LSTAT}" != no  ] && options="${options} -DLSTAT=1"
-		[ "${UTIME_H}" != no  ] && options="${options} -DUTIME_H=1"
+		[ "${LSTAT}" != no ] && options="${options} -DLSTAT=1"
+		[ "${UTIME_H}" != no ] && options="${options} -DUTIME_H=1"
 		options="${options} -DUSERMEM=${USERMEM}"
 		options="${options} -DIBUFSIZ=${IBUFSIZ} -DOBUFSIZ=${OBUFSIZ}"
 		options="${options} ${EXTRA}"

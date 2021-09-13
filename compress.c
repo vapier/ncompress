@@ -369,7 +369,7 @@ static void about(void);
  *   substrings and replaces them with a variable size code.  This is
  *   deterministic, and can be done on the fly.  Thus, the decompression
  *   procedure needs no input table, but tracks the way the table was built.
- */ 
+ */
 int
 main(int argc, char *argv[])
 	{
@@ -612,7 +612,7 @@ comprexx(const char	*fileptr)
 		    	case ENOENT:	/* file doesn't exist */
 	      			/*
 	      			** if the given name doesn't end with .Z, try appending one
-	      			** This is obviously the wrong thing to do if it's a 
+	      			** This is obviously the wrong thing to do if it's a
 	      			** directory, but it shouldn't do any harm.
 	      			*/
 					if (!has_z_suffix)
@@ -756,7 +756,7 @@ comprexx(const char	*fileptr)
 						{
 							fprintf(stderr, "Do you wish to overwrite %s (y or n)? ", ofname);
 							fflush(stderr);
-	
+
 			    			if (read(0, inbuf, 1) > 0)
 							{
 								if (inbuf[0] != '\n')
@@ -830,7 +830,7 @@ comprexx(const char	*fileptr)
 						fprintf(stderr, "\nunlink error (ignored) ");
 	    				perror(ofname);
 					}
-		
+
 					remove_ofname = 0;
 					exit_code = 2;
 				}
@@ -995,7 +995,7 @@ compdir(char *dir)
 /*
  * compress fdin to fdout
  *
- * Algorithm:  use open addressing double hashing (no chaining) on the 
+ * Algorithm:  use open addressing double hashing (no chaining) on the
  * prefix code / next character combination.  We do a variant of Knuth's
  * algorithm D (vol. 3, sec. 6.4) along with G. Knott's relatively-prime
  * secondary probe.  Here, the modular division first probe is gives way
@@ -1130,7 +1130,7 @@ compress(int fdin, int fdout)
 					if ((code_int)i > extcode-free_ent)	i = (int)(extcode-free_ent);
 					if (i > ((sizeof(outbuf) - 32)*8 - outbits)/n_bits)
 						i = ((sizeof(outbuf) - 32)*8 - outbits)/n_bits;
-					
+
 					if (!stcode && (long)i > checkpoint-bytes_in)
 						i = (int)(checkpoint-bytes_in);
 
@@ -1203,7 +1203,7 @@ out:			;
 						codetab[hp] = (unsigned short)free_ent++;
 						htab[hp] = fc;
 					}
-				} 
+				}
 
 				goto next;
 
@@ -1337,7 +1337,7 @@ resetbuf:	;
 				insize += rsize;
 			}
 
-			inbits = ((rsize > 0) ? (insize - insize%n_bits)<<3 : 
+			inbits = ((rsize > 0) ? (insize - insize%n_bits)<<3 :
 									(insize<<3)-(n_bits-1));
 
 			while (inbits > posbits)
@@ -1450,7 +1450,7 @@ resetbuf:	;
 			    	tab_prefixof(code) = (unsigned short)oldcode;
 			    	tab_suffixof(code) = (char_type)finchar;
 	    			free_ent = code+1;
-				} 
+				}
 
 				oldcode = incode;	/* Remember previous code.	*/
 			}
@@ -1495,7 +1495,7 @@ prratio(FILE *stream, long int num, long int den)
 
 		if (den > 0)
 		{
-			if (num > 214748L) 
+			if (num > 214748L)
 				q = (int)(num/(den/10000L));	/* 2147483647/10000 */
 			else
 				q = (int)(10000L*num/den);		/* Long calculations, though */

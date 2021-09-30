@@ -1391,6 +1391,7 @@ resetbuf:	;
 
 						posbits -= n_bits;
 						p = &inbuf[posbits>>3];
+						if (p == inbuf) p++;
 
 						fprintf(stderr, "insize:%d posbits:%d inbuf:%02X %02X %02X %02X %02X (%d)\n", insize, posbits,
 								p[-1],p[0],p[1],p[2],p[3], (posbits&07));

@@ -93,10 +93,10 @@ access(const char *pathname, int mode)
 #define min(a, b) ((a > b) ? b : a)
 
 #ifndef IBUFSIZ
-#	define IBUFSIZ BUFSIZ /* Default input buffer size								*/
+#	define IBUFSIZ BUFSIZ /* Default input buffer size */
 #endif
 #ifndef OBUFSIZ
-#	define OBUFSIZ BUFSIZ /* Default output buffer size 							*/
+#	define OBUFSIZ BUFSIZ /* Default output buffer size */
 #endif
 
 /* Defines for third byte of header 												*/
@@ -111,8 +111,8 @@ access(const char *pathname, int mode)
 
 /* the next two codes should not be changed lightly, as they must not				*/
 /* lie within the contiguous general code space.									*/
-#define FIRST 257 /* first free entry												*/
-#define CLEAR 256 /* table clear output code										*/
+#define FIRST 257 /* first free entry */
+#define CLEAR 256 /* table clear output code */
 
 #define INIT_BITS 9 /* initial number of bits/code */
 
@@ -206,32 +206,32 @@ typedef unsigned char char_type;
 
 #define MAXCODE(n) (1L << (n))
 
-#define output(b, o, c, n)                       \
-	{                                            \
-		char_type *p = &(b)[(o) >> 3];           \
-		long	   i = ((long)(c)) << ((o)&0x7); \
-		p[0] |= (char_type)(i);                  \
-		p[1] |= (char_type)(i >> 8);             \
-		p[2] |= (char_type)(i >> 16);            \
-		(o) += (n);                              \
+#define output(b, o, c, n)                                                           \
+	{                                                                                \
+		char_type *p = &(b)[(o) >> 3];                                               \
+		long	   i = ((long)(c)) << ((o)&0x7);                                     \
+		p[0] |= (char_type)(i);                                                      \
+		p[1] |= (char_type)(i >> 8);                                                 \
+		p[2] |= (char_type)(i >> 16);                                                \
+		(o) += (n);                                                                  \
 	}
-#define input(b, o, c, n, m)                                                    \
-	{                                                                           \
-		char_type *p = &(b)[(o) >> 3];                                          \
-		(c) = ((((long)(p[0])) | ((long)(p[1]) << 8) | ((long)(p[2]) << 16)) >> \
-				  ((o)&0x7)) &                                                  \
-			(m);                                                                \
-		(o) += (n);                                                             \
+#define input(b, o, c, n, m)                                                         \
+	{                                                                                \
+		char_type *p = &(b)[(o) >> 3];                                               \
+		(c) = ((((long)(p[0])) | ((long)(p[1]) << 8) | ((long)(p[2]) << 16)) >>      \
+				  ((o)&0x7)) &                                                       \
+			(m);                                                                     \
+		(o) += (n);                                                                  \
 	}
 
-#define reset_n_bits_for_compressor(n_bits, stcode, free_ent, extcode, maxbits) \
-	{                                                                           \
-		n_bits = INIT_BITS;                                                     \
-		stcode = 1;                                                             \
-		free_ent = FIRST;                                                       \
-		extcode = MAXCODE(n_bits);                                              \
-		if (n_bits < maxbits)                                                   \
-			extcode++;                                                          \
+#define reset_n_bits_for_compressor(n_bits, stcode, free_ent, extcode, maxbits)      \
+	{                                                                                \
+		n_bits = INIT_BITS;                                                          \
+		stcode = 1;                                                                  \
+		free_ent = FIRST;                                                            \
+		extcode = MAXCODE(n_bits);                                                   \
+		if (n_bits < maxbits)                                                        \
+			extcode++;                                                               \
 	}
 
 #define reset_n_bits_for_decompressor(n_bits, bitmask, maxbits, maxcode, maxmaxcode) \
@@ -718,8 +718,8 @@ comprexx(const char *fileptr)
 					 * See comment above in the decompress path.
 					 */
 					if (!recursive)
-						fprintf(
-							stderr, "%s: already has .Z suffix -- no change\n", tempname);
+						fprintf(stderr, "%s: already has .Z suffix -- no change\n",
+							tempname);
 					free(tempname);
 					return;
 				}
@@ -760,7 +760,8 @@ comprexx(const char *fileptr)
 
 					if (fgnd_flag && isatty(0))
 					{
-						fprintf(stderr, "Do you wish to overwrite %s (y or n)? ", ofname);
+						fprintf(
+							stderr, "Do you wish to overwrite %s (y or n)? ", ofname);
 						fflush(stderr);
 
 						if (read(0, inbuf, 1) > 0)
@@ -797,8 +798,8 @@ comprexx(const char *fileptr)
 				}
 			}
 
-			if ((fdout = open(ofname, O_WRONLY | O_CREAT | O_EXCL | O_BINARY, 0600)) ==
-				-1)
+			if ((fdout = open(
+					 ofname, O_WRONLY | O_CREAT | O_EXCL | O_BINARY, 0600)) == -1)
 			{
 				perror(tempname);
 				goto error;
@@ -884,14 +885,14 @@ comprexx(const char *fileptr)
 					perror(ofname);
 				}
 
-				if (chmod(ofname, infstat.st_mode & 07777)) /* Copy modes */
-				{
+				if (chmod(ofname, infstat.st_mode & 07777))
+				{ /* Copy modes */
 					fprintf(stderr, "\nchmod error (ignored) ");
 					perror(ofname);
 				}
 
-				if (chown(ofname, infstat.st_uid, infstat.st_gid)) /* Copy ownership */
-				{
+				if (chown(ofname, infstat.st_uid, infstat.st_gid))
+				{ /* Copy ownership */
 					fprintf(stderr, "\nchown error (ignored) ");
 					perror(ofname);
 				}
@@ -912,7 +913,8 @@ comprexx(const char *fileptr)
 		break;
 
 	default:
-		fprintf(stderr, "%s is not a directory or a regular file - ignored\n", tempname);
+		fprintf(
+			stderr, "%s is not a directory or a regular file - ignored\n", tempname);
 		break;
 	}
 
@@ -1422,7 +1424,8 @@ resetbuf:;
 
 					fprintf(stderr,
 						"insize:%d posbits:%d inbuf:%02X %02X %02X %02X %02X (%d)\n",
-						insize, posbits, p[-1], p[0], p[1], p[2], p[3], (posbits & 07));
+						insize, posbits, p[-1], p[0], p[1], p[2], p[3],
+						(posbits & 07));
 					fprintf(stderr, "uncompress: corrupt input\n");
 					abort_compress();
 				}

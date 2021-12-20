@@ -3,10 +3,10 @@ BasedOnStyle: WebKit
 UseTab: Always
 IndentWidth: 4
 TabWidth: 4
-ColumnLimit: 90
+ColumnLimit: 86
 AlignConsecutiveDeclarations: AcrossEmptyLinesAndComments
 AlignConsecutiveMacros: AcrossComments
-AlignEscapedNewlines: Left
+AlignEscapedNewlines: Right
 AlignTrailingComments: true
 AlwaysBreakAfterReturnType: TopLevelDefinitions
 BreakBeforeBinaryOperators: None

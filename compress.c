@@ -55,19 +55,19 @@ struct utimbuf
 #endif
 
 #if defined(AMIGA) || defined(DOS) || defined(MINGW) || defined(WINDOWS)
-#	define chmod(pathname, mode)		  0
+#	define chmod(pathname, mode)         0
 #	define chown(pathname, owner, group) 0
-#	define utime(pathname, times)		  0
+#	define utime(pathname, times)        0
 #endif
 
 #if defined(MINGW) || defined(WINDOWS)
 #	define isatty(fd) 0
-#	define open	   _open
-#	define close	   _close
-#	define read	   _read
-#	define strdup	   _strdup
-#	define unlink	   _unlink
-#	define write	   _write
+#	define open       _open
+#	define close      _close
+#	define read       _read
+#	define strdup     _strdup
+#	define unlink     _unlink
+#	define write      _write
 #else
 /* NB: macOS has a setmode() that is different from Windows. */
 #	define setmode(fd, mode)
@@ -99,18 +99,18 @@ access(const char *pathname, int mode)
 #	define OBUFSIZ BUFSIZ /* Default output buffer size */
 #endif
 
-/* Defines for third byte of header 												*/
-#define MAGIC_1	   (char_type)'\037' /* First byte of compressed file				*/
-#define MAGIC_2	   (char_type)'\235' /* Second byte of compressed file				*/
-#define BIT_MASK   0x1f				 /* Mask for 'number of compression bits'		*/
-									 /* Masks 0x20 and 0x40 are free.  				*/
-									 /* I think 0x20 should mean that there is		*/
-									 /* a fourth header byte (for expansion).    	*/
-#define BLOCK_MODE 0x80				 /* Block compression if table is full and		*/
-									 /* compression rate is dropping flush tables	*/
+/* Defines for third byte of header                                                 */
+#define MAGIC_1    (char_type)'\037' /* First byte of compressed file               */
+#define MAGIC_2    (char_type)'\235' /* Second byte of compressed file              */
+#define BIT_MASK   0x1f              /* Mask for 'number of compression bits'       */
+									 /* Masks 0x20 and 0x40 are free.               */
+									 /* I think 0x20 should mean that there is      */
+									 /* a fourth header byte (for expansion).       */
+#define BLOCK_MODE 0x80              /* Block compression if table is full and      */
+									 /* compression rate is dropping flush tables   */
 
-/* the next two codes should not be changed lightly, as they must not				*/
-/* lie within the contiguous general code space.									*/
+/* the next two codes should not be changed lightly, as they must not               */
+/* lie within the contiguous general code space.                                    */
 #define FIRST 257 /* first free entry */
 #define CLEAR 256 /* table clear output code */
 
@@ -137,16 +137,16 @@ access(const char *pathname, int mode)
  * machine variants which require cc -Dmachine:  pdp11, z8000, DOS
  */
 
-#ifdef DOS			/* PC/XT/AT (8088) processor	*/
+#ifdef DOS          /* PC/XT/AT (8088) processor    */
 #	define BITS 16 /* 16-bits processor max 12 bits */
-#endif				/* DOS */
+#endif              /* DOS */
 
 #ifndef O_BINARY
 #	define O_BINARY 0 /* System has no binary mode */
 #endif
 
-#ifdef M_XENIX	  /* Stupid compiler can't handle arrays with	*/
-#	if BITS > 13 /* Code only handles BITS = 12, 13, or 16		*/
+#ifdef M_XENIX    /* Stupid compiler can't handle arrays with */
+#	if BITS > 13 /* Code only handles BITS = 12, 13, or 16    */
 #		define BITS 13
 #	endif
 #endif
@@ -194,7 +194,7 @@ typedef long int code_int;
 #ifdef SIGNED_COMPARE_SLOW
 typedef unsigned long int  count_int;
 typedef unsigned short int count_short;
-typedef unsigned long int  cmp_code_int; /* Cast to make compare faster	*/
+typedef unsigned long int  cmp_code_int; /* Cast to make compare faster */
 #else
 typedef long int count_int;
 typedef long int cmp_code_int;
@@ -209,7 +209,7 @@ typedef unsigned char char_type;
 #define output(b, o, c, n)                                                           \
 	{                                                                                \
 		char_type *p = &(b)[(o) >> 3];                                               \
-		long	   i = ((long)(c)) << ((o)&0x7);                                     \
+		long       i = ((long)(c)) << ((o)&0x7);                                     \
 		p[0] |= (char_type)(i);                                                      \
 		p[1] |= (char_type)(i >> 8);                                                 \
 		p[2] |= (char_type)(i >> 16);                                                \
@@ -244,38 +244,37 @@ typedef unsigned char char_type;
 			maxcode = MAXCODE(n_bits) - 1;                                           \
 	}
 
-char			 *progname;	   /* Program name										*/
-int			   silent = 0;	   /* don't tell me about errors						*/
-int			   quiet = 1;	   /* don't tell me about compression 					*/
-int			   do_decomp = 0;  /* Decompress mode									*/
-int			   force = 0;	   /* Force overwrite of files and links				*/
-int			   keep = 0;	   /* Keep input files									*/
-int			   nomagic = 0;	   /* Use a 3-byte magic number header,					*/
-							   /* unless old file 									*/
-int			   maxbits = BITS; /* user settable max # bits/code 					*/
-int			   zcat_flg = 0;   /* Write output on stdout, suppress messages 		*/
-int			   recursive = 0;  /* compress directories 								*/
-int			   exit_code = -1; /* Exitcode of compress (-1 no file compressed)		*/
+char          *progname;       /* Program name                                      */
+int            silent = 0;     /* don't tell me about errors                        */
+int            quiet = 1;      /* don't tell me about compression                   */
+int            do_decomp = 0;  /* Decompress mode                                   */
+int            force = 0;      /* Force overwrite of files and links                */
+int            keep = 0;       /* Keep input files                                  */
+int            nomagic = 0;    /* Use a 3-byte magic number header, unless old file */
+int            maxbits = BITS; /* user settable max # bits/code                     */
+int            zcat_flg = 0;   /* Write output on stdout, suppress messages         */
+int            recursive = 0;  /* compress directories                              */
+int            exit_code = -1; /* Exitcode of compress (-1 no file compressed)      */
 
-char_type	   inbuf[IBUFSIZ + 64];	   /* Input buffer								*/
-char_type	   outbuf[OBUFSIZ + 2048]; /* Output buffer								*/
+char_type      inbuf[IBUFSIZ + 64];    /* Input buffer                              */
+char_type      outbuf[OBUFSIZ + 2048]; /* Output buffer                             */
 
-struct stat	   infstat;			  /* Input file status								*/
-char			 *ifname;			  /* Input filename								*/
-int			   remove_ofname = 0; /* Remove output file on a error					*/
-char			 *ofname = NULL;	  /* Output filename							*/
-int			   fgnd_flag = 0;	  /* Running in background (SIGINT=SIGIGN)			*/
+struct stat    infstat;           /* Input file status                              */
+char          *ifname;            /* Input filename                                 */
+int            remove_ofname = 0; /* Remove output file on an error                 */
+char          *ofname = NULL;     /* Output filename                                */
+int            fgnd_flag = 0;     /* Running in background (SIGINT=SIGIGN)          */
 
-long		   bytes_in;  /* Total number of byte from input						*/
-long		   bytes_out; /* Total number of byte to output							*/
+long           bytes_in;  /* Total number of byte from input                        */
+long           bytes_out; /* Total number of byte to output                         */
 
-count_int	   htab[HSIZE];
+count_int      htab[HSIZE];
 unsigned short codetab[HSIZE];
 
-#define tab_prefixof(i)		 codetab[i]
-#define tab_suffixof(i)		 ((char_type *)(htab))[i]
-#define de_stack			 ((char_type *)&(htab[HSIZE - 1]))
-#define clear_htab()		 memset(htab, -1, sizeof(htab))
+#define tab_prefixof(i)      codetab[i]
+#define tab_suffixof(i)      ((char_type *)(htab))[i]
+#define de_stack             ((char_type *)&(htab[HSIZE - 1]))
+#define clear_htab()         memset(htab, -1, sizeof(htab))
 #define clear_tab_prefixof() memset(codetab, 0, 256);
 
 #ifdef FAST
@@ -374,7 +373,7 @@ main(int argc, char *argv[])
 {
 	char **filelist;
 	char **fileptr;
-	int	   seen_double_dash = 0;
+	int    seen_double_dash = 0;
 
 #ifdef SIGINT
 	if ((fgnd_flag = (signal(SIGINT, SIG_IGN)) != SIG_IGN))
@@ -589,9 +588,9 @@ Usage: %s [-dfhvcVr] [-b maxbits] [--] [path ...]\n\
 void
 comprexx(const char *fileptr)
 {
-	int			  fdin = -1;
-	int			  fdout = -1;
-	int			  has_z_suffix;
+	int           fdin = -1;
+	int           fdout = -1;
+	int           has_z_suffix;
 	char		 *tempname;
 	unsigned long namesize = strlen(fileptr);
 
@@ -942,9 +941,9 @@ void
 compdir(char *dir)
 {
 	struct dirent *dp;
-	DIR			*dirp;
-	char			 *nptr;
-	char			 *fptr;
+	DIR           *dirp;
+	char          *nptr;
+	char          *fptr;
 	unsigned long  dir_size = strlen(dir);
 	/* The +256 is a lazy optimization. We'll resize on demand. */
 	unsigned long  size = dir_size + 256;
@@ -1017,25 +1016,25 @@ compdir(char *dir)
 void
 compress(int fdin, int fdout)
 {
-	long	 hp;
-	int		 rpos;
-	long	 fc;
-	int		 outbits;
-	int		 rlop;
-	int		 rsize;
-	int		 stcode;
+	long     hp;
+	int      rpos;
+	long     fc;
+	int      outbits;
+	int      rlop;
+	int      rsize;
+	int      stcode;
 	code_int free_ent;
-	int		 boff;
-	int		 n_bits;
-	int		 ratio;
-	long	 checkpoint;
+	int      boff;
+	int      n_bits;
+	int      ratio;
+	long     checkpoint;
 	code_int extcode;
 	union
 	{
 		long code;
 		struct
 		{
-			char_type	   c;
+			char_type      c;
 			unsigned short ent;
 		} e;
 	} fcode;
@@ -1272,20 +1271,20 @@ decompress(int fdin, int fdout)
 {
 	char_type *stackp;
 	code_int   code;
-	int		   finchar;
+	int        finchar;
 	code_int   oldcode;
 	code_int   incode;
-	int		   inbits;
-	int		   posbits;
-	int		   outpos;
-	int		   insize;
-	int		   bitmask;
+	int        inbits;
+	int        posbits;
+	int        outpos;
+	int        insize;
+	int        bitmask;
 	code_int   free_ent;
 	code_int   maxcode;
 	code_int   maxmaxcode;
-	int		   n_bits;
-	int		   rsize;
-	int		   block_mode;
+	int        n_bits;
+	int        rsize;
+	int        block_mode;
 
 	bytes_in = 0;
 	bytes_out = 0;
@@ -1411,7 +1410,7 @@ resetbuf:;
 			incode = code;
 			stackp = de_stack;
 
-			if (code >= free_ent) /* Special case for KwKwK string.	*/
+			if (code >= free_ent) /* Special case for KwKwK string.    */
 			{
 				if (code > free_ent)
 				{
@@ -1485,7 +1484,7 @@ resetbuf:;
 				free_ent = code + 1;
 			}
 
-			oldcode = incode; /* Remember previous code.	*/
+			oldcode = incode; /* Remember previous code.    */
 		}
 
 		bytes_in += rsize;

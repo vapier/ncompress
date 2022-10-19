@@ -24,7 +24,7 @@ jobs:
     env:
       CC: ${{ matrix.cc }}
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - run: make
     - run: make check
     - run: make install DESTDIR="${PWD}/root/"
@@ -41,7 +41,7 @@ jobs:
       run:
         shell: bash
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
     - name: compile
       run:
         /c/msys64/${SUBDIR}/bin/clang.exe

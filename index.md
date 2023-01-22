@@ -84,14 +84,18 @@ the compress code were developed & posted, but eventually died out.  The history
 below will only focus on the canonical C implementation and its lineage that has
 been widely integrated into other projects.
 
-* 10 Aug 1981: [U.S. Patent 4,464,650] filed for [LZ78].
-* 20 Jun 1983: [U.S. Patent 4,558,302] filed for [LZW].
+* 10 Aug 1981: [U.S. Patent 4,464,650] filed for [LZ78] by the [Sperry
+  Corporation] by, among others, [Abraham Lempel] & [Jacob Ziv] (the "L" & "Z"
+  in "[LZ78]" & "[LZW]").
+* 20 Jun 1983: [U.S. Patent 4,558,302] filed for [LZW] by the [Sperry
+  Corporation] by [Abraham Lempel] & [Jacob Ziv] & [Terry A. Welch] (the "L" &
+  "Z" & "W" in "[LZW]").
 * June 1984: [A Technique for High Performance Data Compression] published by
-  Terry A. Welch (the "W" in "[LZW]") in [IEEE Computer Vol 17, No 6].  No
+  [Terry A. Welch] (the "W" in "[LZW]") in [IEEE Computer Vol 17, No 6].  No
   mention of the pending patent is made in the article.
-* 05 Jul 1984: Spencer W. Thomas makes [first release of compress (v1.4)][1.4]
-  on [net.sources].  It implements the [LZW] algorithm described in the IEEE
-  paper, unaware of the pending patent coverage.
+* 05 Jul 1984: [Spencer W. Thomas] makes [first release of compress (v1.4)][1.4]
+  on [net.sources] while at the [University of Utah].  It implements the [LZW]
+  algorithm described in the IEEE paper, unaware of the pending patent coverage.
 * 05 Aug 1984: Joseph M. Orost [releases a portable update (v1.6)][1.6] on
   [net.sources].
 * 07 Aug 1984: [U.S. Patent 4,464,650] granted for [LZ78].  It isn't directly
@@ -101,8 +105,8 @@ been widely integrated into other projects.
   news software).
 * 03 Jan 1985: Joseph M. Orost [releases v3.0][3.0] on [mod.sources].  It breaks
   backwards compatibility with earlier versions with compressed outputs.
-* 01 Aug 1985: Joseph M. Orost [releases v4.0][4.0] on [mod.sources].  This ends
-  up as the last official release and the foundation of all future forks.  Many
+* 01 Aug 1985: Joseph M. Orost [releases v4.0][4.0] on [mod.sources].  This is
+  the last official release and the foundation of all future forks.  Many
   projects integrate this version directly.
 * Sep 1985: [compress v4.0 is merged][BSD-compress-merge] into [BSD]
   (after the [4.2BSD] release, but before [4.3BSD] is released).
@@ -179,10 +183,11 @@ been widely integrated into other projects.
 [v5.0]: https://github.com/vapier/ncompress/releases/tag/v5.0
 [walnut-iso]: https://archive.org/details/CDROM_March92
 
-[A Technique for High Performance Data Compression]: https://www.cs.duke.edu/courses/spring03/cps296.5/papers/welch_1984_technique_for.pdf
 [386BSD]: https://en.wikipedia.org/wiki/386BSD
 [4.2BSD]: https://en.wikipedia.org/wiki/History_of_the_Berkeley_Software_Distribution#4.2BSD
 [4.3BSD]: https://en.wikipedia.org/wiki/History_of_the_Berkeley_Software_Distribution#4.3BSD
+[A Technique for High Performance Data Compression]: https://www.cs.duke.edu/courses/spring03/cps296.5/papers/welch_1984_technique_for.pdf
+[Abraham Lempel]: https://en.wikipedia.org/wiki/Abraham_Lempel
 [BSD]: https://en.wikipedia.org/wiki/BSD
 [BSD-compress-merge]: https://minnie.tuhs.org/cgi-bin/utree.pl?file=4.3BSD/usr/src/ucb/compress/compress.c
 [Darwin]: https://en.wikipedia.org/wiki/Darwin_(operating_system)
@@ -191,11 +196,14 @@ been widely integrated into other projects.
 [OpenBSD]: https://en.wikipedia.org/wiki/OpenBSD
 [GNU gzip]: https://www.gnu.org/software/gzip/
 [IEEE Computer Vol 17, No 6]: https://ieeexplore.ieee.org/document/1659158
+[Jacob Ziv]: https://en.wikipedia.org/wiki/Jacob_Ziv
 [LZ78]: https://en.wikipedia.org/wiki/LZ78
 [LZW]: https://en.wikipedia.org/wiki/LZW
 [LZW Data Compression]: https://marknelson.us/posts/2011/11/08/lzw-revisited.html
 [Mark Nelson]: https://marknelson.us/
 [public domain]: https://en.wikipedia.org/wiki/Public_domain
+[Spencer W. Thomas]: https://scholar.google.com/citations?user=ayP-BakAAAAJ
+[Terry A. Welch]: https://en.wikipedia.org/wiki/Terry_Welch
 [U.S. Patent 4,464,650]: https://patents.google.com/patent/US4464650
 [U.S. Patent 4,558,302]: https://patents.google.com/patent/US4558302
 [comp.sources.misc]: https://groups.google.com/forum/#!forum/comp.sources.misc
@@ -206,5 +214,7 @@ been widely integrated into other projects.
 [Git]: https://en.wikipedia.org/wiki/Git
 [RCS]: https://en.wikipedia.org/wiki/Revision_Control_System
 [Subversion]: https://en.wikipedia.org/wiki/Apache_Subversion
+[Sperry Corporation]: https://en.wikipedia.org/wiki/Sperry_Corporation
+[University of Utah]: https://en.wikipedia.org/wiki/University_of_Utah
 [VCS]: https://en.wikipedia.org/wiki/Version_control_system
 [GitHub]: https://github.com/

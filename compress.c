@@ -973,13 +973,14 @@ compdir(char *dir)
 			if (size < dir_size + strlen(dp->d_name) + 2)
 			{
 				size = dir_size + strlen(dp->d_name) + 2;
-				nptr = realloc(nptr, size);
-				if (nptr == NULL)
+				char* tmp = realloc(nptr, size);
+				if (tmp == NULL)
 				{
 					perror("realloc");
 					exit_code = 1;
 					break;
 				}
+				nptr = tmp;
 				fptr = &nptr[dir_size + 1];
 			}
 

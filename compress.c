@@ -589,6 +589,7 @@ comprexx(const char	*fileptr)
 		int				 fdout = -1;
 		int				 has_z_suffix;
 		char			*tempname;
+		struct stat		 opened_stat;
 		unsigned long	 namesize = strlen(fileptr);
 
 		/* Create a temp buffer to add/remove the .Z suffix. */
@@ -742,6 +743,21 @@ comprexx(const char	*fileptr)
 				goto error;
 	    	}
 
+		if (fstat(fdin, &opened_stat) == -1)
+			{
+				perror(tempname);
+				goto error;
+			}
+
+		if (opened_stat.st_dev != infstat.st_dev ||
+		    opened_stat.st_ino != infstat.st_ino)
+			{
+				fprintf(stderr, "%s changed while opening -- ignored\n", tempname);
+				goto error;
+			}
+
+		infstat = opened_stat;
+
     		if (zcat_flg == 0)
 			{
 				if (access(ofname, F_OK) == 0)
@@ -816,8 +832,42 @@ comprexx(const char	*fileptr)
 
 			close(fdin);
 
-			if (fdout != 1 && close(fdout))
-				write_error();
+			if (fdout != 1)
+			{
+				if (!((bytes_in == 0 && force == 0) ||
+				      (!do_decomp && bytes_out >= bytes_in && !force)))
+				{
+#if !defined(AMIGA) && !defined(DOS) && !defined(MINGW) && !defined(WINDOWS)
+					struct timespec times[2];
+
+					times[0].tv_sec = infstat.st_atime;
+					times[0].tv_nsec = 0;
+					times[1].tv_sec = infstat.st_mtime;
+					times[1].tv_nsec = 0;
+
+					if (futimens(fdout, times))
+					{
+						fprintf(stderr, "\nfutimens error (ignored) ");
+						perror(ofname);
+					}
+
+					if (fchmod(fdout, infstat.st_mode & 07777))
+					{
+						fprintf(stderr, "\nfchmod error (ignored) ");
+						perror(ofname);
+					}
+
+					if (fchown(fdout, infstat.st_uid, infstat.st_gid))
+					{
+						fprintf(stderr, "\nfchown error (ignored) ");
+						perror(ofname);
+					}
+#endif
+				}
+
+				if (close(fdout))
+					write_error();
+			}
 
 			if ( (bytes_in == 0) && (force == 0 ) )
 			{
@@ -838,8 +888,6 @@ comprexx(const char	*fileptr)
 			else
     		if (zcat_flg == 0)
 			{
-		    	struct utimbuf	timep;
-
 		    	if (!do_decomp && bytes_out >= bytes_in && (!force))
 				{/* No compression: remove file.Z */
 					if (!quiet)
@@ -867,27 +915,6 @@ comprexx(const char	*fileptr)
 						}
 
 						fprintf(stderr, "\n");
-					}
-
-					timep.actime = infstat.st_atime;
-					timep.modtime = infstat.st_mtime;
-
-					if (utime(ofname, &timep))
-					{
-						fprintf(stderr, "\nutime error (ignored) ");
-				    	perror(ofname);
-					}
-
-					if (chmod(ofname, infstat.st_mode & 07777))		/* Copy modes */
-					{
-						fprintf(stderr, "\nchmod error (ignored) ");
-				    	perror(ofname);
-					}
-
-					if (chown(ofname, infstat.st_uid, infstat.st_gid))	/* Copy ownership */
-					{
-						fprintf(stderr, "\nchown error (ignored) ");
-						perror(ofname);
 					}
 
 					remove_ofname = 0;

@@ -248,7 +248,7 @@ uncompress -k i
 rm i.Z
 
 : "### Check nine bits on large input"
-compress -b 9 <$COMPRESS >input.Z
+compress -f -b 9 <$COMPRESS >input.Z
 uncompress -c input.Z >input.new
 cmp $COMPRESS input.new
 

@@ -49,10 +49,6 @@
 	};
 #endif
 
-#ifndef SIG_TYPE
-#	define	SIG_TYPE	void (*)()
-#endif
-
 #if defined(AMIGA) || defined(DOS) || defined(MINGW) || defined(WINDOWS)
 #	define	chmod(pathname, mode) 0
 #	define	chown(pathname, owner, group) 0
@@ -327,6 +323,7 @@ static void decompress(int, int);
 static void read_error(void);
 static void write_error(void);
 static void abort_compress(void);
+static void abort_compress_handler(int);
 static void prratio(FILE *, long, long);
 static void about(void);
 
@@ -379,14 +376,14 @@ main(int argc, char *argv[])
 
 #ifdef SIGINT
 		if ((fgnd_flag = (signal(SIGINT, SIG_IGN)) != SIG_IGN))
-			signal(SIGINT, (SIG_TYPE)abort_compress);
+			signal(SIGINT, abort_compress_handler);
 #endif
 
 #ifdef SIGTERM
-		signal(SIGTERM, (SIG_TYPE)abort_compress);
+		signal(SIGTERM, abort_compress_handler);
 #endif
 #ifdef SIGHUP
-		signal(SIGHUP, (SIG_TYPE)abort_compress);
+		signal(SIGHUP, abort_compress_handler);
 #endif
 
 #ifdef COMPATIBLE
@@ -1487,6 +1484,14 @@ abort_compress(void)
 	    	unlink(ofname);
 
 		exit(1);
+	}
+
+
+void
+abort_compress_handler(int signo)
+	{
+		(void)signo;
+		abort_compress();
 	}
 
 void

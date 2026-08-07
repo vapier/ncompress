@@ -21,6 +21,7 @@ MANDIR=$(PREFIX)/share/man/man1
 #	-DAMIGA=1					Amiga support.
 #	-DLSTAT=1					Use lstat for finding symlinks.
 #	-DUTIME_H=1					Use utime.h
+#	-DUSE_ZLIB=1				Enable gzip/deflate support via zlib
 #	-DUSERMEM=<size>			Available memory for compress (default 800k).
 #	-DIBUFSIZ=<size>			Input buffer size (default BUFSIZ).
 #	-DOBUFSIZ=<size>			Output buffer size (default BUFSIZ)
@@ -30,9 +31,17 @@ options= $(CFLAGS) $(CPPFLAGS) -DUSERMEM=800000
 # library options
 LBOPT= $(LDFLAGS)
 
+# gzip/deflate support is enabled by default.  Use NO_ZLIB=1 to disable it.
+ZLIB_OPTIONS= -DUSE_ZLIB=1
+ZLIB_LBOPT= -lz
+
 
 compress:	Makefile compress.c patchlevel.h
-	$(CC) -o compress $(options) compress.c $(LBOPT)
+	if [ "$(NO_ZLIB)" = 1 ]; then \
+		$(CC) -o compress $(options) compress.c $(LBOPT); \
+	else \
+		$(CC) -o compress $(options) $(ZLIB_OPTIONS) compress.c $(LBOPT) $(ZLIB_LBOPT); \
+	fi
 
 install_core:	compress
 		[ -f $(DESTDIR)$(BINDIR)/compress ] && \

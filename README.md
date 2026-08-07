@@ -2,10 +2,11 @@
 
 This is (N)compress.  It is an improved version of compress 4.1.
 
-Compress is a fast, simple LZW file compressor.  Compress does not have
-the highest compression rate, but it is one of the fastest programs to
-compress data.  Compress is the defacto standard in the UNIX community
-for compressing files.
+Compress is a fast, simple LZW file compressor.  Compress also supports
+POSIX gzip/deflate mode when built with zlib.  Compress does not have the
+highest compression rate, but it is one of the fastest programs to compress
+data.  Compress is the defacto standard in the UNIX community for compressing
+files.
 
 (N)compress 4.2 introduced a special, fast compression hash algorithm.
 This algorithm uses more memory than the old hash table. If you don't want
@@ -25,7 +26,9 @@ though -- i.e. compress 3.0+ is able to decompress files produced by compress
 # Building
 
 For recent systems with GNU make, you can simply run `make` as the default
-'GNUMakefile' will get picked up.
+'GNUMakefile' will get picked up.  zlib support is enabled by default for
+the POSIX gzip/deflate algorithm options; use `make NO_ZLIB=1` to build
+without it.
 
 'build' is a menu driven shell script for compiling, testing and
 installing (N)compress. So to build and install (N)compress all you have to

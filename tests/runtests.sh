@@ -144,6 +144,79 @@ cmp input input.new
 uncompress <input.Z >input.new
 cmp input input.new
 
+: "### Check algorithm selection"
+cp input lzwinput
+compress -m lzw lzwinput
+[ ! -e lzwinput ]
+[ -e lzwinput.Z ]
+uncompress lzwinput.Z
+cmp input lzwinput
+rm lzwinput
+
+if "${COMPRESS}" -V | grep USE_ZLIB >/dev/null; then
+	cp input gzinput
+	compress -g gzinput
+	[ ! -e gzinput ]
+	[ -e gzinput.gz ]
+	uncompress gzinput.gz
+	cmp input gzinput
+	rm gzinput
+
+	compress -m deflate -b 9 -c input >stream.gz
+	uncompress -c stream.gz >input.new
+	cmp input input.new
+
+	mv stream.gz stream.data
+	uncompress -c stream.data >input.new
+	cmp input input.new
+
+	cp "${COMPRESS}" ./zcat
+	compress -m gzip -c input >stream.gz
+	./zcat stream.gz >input.new
+	cmp input input.new
+	rm ./zcat stream.gz stream.data
+
+	cp input last
+	compress -m gzip -m lzw last
+	[ ! -e last ]
+	[ -e last.Z ]
+	uncompress last.Z
+	cmp input last
+	rm last
+
+	cp input last
+	compress -m lzw -g last
+	[ ! -e last ]
+	[ -e last.gz ]
+	uncompress last.gz
+	cmp input last
+	rm last
+else
+	cp input nogzip
+	set +e
+	compress -g nogzip
+	ret=$?
+	set -e
+	[ "${ret}" -eq 3 ]
+	[ -e nogzip ]
+	[ ! -e nogzip.gz ]
+
+	compress -m gzip -m lzw nogzip
+	[ ! -e nogzip ]
+	[ -e nogzip.Z ]
+	uncompress nogzip.Z
+	cmp input nogzip
+
+	set +e
+	compress -m deflate nogzip
+	ret=$?
+	set -e
+	[ "${ret}" -eq 3 ]
+	[ -e nogzip ]
+	[ ! -e nogzip.gz ]
+	rm nogzip
+fi
+
 : "### Check existing files"
 if compress input </dev/null; then false; fi
 compress -f input
@@ -175,7 +248,7 @@ uncompress -k i
 rm i.Z
 
 : "### Check nine bits on large input"
-compress -b 9 <$COMPRESS >input.Z
+compress -f -b 9 <$COMPRESS >input.Z
 uncompress -c input.Z >input.new
 cmp $COMPRESS input.new
 

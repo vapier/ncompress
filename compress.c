@@ -32,6 +32,10 @@
 #include	<sys/stat.h>
 #include	<errno.h>
 
+#ifdef USE_ZLIB
+#	include	<zlib.h>
+#endif
+
 #if !defined(DOS) && !defined(WINDOWS)
 #	include	<dirent.h>
 #	define RECURSIVE 1
@@ -212,6 +216,12 @@ typedef long int			code_int;
 
 typedef	unsigned char	char_type;
 
+typedef enum {
+	ALGORITHM_AUTO,
+	ALGORITHM_LZW,
+	ALGORITHM_GZIP
+} algorithm_type;
+
 #define ARGVAL() (*++(*argv) || (--argc && *++argv))
 
 #define MAXCODE(n)	(1L << (n))
@@ -256,6 +266,9 @@ int				keep = 0;			/* Keep input files								*/
 int				nomagic = 0;		/* Use a 3-byte magic number header,			*/
 									/* unless old file 								*/
 int				maxbits = BITS;		/* user settable max # bits/code 				*/
+int				maxbits_set = 0;	/* -b was given on the command line				*/
+int				gzip_level = 6;		/* gzip/deflate compression level				*/
+algorithm_type	algorithm = ALGORITHM_LZW;
 int 			zcat_flg = 0;		/* Write output on stdout, suppress messages 	*/
 int				recursive = 0;  	/* compress directories 						*/
 int				exit_code = -1;		/* Exitcode of compress (-1 no file compressed)	*/
@@ -322,10 +335,25 @@ static const int primetab[256] =		/* Special secudary hash table.		*/
 static void Usage(int);
 static void comprexx(const char *);
 static void compdir(char *);
-static void compress(int, int);
-static void decompress(int, int);
+static int parse_algorithm(const char *);
+static const char *algorithm_name(algorithm_type);
+static const char *algorithm_suffix(algorithm_type);
+static algorithm_type algorithm_from_suffix(const char *, unsigned long);
+static algorithm_type algorithm_from_header(const char_type *, int);
+static int algorithm_supported(algorithm_type);
+static void unsupported_algorithm(algorithm_type);
+static void compress_stream(int, int);
+static void decompress_stream(int, int, algorithm_type);
+static void lzw_compress(int, int);
+static void lzw_decompress(int, int, const char_type *, int);
+static void gzip_compress(int, int);
+static void gzip_decompress(int, int, const char_type *, int);
+#ifdef USE_ZLIB
+static void write_buf(int, const void *, size_t);
+#endif
 static void read_error(void);
 static void write_error(void);
+static void abort_compress_signal(int);
 static void abort_compress(void);
 static void prratio(FILE *, long, long);
 static void about(void);
@@ -379,14 +407,14 @@ main(int argc, char *argv[])
 
 #ifdef SIGINT
 		if ((fgnd_flag = (signal(SIGINT, SIG_IGN)) != SIG_IGN))
-			signal(SIGINT, (SIG_TYPE)abort_compress);
+			signal(SIGINT, abort_compress_signal);
 #endif
 
 #ifdef SIGTERM
-		signal(SIGTERM, (SIG_TYPE)abort_compress);
+		signal(SIGTERM, abort_compress_signal);
 #endif
 #ifdef SIGHUP
-		signal(SIGHUP, (SIG_TYPE)abort_compress);
+		signal(SIGHUP, abort_compress_signal);
 #endif
 
 #ifdef COMPATIBLE
@@ -422,6 +450,8 @@ main(int argc, char *argv[])
 		 * -k => keep input files
      	 * -n => no header: useful to uncompress old files
      	 * -b maxbits => maxbits.  If -b is specified, then maxbits MUST be given also.
+	     * -g => select gzip/deflate output
+	     * -m algo => select lzw, gzip, or deflate output
      	 * -c => cat all output to stdout
      	 * -C => generate output compatible with compress 2.0.
      	 * -r => recursively compress directories
@@ -481,6 +511,22 @@ main(int argc, char *argv[])
 						}
 
 						maxbits = atoi(*argv);
+						maxbits_set = 1;
+						goto nextarg;
+
+					case 'g':
+						algorithm = ALGORITHM_GZIP;
+						break;
+
+					case 'm':
+						if (!ARGVAL())
+						{
+							fprintf(stderr, "Missing algorithm\n");
+							Usage(1);
+						}
+
+						if (!parse_algorithm(*argv))
+							Usage(1);
 						goto nextarg;
 
 		    		case 'c':
@@ -518,8 +564,25 @@ main(int argc, char *argv[])
 nextarg:	continue;
     	}
 
-    	if (maxbits < INIT_BITS)	maxbits = INIT_BITS;
-    	if (maxbits > BITS) 		maxbits = BITS;
+		if (algorithm == ALGORITHM_GZIP)
+		{
+			if (maxbits_set)
+			{
+				if (maxbits < 1 || maxbits > 9)
+				{
+					fprintf(stderr, "gzip compression level must be between 1 and 9\n");
+					Usage(1);
+				}
+				gzip_level = maxbits;
+			}
+			else
+				gzip_level = 6;
+		}
+		else
+		{
+			if (maxbits < INIT_BITS)	maxbits = INIT_BITS;
+			if (maxbits > BITS) 		maxbits = BITS;
+		}
 
     	if (*filelist != NULL)
 		{
@@ -537,20 +600,20 @@ nextarg:	continue;
 
 			if (do_decomp == 0)
 			{
-				compress(0, 1);
+				compress_stream(0, 1);
 
-				if (zcat_flg == 0 && !quiet)
+				if (exit_code != 3 && zcat_flg == 0 && !quiet)
 				{
 					fprintf(stderr, "Compression: ");
 					prratio(stderr, bytes_in-bytes_out, bytes_in);
 					fprintf(stderr, "\n");
 				}
 
-				if (bytes_out >= bytes_in && !(force))
+				if (exit_code != 3 && bytes_out >= bytes_in && !(force))
 					exit_code = 2;
 			}
 			else
-				decompress(0, 1);
+				decompress_stream(0, 1, ALGORITHM_AUTO);
 		}
 
 		if (recursive && exit_code == -1) {
@@ -563,17 +626,19 @@ void
 Usage(int status)
 	{
 		fprintf(status ? stderr : stdout, "\
-Usage: %s [-dfhvcVr] [-b maxbits] [--] [path ...]\n\
+Usage: %s [-dfghvcVr] [-b maxbits] [-m algo] [--] [path ...]\n\
   --   Halt option processing and treat all remaining args as paths.\n\
   -d   If given, decompression is done instead.\n\
   -c   Write output on stdout, don't remove original.\n\
   -k   Keep input files (do not automatically remove).\n\
-  -b   Parameter limits the max number of bits/code.\n\
+  -b   Limits LZW bits/code, or gzip compression level when using gzip.\n\
   -f   Forces output file to be generated, even if one already.\n\
        exists, and even if no space is saved by compressing.\n\
        If -f is not used, the user will be prompted if stdin is.\n\
        a tty, otherwise, the output file will not be overwritten.\n\
+  -g   Compress using gzip/deflate; equivalent to -m gzip.\n\
   -h   This help output.\n\
+  -m   Select algorithm: lzw, gzip, or deflate.\n\
   -v   Write compression statistics.\n\
   -V   Output version and compile options.\n\
   -r   Recursive. If a path is a directory, compress everything in it.\n",
@@ -582,17 +647,112 @@ Usage: %s [-dfhvcVr] [-b maxbits] [--] [path ...]\n\
     		exit(status);
 	}
 
+int
+parse_algorithm(const char *name)
+	{
+		if (strcmp(name, "lzw") == 0)
+		{
+			algorithm = ALGORITHM_LZW;
+			return 1;
+		}
+
+		if (strcmp(name, "gzip") == 0 || strcmp(name, "deflate") == 0)
+		{
+			algorithm = ALGORITHM_GZIP;
+			return 1;
+		}
+
+		fprintf(stderr, "Unknown algorithm: %s\n", name);
+		return 0;
+	}
+
+const char *
+algorithm_name(algorithm_type algo)
+	{
+		switch (algo)
+		{
+		case ALGORITHM_LZW:
+			return "lzw";
+		case ALGORITHM_GZIP:
+			return "gzip";
+		default:
+			return "unknown";
+		}
+	}
+
+const char *
+algorithm_suffix(algorithm_type algo)
+	{
+		switch (algo)
+		{
+		case ALGORITHM_GZIP:
+			return ".gz";
+		case ALGORITHM_LZW:
+		default:
+			return ".Z";
+		}
+	}
+
+algorithm_type
+algorithm_from_suffix(const char *name, unsigned long namesize)
+	{
+		if (namesize >= 2 && strcmp(&name[namesize - 2], ".Z") == 0)
+			return ALGORITHM_LZW;
+		if (namesize >= 3 && strcmp(&name[namesize - 3], ".gz") == 0)
+			return ALGORITHM_GZIP;
+		return ALGORITHM_AUTO;
+	}
+
+algorithm_type
+algorithm_from_header(const char_type *header, int header_len)
+	{
+		if (header_len >= 2 && header[0] == MAGIC_1 && header[1] == MAGIC_2)
+			return ALGORITHM_LZW;
+		if (header_len >= 2 && header[0] == (char_type)'\037' &&
+				header[1] == (char_type)'\213')
+			return ALGORITHM_GZIP;
+		return ALGORITHM_AUTO;
+	}
+
+int
+algorithm_supported(algorithm_type algo)
+	{
+#ifdef USE_ZLIB
+		(void)algo;
+		return 1;
+#else
+		return algo != ALGORITHM_GZIP;
+#endif
+	}
+
+void
+unsupported_algorithm(algorithm_type algo)
+	{
+		fprintf(stderr, "%s algorithm not supported in this build\n",
+				algorithm_name(algo));
+		exit_code = 3;
+	}
+
 void
 comprexx(const char	*fileptr)
 	{
 		int				 fdin = -1;
 		int				 fdout = -1;
-		int				 has_z_suffix;
+		algorithm_type	 suffix_algorithm;
+		algorithm_type	 file_algorithm = ALGORITHM_AUTO;
+		const char		*suffix;
+		size_t			 suffix_len;
 		char			*tempname;
 		unsigned long	 namesize = strlen(fileptr);
 
-		/* Create a temp buffer to add/remove the .Z suffix. */
-		tempname = malloc(namesize + 3);
+		if (!do_decomp && !algorithm_supported(algorithm))
+		{
+			unsupported_algorithm(algorithm);
+			return;
+		}
+
+		/* Create a temp buffer to add/remove compressed suffixes. */
+		tempname = malloc(namesize + 4);
 		if (tempname == NULL)
 		{
 			perror("malloc");
@@ -600,7 +760,7 @@ comprexx(const char	*fileptr)
 		}
 
 		strcpy(tempname,fileptr);
-		has_z_suffix = (namesize >= 2 && strcmp(&tempname[namesize - 2], ".Z") == 0);
+		suffix_algorithm = algorithm_from_suffix(tempname, namesize);
 		errno = 0;
 
 		if (lstat(tempname,&infstat) == -1)
@@ -611,15 +771,16 @@ comprexx(const char	*fileptr)
 				{
 		    	case ENOENT:	/* file doesn't exist */
 	      			/*
-	      			** if the given name doesn't end with .Z, try appending one
+					** if the given name doesn't end with a compressed suffix,
+					** try appending .Z for historical compatibility.
 	      			** This is obviously the wrong thing to do if it's a
 	      			** directory, but it shouldn't do any harm.
 	      			*/
-					if (!has_z_suffix)
+					if (suffix_algorithm == ALGORITHM_AUTO)
 					{
 						memcpy(&tempname[namesize], ".Z", 3);
 						namesize += 2;
-						has_z_suffix = 1;
+						suffix_algorithm = ALGORITHM_LZW;
 						errno = 0;
 						if (lstat(tempname,&infstat) == -1)
 						{
@@ -668,9 +829,10 @@ comprexx(const char	*fileptr)
 		case S_IFREG:	/* regular file */
 		  	if (do_decomp != 0)
 			{/* DECOMPRESSION */
+				file_algorithm = suffix_algorithm;
 		    	if (!zcat_flg)
 				{
-					if (!has_z_suffix)
+					if (file_algorithm == ALGORITHM_AUTO)
 					{
 						/* Ignore this scenario in recursive mode: while we
 						 * decompress files in this dir, our readdir scan
@@ -685,11 +847,13 @@ comprexx(const char	*fileptr)
 						}
 
 						if (!quiet)
-		  					fprintf(stderr,"%s - no .Z suffix\n",tempname);
+							fprintf(stderr,"%s - no .Z or .gz suffix\n",tempname);
 
 						goto error;
 	      			}
 		    	}
+				else
+					file_algorithm = ALGORITHM_AUTO;
 
 				free(ofname);
 				ofname = strdup(tempname);
@@ -699,21 +863,31 @@ comprexx(const char	*fileptr)
 					goto error;
 				}
 
-				/* Strip of .Z suffix */
-				if (has_z_suffix)
-					ofname[namesize - 2] = '\0';
+				/* Strip off the compressed suffix. */
+				if (file_algorithm != ALGORITHM_AUTO)
+					ofname[namesize - strlen(algorithm_suffix(file_algorithm))] = '\0';
+
+				if (!zcat_flg && !algorithm_supported(file_algorithm))
+				{
+					unsupported_algorithm(file_algorithm);
+					free(ofname);
+					ofname = NULL;
+					free(tempname);
+					return;
+				}
 	   		}
 	   		else
 			{/* COMPRESSION */
 		    	if (!zcat_flg)
 				{
-					if (has_z_suffix)
+					if (suffix_algorithm == algorithm)
 					{
 						/* Ignore this scenario in recursive mode.
 						 * See comment above in the decompress path.
 						 */
 						if (!recursive)
-							fprintf(stderr, "%s: already has .Z suffix -- no change\n", tempname);
+							fprintf(stderr, "%s: already has %s suffix -- no change\n",
+									tempname, algorithm_suffix(algorithm));
 						free(tempname);
 						return;
 					}
@@ -726,14 +900,16 @@ comprexx(const char	*fileptr)
 					}
 				}
 
-				ofname = malloc(namesize + 3);
+				suffix = algorithm_suffix(algorithm);
+				suffix_len = strlen(suffix);
+				ofname = malloc(namesize + suffix_len + 1);
 				if (ofname == NULL)
 				{
 					perror("malloc");
 					goto error;
 				}
 				memcpy(ofname, tempname, namesize);
-				strcpy(&ofname[namesize], ".Z");
+				strcpy(&ofname[namesize], suffix);
     		}
 
 	    	if ((fdin = open(ifname = tempname, O_RDONLY|O_BINARY)) == -1)
@@ -810,9 +986,9 @@ comprexx(const char	*fileptr)
 			}
 
     		if (do_decomp == 0)
-				compress(fdin, fdout);
+				compress_stream(fdin, fdout);
     		else
-				decompress(fdin, fdout);
+				decompress_stream(fdin, fdout, file_algorithm);
 
 			close(fdin);
 
@@ -992,6 +1168,266 @@ compdir(char *dir)
 		free(nptr);
 	}
 #endif
+
+#ifdef USE_ZLIB
+void
+write_buf(int fd, const void *buf, size_t len)
+	{
+		const char *pos = (const char *)buf;
+
+		while (len > 0)
+		{
+			int wrote = write(fd, pos, len);
+
+			if (wrote <= 0)
+				write_error();
+
+			pos += wrote;
+			len -= wrote;
+		}
+	}
+#endif
+
+void
+compress_stream(int fdin, int fdout)
+	{
+		if (!algorithm_supported(algorithm))
+		{
+			unsupported_algorithm(algorithm);
+			return;
+		}
+
+		switch (algorithm)
+		{
+		case ALGORITHM_GZIP:
+			gzip_compress(fdin, fdout);
+			break;
+		case ALGORITHM_LZW:
+		default:
+			lzw_compress(fdin, fdout);
+			break;
+		}
+	}
+
+void
+decompress_stream(int fdin, int fdout, algorithm_type expected_algorithm)
+	{
+		char_type header[3];
+		int header_len = 0;
+		int rsize = 0;
+
+		while (header_len < (int)sizeof(header) &&
+				(rsize = read(fdin, header + header_len,
+							  sizeof(header) - header_len)) > 0)
+			header_len += rsize;
+
+		if (rsize < 0)
+			read_error();
+
+		if (header_len == 0)
+		{
+			bytes_in = 0;
+			bytes_out = 0;
+			return;
+		}
+
+		if (expected_algorithm == ALGORITHM_AUTO)
+			expected_algorithm = algorithm_from_header(header, header_len);
+
+		if (expected_algorithm == ALGORITHM_AUTO)
+		{
+			fprintf(stderr, "%s: not in compressed format\n",
+								(ifname[0] != '\0'? ifname : "stdin"));
+			exit_code = 1;
+			return;
+		}
+
+		if (!algorithm_supported(expected_algorithm))
+		{
+			unsupported_algorithm(expected_algorithm);
+			return;
+		}
+
+		switch (expected_algorithm)
+		{
+		case ALGORITHM_GZIP:
+			gzip_decompress(fdin, fdout, header, header_len);
+			break;
+		case ALGORITHM_LZW:
+		default:
+			lzw_decompress(fdin, fdout, header, header_len);
+			break;
+		}
+	}
+
+#ifdef USE_ZLIB
+void
+gzip_compress(int fdin, int fdout)
+	{
+		z_stream stream;
+		int rsize;
+		int ret;
+		int flush;
+
+		memset(&stream, 0, sizeof(stream));
+
+		ret = deflateInit2(&stream, gzip_level, Z_DEFLATED, 15 + 16, 8,
+						   Z_DEFAULT_STRATEGY);
+		if (ret != Z_OK)
+		{
+			fprintf(stderr, "%s: cannot initialize gzip compressor\n", progname);
+			abort_compress();
+		}
+
+		bytes_in = 0;
+		bytes_out = 0;
+
+		do
+		{
+			rsize = read(fdin, inbuf, IBUFSIZ);
+			if (rsize < 0)
+			{
+				deflateEnd(&stream);
+				read_error();
+			}
+
+			bytes_in += rsize;
+			flush = (rsize == 0) ? Z_FINISH : Z_NO_FLUSH;
+			stream.next_in = inbuf;
+			stream.avail_in = rsize;
+
+			do
+			{
+				unsigned int have;
+
+				stream.next_out = outbuf;
+				stream.avail_out = OBUFSIZ;
+				ret = deflate(&stream, flush);
+
+				if (ret == Z_STREAM_ERROR)
+				{
+					deflateEnd(&stream);
+					fprintf(stderr, "%s: gzip compression failed\n", progname);
+					abort_compress();
+				}
+
+				have = OBUFSIZ - stream.avail_out;
+				if (have > 0)
+				{
+					write_buf(fdout, outbuf, have);
+					bytes_out += have;
+				}
+			}
+			while (stream.avail_out == 0);
+		}
+		while (flush != Z_FINISH);
+
+		deflateEnd(&stream);
+	}
+
+void
+gzip_decompress(int fdin, int fdout, const char_type *initial, int initial_len)
+	{
+		z_stream stream;
+		int ret;
+		int rsize;
+		int using_initial = initial_len > 0;
+
+		memset(&stream, 0, sizeof(stream));
+
+		ret = inflateInit2(&stream, 15 + 16);
+		if (ret != Z_OK)
+		{
+			fprintf(stderr, "%s: cannot initialize gzip decompressor\n", progname);
+			abort_compress();
+		}
+
+		bytes_in = 0;
+		bytes_out = 0;
+		ret = Z_OK;
+
+		do
+		{
+			if (using_initial)
+			{
+				stream.next_in = (Bytef *)initial;
+				stream.avail_in = initial_len;
+				bytes_in += initial_len;
+				using_initial = 0;
+			}
+			else
+			{
+				rsize = read(fdin, inbuf, IBUFSIZ);
+				if (rsize < 0)
+				{
+					inflateEnd(&stream);
+					read_error();
+				}
+
+				if (rsize == 0)
+					break;
+
+				stream.next_in = inbuf;
+				stream.avail_in = rsize;
+				bytes_in += rsize;
+			}
+
+			do
+			{
+				unsigned int have;
+
+				stream.next_out = outbuf;
+				stream.avail_out = OBUFSIZ;
+				ret = inflate(&stream, Z_NO_FLUSH);
+
+				if (ret == Z_NEED_DICT || ret == Z_DATA_ERROR ||
+						ret == Z_MEM_ERROR || ret == Z_STREAM_ERROR)
+				{
+					inflateEnd(&stream);
+					fprintf(stderr, "uncompress: corrupt input\n");
+					abort_compress();
+				}
+
+				have = OBUFSIZ - stream.avail_out;
+				if (have > 0)
+				{
+					write_buf(fdout, outbuf, have);
+					bytes_out += have;
+				}
+			}
+			while (stream.avail_out == 0);
+		}
+		while (ret != Z_STREAM_END);
+
+		if (ret != Z_STREAM_END)
+		{
+			inflateEnd(&stream);
+			fprintf(stderr, "uncompress: corrupt input\n");
+			abort_compress();
+		}
+
+		inflateEnd(&stream);
+	}
+#else
+void
+gzip_compress(int fdin, int fdout)
+	{
+		(void)fdin;
+		(void)fdout;
+		unsupported_algorithm(ALGORITHM_GZIP);
+	}
+
+void
+gzip_decompress(int fdin, int fdout, const char_type *initial, int initial_len)
+	{
+		(void)fdin;
+		(void)fdout;
+		(void)initial;
+		(void)initial_len;
+		unsupported_algorithm(ALGORITHM_GZIP);
+	}
+#endif
+
 /*
  * compress fdin to fdout
  *
@@ -1008,7 +1444,7 @@ compdir(char *dir)
  * questions about this implementation to ames!jaw.
  */
 void
-compress(int fdin, int fdout)
+lzw_compress(int fdin, int fdout)
 	{
 		long hp;
 		int rpos;
@@ -1241,7 +1677,7 @@ endlop:			if (fcode.e.ent >= FIRST && rpos < rsize)
  */
 
 void
-decompress(int fdin, int fdout)
+lzw_decompress(int fdin, int fdout, const char_type *initial, int initial_len)
 	{
 		char_type *stackp;
 		code_int code;
@@ -1263,6 +1699,13 @@ decompress(int fdin, int fdout)
 		bytes_in = 0;
 		bytes_out = 0;
 		insize = 0;
+		rsize = 0;
+
+		if (initial_len > 0)
+		{
+			memcpy(inbuf, initial, initial_len);
+			insize = initial_len;
+		}
 
 		while (insize < 3 && (rsize = read(fdin, inbuf+insize, IBUFSIZ)) > 0)
 			insize += rsize;
@@ -1481,6 +1924,13 @@ write_error(void)
 	}
 
 void
+abort_compress_signal(int signum)
+	{
+		(void)signum;
+		abort_compress();
+	}
+
+void
 abort_compress(void)
 	{
 		if (remove_ofname)
@@ -1532,6 +1982,9 @@ about(void)
 #endif
 #ifdef LSTAT
 		printf("LSTAT, ");
+#endif
+#ifdef USE_ZLIB
+		printf("USE_ZLIB, ");
 #endif
 		printf("\n        IBUFSIZ=%d, OBUFSIZ=%d, BITS=%d\n",
 			IBUFSIZ, OBUFSIZ, BITS);

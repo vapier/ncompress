@@ -13,12 +13,17 @@ compress, uncompress, zcat \- compress and expand data
 ] [
 .B \-c
 ] [
+.B \-g
+] [
 .B \-V
 ] [
 .B \-r
 ] [
 .B \-b
 .I bits
+] [
+.B \-m
+.I algo
 ] [
 .B \-\-
 ] [
@@ -53,7 +58,8 @@ compress, uncompress, zcat \- compress and expand data
 ]
 .SH DESCRIPTION
 .I Compress
-reduces the size of the named files using adaptive Lempel\-Ziv coding.
+reduces the size of the named files using the selected compression algorithm.
+The default algorithm is adaptive Lempel\-Ziv coding.
 Whenever possible,
 each file is replaced by one with the extension
 .B "\&.Z,"
@@ -85,9 +91,10 @@ or
 takes a list of files on its command line and replaces each
 file whose name ends with
 .B "\&.Z"
+or
+.B "\&.gz"
 and which begins with the correct magic number with an uncompressed
-file without the
-.B "\&.Z."
+file without the compressed suffix.
 The uncompressed file will have the mode, ownership and
 timestamps of the compressed file.
 .PP
@@ -114,7 +121,36 @@ standard input and writes the uncompressed data on standard output.
 will uncompress files that have the correct magic number whether
 they have a
 .B "\&.Z"
+or
+.B "\&.gz"
 suffix or not.
+.PP
+The
+.B \-g
+option is equivalent to
+.BR "\-m gzip" .
+The
+.B \-m
+option selects the compression algorithm.  Supported values are
+.BR lzw ,
+.BR gzip ,
+and
+.BR deflate .
+.B lzw
+uses adaptive Lempel\-Ziv coding and the
+.B "\&.Z"
+suffix.
+.B gzip
+and
+.B deflate
+are synonyms for DEFLATE data stored in gzip format and use the
+.B "\&.gz"
+suffix.
+If multiple
+.B \-g
+or
+.B \-m
+options are specified, the last one is used.
 .PP
 If the
 .B \-r
@@ -134,6 +170,9 @@ along with any preprocessor flags specified during compilation, on
 stderr before doing any compression or uncompression.
 .PP
 .I Compress
+with the default
+.B lzw
+algorithm
 uses the modified Lempel\-Ziv algorithm popularized in
 "A Technique for High Performance Data Compression",
 Terry A. Welch,
@@ -173,6 +212,15 @@ is encoded within the output, along with
 a magic number to ensure that neither decompression of random data nor
 recompression of compressed data is attempted.
 .PP
+When
+.B gzip
+or
+.B deflate
+is selected, the
+.B \-b
+option specifies the gzip compression level from 1 through 9.  The default
+level is 6.
+.PP
 .ne 8
 The amount of compression obtained depends on the size of the
 input, the number of
@@ -201,7 +249,7 @@ Exit status is normally 0;
 if the last file is larger after (attempted) compression, the status is 2;
 if an error occurs, exit status is 1.
 .PP
-Usage: compress [\-dfvcVr] [\-b maxbits] [file ...]
+Usage: compress [\-dfgvcVr] [\-b maxbits] [\-m algo] [file ...]
 .in +8
 Invalid options were specified on the command line.
 .in -8
@@ -262,6 +310,10 @@ Compression:
 Percentage of the input saved by compression.
 (Relevant only for
 .BR \-v \.)
+.in -8
+algorithm not supported in this build
+.in +8
+The selected algorithm requires support that was disabled at build time.
 .in -8
 \-\- not a regular file or directory: ignored
 .in +8

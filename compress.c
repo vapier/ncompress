@@ -275,11 +275,12 @@ long 			bytes_out;			/* Total number of byte to output				*/
 count_int		htab[HSIZE];
 unsigned short	codetab[HSIZE];
 
+#define TABPREFIXSIZE			256
 #define	tab_prefixof(i)			codetab[i]
 #define	tab_suffixof(i)			((char_type *)(htab))[i]
 #define	de_stack				((char_type *)&(htab[HSIZE-1]))
 #define	clear_htab()			memset(htab, -1, sizeof(htab))
-#define	clear_tab_prefixof()	memset(codetab, 0, 256);
+#define	clear_tab_prefixof()	memset(codetab, 0, TABPREFIXSIZE);
 
 #ifdef FAST
 static const int primetab[256] =		/* Special secudary hash table.		*/
@@ -1303,12 +1304,12 @@ decompress(int fdin, int fdout)
 		outpos = 0;
 		posbits = 3<<3;
 
-	    free_ent = ((block_mode) ? FIRST : 256);
+	    free_ent = ((block_mode) ? FIRST : TABPREFIXSIZE);
 
 		clear_tab_prefixof();	/* As above, initialize the first
-								   256 entries in the table. */
+								   256 entries (TABPREFIXSIZE) in the table. */
 
-	    for (code = 255 ; code >= 0 ; --code)
+	    for (code = TABPREFIXSIZE-1 ; code >= 0 ; --code)
 			tab_suffixof(code) = (char_type)code;
 
 		do

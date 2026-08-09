@@ -259,6 +259,7 @@ int				maxbits = BITS;		/* user settable max # bits/code 				*/
 int 			zcat_flg = 0;		/* Write output on stdout, suppress messages 	*/
 int				recursive = 0;  	/* compress directories 						*/
 int				exit_code = -1;		/* Exitcode of compress (-1 no file compressed)	*/
+int			compat9 = 0;                    /* compatibility with older -b9 bug */
 
 char_type		inbuf[IBUFSIZ+64];	/* Input buffer									*/
 char_type		outbuf[OBUFSIZ+2048];/* Output buffer								*/
@@ -502,7 +503,14 @@ main(int argc, char *argv[])
 					case 'h':
 						Usage(0);
 						break;
-
+				case '-':
+					if (strcmp(*argv, "-compat9") == 0) {
+						compat9 = 1;
+						goto nextarg;
+					} else {
+						fprintf(stderr, "Unknown flag: '-%s'; ", *argv);
+						Usage(1);
+					}
 			    	default:
 						fprintf(stderr, "Unknown flag: '%c'; ", **argv);
 						Usage(1);
@@ -576,7 +584,8 @@ Usage: %s [-dfhvcVr] [-b maxbits] [--] [path ...]\n\
   -h   This help output.\n\
   -v   Write compression statistics.\n\
   -V   Output version and compile options.\n\
-  -r   Recursive. If a path is a directory, compress everything in it.\n",
+  -r   Recursive. If a path is a directory, compress everything in it.\n\
+  --compat9   Decompress files compressed with old `-b9' bug\n",
 			progname);
 
     		exit(status);
@@ -1292,6 +1301,11 @@ decompress(int fdin, int fdout)
 					(*ifname != '\0' ? ifname : "stdin"), maxbits, BITS);
 			exit_code = 4;
 			return;
+		}
+
+		if (maxbits == 9 && compat9) {
+			// See: https://github.com/vapier/ncompress/pull/34#issuecomment-2106184649
+			maxbits = 10;
 		}
 
 		maxmaxcode = MAXCODE(maxbits);

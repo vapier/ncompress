@@ -2,43 +2,47 @@
 #!/bin/sh
 
 OPTIONS=
-FILES=
-for ARG
+while case ${1-} in -*) true;; *) false;; esac
 do
-	case "$ARG" in
-	-*)	OPTIONS="$OPTIONS $ARG";;
-	*)	FILES="$FILES $ARG";;
+	case $1 in
+	--)	shift; break;;
 	esac
+	OPTIONS="$OPTIONS $1"
+	shift
 done
-if test -z "$FILES"; then
-	echo "Usage: zcmp [cmp_options] file [file]"
-	exit 1
-fi
-set $FILES
-if test $# -eq 1; then
-	FILE=`expr $1 : '\(.*\)\.Z' '|' $1`
-	zcat $FILE | cmp $OPTIONS - $FILE
-	STAT="$?"
-elif test $# -eq 2; then
-	case "$1" in
-	*.Z)	case "$2" in
-		*.Z)	F=`basename $2 .Z`
-			zcat $2 > /tmp/$F.$$
-			zcat $1 | cmp $OPTIONS - /tmp/$F.$$
-			STAT="$?";;
-		*)	zcat $1 | cmp $OPTIONS - $2;;
+
+case $# in
+1)	FILE=${1%.Z}
+	zcat -- "$FILE" | cmp $OPTIONS -- - "$FILE"
+	STAT=$?;;
+2)	case $1 in
+	*.Z)	case $2 in
+		*.Z)	tmp=
+			trap 'test -n "$tmp" && rm -f "$tmp"; exit 2' HUP INT PIPE TERM
+			trap 'test -n "$tmp" && rm -f "$tmp"' 0
+			if type mktemp >/dev/null 2>&1; then
+				tmp=`mktemp "${TMPDIR:-/tmp}/zcmp.XXXXXX"` || exit 2
+			else
+				set -C
+				tmp=${TMPDIR:-/tmp}/zcmp.$$
+				(umask 077; : >"$tmp") 2>/dev/null || exit 2
+			fi
+			zcat -- "$2" >"$tmp" || exit 2
+			zcat -- "$1" | cmp $OPTIONS -- - "$tmp"
+			STAT=$?
+			rm -f "$tmp"
+			trap - HUP INT PIPE TERM 0;;
+		*)	zcat -- "$1" | cmp $OPTIONS -- - "$2"
+			STAT=$?;;
 		esac;;
-	*)	case "$2" in
-		*.Z)	F=`basename $2 .Z`
-			zcat $2 > /tmp/$F.$$
-			cmp $OPTIONS $1 /tmp/$F.$$
-			STAT="$?";;
-		*)	cmp $OPTIONS $1 $2
-			STAT="$?";;
+	*)	case $2 in
+		*.Z)	zcat -- "$2" | cmp $OPTIONS -- "$1" -
+			STAT=$?;;
+		*)	cmp $OPTIONS -- "$1" "$2"
+			STAT=$?;;
 		esac;;
-	esac
-	exit "$STAT"
-else
-	echo "Usage: zcmp [cmp_options] file [file]"
-	exit 1
-fi
+	esac;;
+*)	echo "Usage: zcmp [cmp_options] file [file]" >&2
+	exit 1;;
+esac
+exit "$STAT"

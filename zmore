@@ -15,7 +15,7 @@ do
 		fi
 	fi
 	echo "------> $FILE <------"
-	zcat $FILE | more
+	zcat -- "$FILE" | more
 	if test -t; then
 		FIRST=0
 	fi

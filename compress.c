@@ -40,6 +40,10 @@
 #	include	<io.h>
 #endif
 
+#if defined(RECURSIVE) && !defined(AMIGA) && !defined(MINGW)
+#	define DIRFD_RECURSIVE 1
+#endif
+
 #ifdef UTIME_H
 #	include	<utime.h>
 #else
@@ -320,8 +324,8 @@ static const int primetab[256] =		/* Special secudary hash table.		*/
 #endif
 
 static void Usage(int);
-static void comprexx(const char *);
-static void compdir(char *);
+static void comprexx(const char *, const char *);
+static void compdir(char *, const char *);
 static void compress(int, int);
 static void decompress(int, int);
 static void read_error(void);
@@ -524,7 +528,7 @@ nextarg:	continue;
     	if (*filelist != NULL)
 		{
       		for (fileptr = filelist; *fileptr; fileptr++)
-				comprexx(*fileptr);
+				comprexx(*fileptr, *fileptr);
     	}
 		else
 		{/* Standard input */
@@ -583,23 +587,28 @@ Usage: %s [-dfhvcVr] [-b maxbits] [--] [path ...]\n\
 	}
 
 void
-comprexx(const char	*fileptr)
+comprexx(const char *fileptr, const char *displayptr)
 	{
 		int				 fdin = -1;
 		int				 fdout = -1;
 		int				 has_z_suffix;
 		char			*tempname;
+		char			*displayname;
+		char			*display_ofname = NULL;
 		unsigned long	 namesize = strlen(fileptr);
+		unsigned long	 displaysize = strlen(displayptr);
 
 		/* Create a temp buffer to add/remove the .Z suffix. */
 		tempname = malloc(namesize + 3);
-		if (tempname == NULL)
+		displayname = malloc(displaysize + 3);
+		if (tempname == NULL || displayname == NULL)
 		{
 			perror("malloc");
 			goto error;
 		}
 
 		strcpy(tempname,fileptr);
+		strcpy(displayname,displayptr);
 		has_z_suffix = (namesize >= 2 && strcmp(&tempname[namesize - 2], ".Z") == 0);
 		errno = 0;
 
@@ -618,37 +627,39 @@ comprexx(const char	*fileptr)
 					if (!has_z_suffix)
 					{
 						memcpy(&tempname[namesize], ".Z", 3);
+						memcpy(&displayname[displaysize], ".Z", 3);
 						namesize += 2;
+						displaysize += 2;
 						has_z_suffix = 1;
 						errno = 0;
 						if (lstat(tempname,&infstat) == -1)
 						{
-						  	perror(tempname);
+							perror(displayname);
 							goto error;
 						}
 
 						if ((infstat.st_mode & S_IFMT) != S_IFREG)
 						{
-							fprintf(stderr, "%s: Not a regular file.\n", tempname);
+							fprintf(stderr, "%s: Not a regular file.\n", displayname);
 							goto error;
 						}
 		      		}
 		      		else
 					{
-						perror(tempname);
+						perror(displayname);
 						goto error;
 		      		}
 
 		      		break;
 
 	    		default:
-		      		perror(tempname);
+					perror(displayname);
 					goto error;
 	    		}
 	  		}
 	  		else
 			{
-	      		perror(tempname);
+				perror(displayname);
 				goto error;
 	  		}
 		}
@@ -658,11 +669,11 @@ comprexx(const char	*fileptr)
 		case S_IFDIR:	/* directory */
 #ifdef	RECURSIVE
 		  	if (recursive)
-		    	compdir(tempname);
+				compdir(tempname, displayname);
 		  	else
 #endif
 			if (!quiet)
-		    	fprintf(stderr,"%s is a directory -- ignored\n", tempname);
+				fprintf(stderr,"%s is a directory -- ignored\n", displayname);
 		  	break;
 
 		case S_IFREG:	/* regular file */
@@ -681,11 +692,12 @@ comprexx(const char	*fileptr)
 						 */
 						if (recursive) {
 							free(tempname);
+							free(displayname);
 							return;
 						}
 
 						if (!quiet)
-		  					fprintf(stderr,"%s - no .Z suffix\n",tempname);
+							fprintf(stderr,"%s - no .Z suffix\n",displayname);
 
 						goto error;
 	      			}
@@ -693,15 +705,18 @@ comprexx(const char	*fileptr)
 
 				free(ofname);
 				ofname = strdup(tempname);
-				if (ofname == NULL)
+				display_ofname = strdup(displayname);
+				if (ofname == NULL || display_ofname == NULL)
 				{
 					perror("strdup");
 					goto error;
 				}
 
 				/* Strip of .Z suffix */
-				if (has_z_suffix)
+				if (has_z_suffix) {
 					ofname[namesize - 2] = '\0';
+					display_ofname[displaysize - 2] = '\0';
+				}
 	   		}
 	   		else
 			{/* COMPRESSION */
@@ -713,32 +728,37 @@ comprexx(const char	*fileptr)
 						 * See comment above in the decompress path.
 						 */
 						if (!recursive)
-							fprintf(stderr, "%s: already has .Z suffix -- no change\n", tempname);
+							fprintf(stderr, "%s: already has .Z suffix -- no change\n", displayname);
 						free(tempname);
+						free(displayname);
 						return;
 					}
 
 					if (infstat.st_nlink > 1 && (!force))
 					{
 						fprintf(stderr, "%s has %jd other links: unchanged\n",
-										tempname, (intmax_t)(infstat.st_nlink - 1));
+										displayname, (intmax_t)(infstat.st_nlink - 1));
 						goto error;
 					}
 				}
 
 				ofname = malloc(namesize + 3);
-				if (ofname == NULL)
+				display_ofname = malloc(displaysize + 3);
+				if (ofname == NULL || display_ofname == NULL)
 				{
 					perror("malloc");
 					goto error;
 				}
 				memcpy(ofname, tempname, namesize);
 				strcpy(&ofname[namesize], ".Z");
+				memcpy(display_ofname, displayname, displaysize);
+				strcpy(&display_ofname[displaysize], ".Z");
     		}
 
-	    	if ((fdin = open(ifname = tempname, O_RDONLY|O_BINARY)) == -1)
+		ifname = displayname;
+		if ((fdin = open(tempname, O_RDONLY|O_BINARY)) == -1)
 			{
-		      	perror(tempname);
+				perror(displayname);
 				goto error;
 	    	}
 
@@ -750,11 +770,11 @@ comprexx(const char	*fileptr)
 					{
 		    			inbuf[0] = 'n';
 
-		    			fprintf(stderr, "%s already exists.\n", ofname);
+					fprintf(stderr, "%s already exists.\n", display_ofname);
 
 		    			if (fgnd_flag && isatty(0))
 						{
-							fprintf(stderr, "Do you wish to overwrite %s (y or n)? ", ofname);
+							fprintf(stderr, "Do you wish to overwrite %s (y or n)? ", display_ofname);
 							fflush(stderr);
 
 			    			if (read(0, inbuf, 1) > 0)
@@ -778,7 +798,7 @@ comprexx(const char	*fileptr)
 
 		    			if (inbuf[0] != 'y')
 						{
-							fprintf(stderr, "%s not overwritten\n", ofname);
+							fprintf(stderr, "%s not overwritten\n", display_ofname);
 							goto error;
 		    			}
 					}
@@ -786,19 +806,19 @@ comprexx(const char	*fileptr)
 					if (unlink(ofname))
 					{
 						fprintf(stderr, "Can't remove old output file\n");
-						perror(ofname);
+						perror(display_ofname);
 						goto error;
 					}
 				}
 
 		    	if ((fdout = open(ofname, O_WRONLY|O_CREAT|O_EXCL|O_BINARY,0600)) == -1)
 				{
-			      	perror(tempname);
+					perror(display_ofname);
 					goto error;
 		    	}
 
 				if (!quiet)
-					fprintf(stderr, "%s: ", tempname);
+					fprintf(stderr, "%s: ", displayname);
 
 				remove_ofname = 1;
     		}
@@ -828,7 +848,7 @@ comprexx(const char	*fileptr)
 					if (unlink(ofname))	/* Remove input file */
 					{
 						fprintf(stderr, "\nunlink error (ignored) ");
-	    				perror(ofname);
+						perror(display_ofname);
 					}
 
 					remove_ofname = 0;
@@ -848,7 +868,7 @@ comprexx(const char	*fileptr)
 			    	if (unlink(ofname))
 					{
 						fprintf(stderr, "unlink error (ignored) ");
-						perror(ofname);
+						perror(display_ofname);
 					}
 
 					remove_ofname = 0;
@@ -858,7 +878,7 @@ comprexx(const char	*fileptr)
 				{/* ***** Successful Compression ***** */
 					if (!quiet)
 					{
-						fprintf(stderr, " -- replaced with %s",ofname);
+						fprintf(stderr, " -- replaced with %s",display_ofname);
 
 						if (!do_decomp)
 						{
@@ -875,27 +895,27 @@ comprexx(const char	*fileptr)
 					if (utime(ofname, &timep))
 					{
 						fprintf(stderr, "\nutime error (ignored) ");
-				    	perror(ofname);
+						perror(display_ofname);
 					}
 
 					if (chmod(ofname, infstat.st_mode & 07777))		/* Copy modes */
 					{
 						fprintf(stderr, "\nchmod error (ignored) ");
-				    	perror(ofname);
+						perror(display_ofname);
 					}
 
 					if (chown(ofname, infstat.st_uid, infstat.st_gid))	/* Copy ownership */
 					{
 						fprintf(stderr, "\nchown error (ignored) ");
-						perror(ofname);
+						perror(display_ofname);
 					}
 
 					remove_ofname = 0;
 
-					if (!keep && unlink(ifname))	/* Remove input file */
+					if (!keep && unlink(tempname))	/* Remove input file */
 					{
 						fprintf(stderr, "\nunlink error (ignored) ");
-	    				perror(ifname);
+						perror(displayname);
 					}
     			}
     		}
@@ -907,11 +927,13 @@ comprexx(const char	*fileptr)
 
 		default:
 	  		fprintf(stderr,"%s is not a directory or a regular file - ignored\n",
-			  		tempname);
+					displayname);
 	  		break;
 		}
 
 		free(tempname);
+		free(displayname);
+		free(display_ofname);
 		if (!remove_ofname)
 		{
 			free(ofname);
@@ -923,6 +945,8 @@ error:
 		free(ofname);
 		ofname = NULL;
 		free(tempname);
+		free(displayname);
+		free(display_ofname);
 		exit_code = 1;
 		if (fdin != -1)
 			close(fdin);
@@ -932,15 +956,20 @@ error:
 
 #ifdef	RECURSIVE
 void
-compdir(char *dir)
+compdir(char *dir, const char *displaydir)
 	{
 		struct dirent *dp;
 		DIR *dirp;
-		char					*nptr;
-		char					*fptr;
-		unsigned long			 dir_size = strlen(dir);
-		/* The +256 is a lazy optimization. We'll resize on demand. */
-		unsigned long			 size = dir_size + 256;
+#ifdef DIRFD_RECURSIVE
+		struct stat opened_stat;
+		dev_t checked_dev = infstat.st_dev;
+		ino_t checked_ino = infstat.st_ino;
+		int cwd_fd;
+#endif
+		char *nptr;
+		char *fptr;
+		unsigned long dir_size = strlen(displaydir);
+		unsigned long size = dir_size + 256;
 
 		nptr = malloc(size);
 		if (nptr == NULL)
@@ -949,7 +978,7 @@ compdir(char *dir)
 			exit_code = 1;
 			return;
 		}
-		memcpy(nptr, dir, dir_size);
+		memcpy(nptr, displaydir, dir_size);
 		nptr[dir_size] = '/';
 		fptr = &nptr[dir_size + 1];
 
@@ -958,9 +987,45 @@ compdir(char *dir)
 		if (dirp == NULL)
 		{
 			free(nptr);
-			printf("%s unreadable\n", dir);		/* not stderr! */
+			printf("%s unreadable\n", displaydir);		/* not stderr! */
 			return ;
 		}
+
+#ifdef DIRFD_RECURSIVE
+		if (fstat(dirfd(dirp), &opened_stat) == -1 ||
+		    opened_stat.st_dev != checked_dev || opened_stat.st_ino != checked_ino)
+		{
+			fprintf(stderr, "%s changed while opening -- ignored\n", displaydir);
+			free(nptr);
+			closedir(dirp);
+			exit_code = 1;
+			return;
+		}
+
+#ifdef O_SEARCH
+		cwd_fd = open(".", O_SEARCH);
+#else
+		cwd_fd = open(".", O_RDONLY);
+#endif
+		if (cwd_fd == -1)
+		{
+			perror("open current directory");
+			free(nptr);
+			closedir(dirp);
+			exit_code = 1;
+			return;
+		}
+
+		if (fchdir(dirfd(dirp)) == -1)
+		{
+			perror(displaydir);
+			free(nptr);
+			close(cwd_fd);
+			closedir(dirp);
+			exit_code = 1;
+			return;
+		}
+#endif
 
 		while ((dp = readdir(dirp)) != NULL)
 		{
@@ -984,11 +1049,25 @@ compdir(char *dir)
 			}
 
 			strcpy(fptr, dp->d_name);
-			comprexx(nptr);
+#ifdef DIRFD_RECURSIVE
+			comprexx(dp->d_name, nptr);
+#else
+			comprexx(nptr, nptr);
+#endif
   		}
 
+#ifdef DIRFD_RECURSIVE
+		if (fchdir(cwd_fd) == -1)
+		{
+			perror("restore current directory");
+			free(nptr);
+			close(cwd_fd);
+			closedir(dirp);
+			exit(1);
+		}
+		close(cwd_fd);
+#endif
 		closedir(dirp);
-
 		free(nptr);
 	}
 #endif

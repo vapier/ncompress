@@ -21,4 +21,4 @@ jobs:
               -D_GNU_SOURCE -Wno-implicit-function-declaration \
               fuzz/uncompress_fuzzer.c -o uncompress_fuzzer
     - name: Fuzz smoke test
-      run: ./uncompress_fuzzer fuzz/corpus -fork=1 -max_total_time=120 -rss_limit_mb=2048
+      run: ./uncompress_fuzzer fuzz/corpus -max_total_time=120 -rss_limit_mb=2048

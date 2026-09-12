@@ -22,16 +22,19 @@ reject it.
 ./uncompress_fuzzer fuzz/corpus
 ```
 
-Run with `-fork=1` for anything longer than a quick check, and always in CI:
+Run it for as long as you like:
 
 ```
-./uncompress_fuzzer fuzz/corpus -fork=1 -max_total_time=300
+./uncompress_fuzzer fuzz/corpus -max_total_time=300
 ```
 
 `decompress()` ends the process through `abort_compress()` on some malformed
-streams, and the decoder tables are not reset between calls, so a persistent
-single-process loop would either stop the fuzzer or carry state from one
-input into the next.
+streams, and its decoder tables are global.  The harness handles both so that
+one process can fuzz many inputs: it redirects `exit()` to a `longjmp` (by
+rewriting the calls inside `compress.c` before including it), and clears the
+tables before each input so every input runs against the state a fresh
+process would have.  Sanitizer failures are not routed through `exit()`, so
+they still abort and are reported normally.
 
 ## Corpus
 

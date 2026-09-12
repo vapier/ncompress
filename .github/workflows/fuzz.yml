@@ -1,0 +1,24 @@
+# Fuzz the .Z decompressor with libFuzzer + ASan + UBSan.
+name: Fuzz
+
+on:
+  push:
+    branches: [main, gh-actions]
+  pull_request:
+    types: [opened]
+    branches: [main]
+
+jobs:
+  fuzz-smoke:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v7
+    - name: Install clang
+      run: sudo apt-get update && sudo apt-get install -y clang
+    - name: Build fuzzer
+      run: |
+        clang -O1 -g -fsanitize=fuzzer,address,undefined \
+              -D_GNU_SOURCE -Wno-implicit-function-declaration \
+              fuzz/uncompress_fuzzer.c -o uncompress_fuzzer
+    - name: Fuzz smoke test
+      run: ./uncompress_fuzzer fuzz/corpus -fork=1 -max_total_time=120 -rss_limit_mb=2048

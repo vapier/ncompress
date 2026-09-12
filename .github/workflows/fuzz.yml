@@ -16,8 +16,7 @@ jobs:
       run: sudo apt-get update && sudo apt-get install -y clang
     - name: Build fuzzer
       run: |
-        clang -O1 -g -fsanitize=fuzzer,address,undefined \
-              -D_GNU_SOURCE -Wno-implicit-function-declaration \
+        clang -O1 -g -fsanitize=fuzzer,address,undefined -DUTIME_H -DLSTAT \
               fuzz/uncompress_fuzzer.c -o uncompress_fuzzer
     - name: Fuzz smoke test
       run: ./uncompress_fuzzer fuzz/corpus -max_total_time=120 -rss_limit_mb=2048

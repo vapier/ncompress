@@ -1,8 +1,7 @@
 /* libFuzzer harness for ncompress' .Z decompressor.
  *
  * Build:
- *   clang -O1 -g -fsanitize=fuzzer,address,undefined \
- *         -D_GNU_SOURCE -Wno-implicit-function-declaration \
+ *   clang -O1 -g -fsanitize=fuzzer,address,undefined -DUTIME_H -DLSTAT \
  *         fuzz/uncompress_fuzzer.c -o uncompress_fuzzer
  *
  * Run:

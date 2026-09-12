@@ -7,14 +7,13 @@ account or network access.
 ## Build
 
 ```
-clang -O1 -g -fsanitize=fuzzer,address,undefined \
-      -D_GNU_SOURCE -Wno-implicit-function-declaration \
+clang -O1 -g -fsanitize=fuzzer,address,undefined -DUTIME_H -DLSTAT \
       fuzz/uncompress_fuzzer.c -o uncompress_fuzzer
 ```
 
-`-Wno-implicit-function-declaration` is needed because `utime()` is used
-without including `<utime.h>`; gcc accepts this silently, clang 16 and later
-reject it.
+Build with the same defines the makefile passes (`UTIME_H`, `LSTAT`).  Without
+`UTIME_H` the file falls back to declaring `struct utimbuf` itself and
+`utime()` has no prototype, which clang 16 and later reject outright.
 
 ## Run
 

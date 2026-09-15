@@ -275,6 +275,34 @@ long 			bytes_out;			/* Total number of byte to output				*/
 count_int		htab[HSIZE];
 unsigned short	codetab[HSIZE];
 
+/*
+ * htab is viewed as bytes and holds two things that must never overlap:
+ *
+ *   1. the code suffix table, tab_suffixof(), in at most the first
+ *      (1 << BITS) bytes (one byte per code); and
+ *   2. the LZW decode stack, de_stack, which grows downwards from the end
+ *      of htab, one byte per entry.
+ *
+ * The stack can never be deeper than the prefix chain, and the chain can
+ * never be longer than the number of table entries.  decompress() links a new
+ * entry with
+ *
+ *	tab_prefixof(code) = oldcode;
+ *
+ * only for the code it has just allocated (free_ent), using an oldcode that
+ * was already accepted, so oldcode < code and the chain strictly decreases;
+ * the other write path, clear_tab_prefixof(), only zeroes entries, which
+ * makes them roots.  Codes read from the input are rejected before use when
+ * code > free_ent.
+ *
+ * Keep that guarantee honest: if htab were ever shrunk, the suffix table and
+ * the stack would silently overlap and the decoder would corrupt its own
+ * state.  Fail the build instead.
+ */
+#define	DE_STACK_BYTES		(1 << BITS)
+typedef char ncompress_htab_fits_decode_state[
+	((sizeof(htab) - sizeof(count_int)) >= 2 * DE_STACK_BYTES) ? 1 : -1];
+
 #define	tab_prefixof(i)			codetab[i]
 #define	tab_suffixof(i)			((char_type *)(htab))[i]
 #define	de_stack				((char_type *)&(htab[HSIZE-1]))

@@ -588,6 +588,7 @@ comprexx(const char	*fileptr)
 		int				 fdin = -1;
 		int				 fdout = -1;
 		int				 has_z_suffix;
+		int				 input_open_flags;
 		char			*tempname;
 		unsigned long	 namesize = strlen(fileptr);
 
@@ -736,11 +737,46 @@ comprexx(const char	*fileptr)
 				strcpy(&ofname[namesize], ".Z");
     		}
 
-	    	if ((fdin = open(ifname = tempname, O_RDONLY|O_BINARY)) == -1)
+		/*
+		 * Do not follow a symlink substituted after lstat(), and verify
+		 * that the opened file is the same regular file we inspected.
+		 * Nonblocking mode also avoids hanging if the path is raced to a
+		 * FIFO. On systems exposing these facilities, the checks prevent
+		 * a path replacement from making us process a different file.
+		 */
+		ifname = tempname;
+		input_open_flags = O_RDONLY|O_BINARY;
+#ifdef O_NOFOLLOW
+		input_open_flags |= O_NOFOLLOW;
+#endif
+#ifdef O_NONBLOCK
+		/* Avoid blocking if the path is raced to a FIFO. */
+		input_open_flags |= O_NONBLOCK;
+#endif
+		fdin = open(ifname, input_open_flags);
+		if (fdin == -1)
+		{
+			perror(tempname);
+			goto error;
+		}
+		{
+			struct stat opened_stat;
+
+			if (fstat(fdin, &opened_stat) == -1)
 			{
-		      	perror(tempname);
+				perror(tempname);
 				goto error;
-	    	}
+			}
+			if ((opened_stat.st_mode & S_IFMT) != S_IFREG ||
+				((opened_stat.st_dev != 0 || infstat.st_dev != 0) &&
+					opened_stat.st_dev != infstat.st_dev) ||
+				((opened_stat.st_ino != 0 || infstat.st_ino != 0) &&
+					opened_stat.st_ino != infstat.st_ino))
+			{
+				fprintf(stderr, "%s changed while opening\n", tempname);
+				goto error;
+			}
+		}
 
     		if (zcat_flg == 0)
 			{

@@ -1118,7 +1118,7 @@ compress(int fdin, int fdout)
 					boff = -(((OBUFSIZ<<3)-boff)%(n_bits<<3));
 					bytes_out += OBUFSIZ;
 
-					memcpy(outbuf, outbuf+OBUFSIZ, (outbits>>3)+1);
+					memmove(outbuf, outbuf+OBUFSIZ, (outbits>>3)+1);
 					memset(outbuf+(outbits>>3)+1, '\0', OBUFSIZ);
 				}
 
